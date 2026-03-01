@@ -1,0 +1,120 @@
+import { useAppStore } from '@/lib/store';
+import { ChevronRight, LayoutDashboard, BookOpen, Users, Search } from 'lucide-react';
+import logo from '@/assets/logo-growhub.png';
+
+const SECTION_TABS = [
+  { id: 'infos', label: 'Informations générales', color: '#2563EB' },
+  { id: 'budget', label: 'Budget (Annexe 1b)', color: '#B45309' },
+  { id: 'fiche', label: 'Fiche récapitulative', color: '#0D9488' },
+  { id: 'rapport-1', label: 'Rapport N° 001', color: '#065F46' },
+  { id: 'trans-1', label: '↳ Transactions REP 01', color: '#059669' },
+  { id: 'rapport-2', label: 'Rapport N° 002', color: '#1A5276' },
+  { id: 'trans-2', label: '↳ Transactions REP 02', color: '#2980B9' },
+  { id: 'rapport-3', label: 'Rapport N° 003', color: '#5B21B6' },
+  { id: 'trans-3', label: '↳ Transactions REP 03', color: '#7C3AED' },
+  { id: 'rapport-4', label: 'Rapport N° 004', color: '#9F1239' },
+  { id: 'trans-4', label: '↳ Transactions REP 04', color: '#E11D48' },
+];
+
+export default function Sidebar() {
+  const { projects, currentPage, currentProjectId, currentTab, openProjectIds, setPage, openProjectTab, toggleSidebarProject, sidebarSearch, setSidebarSearch } = useAppStore();
+
+  return (
+    <aside className="fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col overflow-y-auto bg-sidebar border-r border-sidebar-border/5">
+      {/* Brand */}
+      <div className="border-b border-sidebar-border/10 p-5 pb-4">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="rounded-md bg-card/90 p-1.5 px-2">
+            <img src={logo} alt="Grow Hub" className="h-5 w-auto" />
+          </div>
+        </div>
+        <p className="text-[10.5px] tracking-wide text-sidebar-foreground/30 uppercase">Grants Tracking System</p>
+        
+        {/* Search */}
+        <div className="mt-3 relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-sidebar-foreground/30" />
+          <input
+            type="text"
+            value={sidebarSearch}
+            onChange={(e) => setSidebarSearch(e.target.value)}
+            placeholder="Rechercher…"
+            className="w-full rounded-md border border-sidebar-foreground/10 bg-sidebar-foreground/5 py-1.5 pl-8 pr-3 text-xs text-sidebar-foreground/70 placeholder:text-sidebar-foreground/25 outline-none focus:border-primary/60 focus:bg-sidebar-foreground/8"
+          />
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <div className="p-2.5 pt-3">
+        <p className="px-2 pb-1.5 text-[9.5px] font-semibold uppercase tracking-[1.2px] text-sidebar-foreground/25">Navigation</p>
+        <NavItem icon={<LayoutDashboard className="w-4 h-4" />} label="Portefeuille" active={currentPage === 'portfolio'} onClick={() => setPage('portfolio')} />
+        <NavItem icon={<BookOpen className="w-4 h-4" />} label="Guide d'utilisation" active={currentPage === 'tutoriel'} onClick={() => setPage('tutoriel')} />
+        <NavItem icon={<Users className="w-4 h-4" />} label="Gestion utilisateurs" active={currentPage === 'admin'} onClick={() => setPage('admin')} />
+      </div>
+
+      {/* Projects */}
+      <div className="p-2.5 pt-1">
+        <p className="px-2 pb-1.5 text-[9.5px] font-semibold uppercase tracking-[1.2px] text-sidebar-foreground/25">
+          Projets · <span className="font-mono">{projects.length}</span> actif(s)
+        </p>
+        {projects.filter(p => !sidebarSearch || p.org.toLowerCase().includes(sidebarSearch.toLowerCase())).map(proj => {
+          const isOpen = openProjectIds.includes(proj.id);
+          return (
+            <div key={proj.id} className="border-t border-sidebar-foreground/5 mt-1 pt-1">
+              <button
+                onClick={() => toggleSidebarProject(proj.id)}
+                className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 hover:bg-sidebar-foreground/5 transition-colors"
+              >
+                <span className="font-mono text-[10px] rounded px-1.5 py-0.5" style={{ background: proj.color.stripe + '22', color: proj.color.stripe }}>
+                  {proj.convention.slice(0, 10)}
+                </span>
+                <span className="flex-1 truncate text-left text-xs font-medium text-sidebar-foreground/70">{proj.org}</span>
+                <ChevronRight className={`w-3 h-3 text-sidebar-foreground/25 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
+              </button>
+              {isOpen && (
+                <div className="pb-2 pl-2">
+                  {SECTION_TABS.map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => openProjectTab(proj.id, tab.id)}
+                      className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs transition-colors ${
+                        currentProjectId === proj.id && currentTab === tab.id
+                          ? 'bg-primary/20 text-sidebar-foreground/90'
+                          : 'text-sidebar-foreground/40 hover:text-sidebar-foreground/70 hover:bg-sidebar-foreground/5'
+                      }`}
+                    >
+                      <span className="w-[5px] h-[5px] rounded-full flex-shrink-0" style={{ background: tab.color }} />
+                      <span className="truncate">{tab.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Footer */}
+      <div className="mt-auto border-t border-sidebar-foreground/5 p-4 text-[10.5px] leading-relaxed text-sidebar-foreground/20">
+        Grow Hub SARL · GH-GTS v3.0<br />
+        © 2024 — Tous droits réservés
+      </div>
+    </aside>
+  );
+}
+
+function NavItem({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`relative flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-[13px] transition-all ${
+        active
+          ? 'bg-primary/30 font-medium text-sidebar-foreground'
+          : 'text-sidebar-foreground/50 hover:bg-sidebar-foreground/6 hover:text-sidebar-foreground/85'
+      }`}
+    >
+      {active && <span className="absolute left-0 top-[5px] bottom-[5px] w-[2px] rounded-r bg-primary" />}
+      {icon}
+      {label}
+    </button>
+  );
+}

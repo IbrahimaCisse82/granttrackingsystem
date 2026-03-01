@@ -1,14 +1,27 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useAppStore } from '@/lib/store';
+import AppLayout from '@/components/layout/AppLayout';
+import Portfolio from '@/pages/Portfolio';
+import ProjectView from '@/pages/ProjectView';
 
-const Index = () => {
+export default function Index() {
+  const { currentPage } = useAppStore();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <AppLayout>
+      {currentPage === 'portfolio' && <Portfolio />}
+      {currentPage === 'project' && <ProjectView />}
+      {currentPage === 'tutoriel' && (
+        <div className="text-center py-20 text-muted-foreground">
+          <h1 className="text-xl font-bold text-foreground mb-2">Guide d'utilisation</h1>
+          <p className="text-sm">Section en cours de développement.</p>
+        </div>
+      )}
+      {currentPage === 'admin' && (
+        <div className="text-center py-20 text-muted-foreground">
+          <h1 className="text-xl font-bold text-foreground mb-2">Gestion utilisateurs</h1>
+          <p className="text-sm">Section en cours de développement.</p>
+        </div>
+      )}
+    </AppLayout>
   );
-};
-
-export default Index;
+}

@@ -1,96 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --font-sans: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+
+    --background: 220 20% 97%;
+    --foreground: 215 28% 7%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 215 28% 7%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 215 28% 7%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 204 100% 30%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 215 28% 7%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 215 13% 47%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 215 28% 7%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 204 100% 30%;
 
-    --radius: 0.5rem;
+    --radius: 0.375rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* GTS Custom tokens */
+    --ink: 215 28% 7%;
+    --ink2: 221 29% 15%;
+    --ink3: 217 22% 25%;
+    --steel: 215 14% 35%;
+    --dim: 213 14% 64%;
+    --rule: 214 32% 91%;
+    --rule2: 220 27% 95%;
+    --paper: 220 20% 97%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --enabel: 204 100% 30%;
+    --enabel-dark: 204 100% 21%;
+    --enabel-light: 207 60% 94%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    --teal: 172 86% 32%;
+    --teal-light: 166 76% 90%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    --amber: 28 91% 37%;
+    --amber-light: 44 93% 89%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
+    --emerald: 164 93% 20%;
+    --emerald-light: 149 80% 90%;
 
-    --sidebar-accent-foreground: 240 5.9% 10%;
+    --rose: 343 86% 35%;
+    --rose-light: 0 86% 94%;
 
-    --sidebar-border: 220 13% 91%;
+    --violet: 263 83% 42%;
+    --violet-light: 254 85% 95%;
 
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+    --orange: 20 91% 40%;
+    --orange-light: 27 96% 91%;
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --growhub-green: 93 52% 53%;
+    --growhub-green-dark: 93 52% 40%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-background: 215 28% 7%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 204 100% 30%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 0 0% 100%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 100%;
+    --sidebar-ring: 204 100% 30%;
+
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+    --shadow-md: 0 4px 16px rgba(0,0,0,.10), 0 2px 6px rgba(0,0,0,.07);
   }
 }
 
@@ -99,7 +93,19 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    font-size: 14px;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    line-height: 1.5;
+  }
+}
+
+@layer utilities {
+  .font-mono {
+    font-family: var(--font-mono);
   }
 }

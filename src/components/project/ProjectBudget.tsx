@@ -1,0 +1,94 @@
+import { Project, BudgetLine, lineTotal, fmt } from '@/lib/mock-data';
+
+export default function ProjectBudget({ project }: { project: Project }) {
+  const linesA = project.budgetLines.filter(l => l.section === 'A');
+  const linesB = project.budgetLines.filter(l => l.section === 'B');
+  const totalA = linesA.reduce((s, l) => s + lineTotal(l), 0);
+  const totalB = linesB.reduce((s, l) => s + lineTotal(l), 0);
+  const grand = totalA + totalB;
+
+  return (
+    <div>
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">Budget — Annexe 1b</h1>
+          <p className="text-xs text-muted-foreground mt-1">{project.org} · Répartition des dépenses estimées</p>
+        </div>
+        <button className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-enabel-dark transition-colors">
+          + Coût opérationnel
+        </button>
+      </div>
+
+      <div className="overflow-hidden rounded-[10px] border border-rule bg-card">
+        <div className="overflow-x-auto">
+          <table className="w-full text-[12.5px]">
+            <thead>
+              <tr className="bg-ink-2">
+                {['Code', 'Poste budgétaire', 'Unité', 'Qté', 'Montant unitaire', 'Alloc. %', 'Total EUR'].map(h => (
+                  <th key={h} className="whitespace-nowrap border-r border-sidebar-foreground/5 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-wider text-sidebar-foreground/70 font-mono last:border-r-0">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <SectionRow label="A — COÛTS OPÉRATIONNELS" />
+              {linesA.map((l, i) => <BudgetRow key={i} line={l} badge={project.color.badge} />)}
+              <tr className="bg-ink text-sidebar-foreground font-mono font-bold text-xs">
+                <td colSpan={6} className="px-3 py-2 border-r border-sidebar-foreground/10">SOUS-TOTAL A</td>
+                <td className="px-3 py-2 text-right">{fmt(totalA)} €</td>
+              </tr>
+
+              <SectionRow label="B — FRAIS DE GESTION" amber />
+              {linesB.map((l, i) => <BudgetRow key={i} line={l} badge="b-amber" />)}
+              <tr className="bg-ink text-sidebar-foreground font-mono font-bold text-xs">
+                <td colSpan={6} className="px-3 py-2 border-r border-sidebar-foreground/10">SOUS-TOTAL B</td>
+                <td className="px-3 py-2 text-right">{fmt(totalB)} €</td>
+              </tr>
+
+              <tr className="bg-ink text-sidebar-foreground font-mono font-bold text-sm">
+                <td colSpan={6} className="px-3 py-3 border-r border-sidebar-foreground/10">TOTAL GÉNÉRAL</td>
+                <td className="px-3 py-3 text-right">{fmt(grand)} €</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SectionRow({ label, amber }: { label: string; amber?: boolean }) {
+  return (
+    <tr className={amber ? 'bg-amber-light' : 'bg-enabel-light'}>
+      <td colSpan={7} className={`px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider ${amber ? 'text-amber' : 'text-enabel-dark'}`}>
+        {label}
+      </td>
+    </tr>
+  );
+}
+
+const BADGE_COLORS: Record<string, string> = {
+  'b-blue': 'bg-enabel-light text-enabel-dark',
+  'b-teal': 'bg-teal-light text-teal',
+  'b-amber': 'bg-amber-light text-amber',
+  'b-violet': 'bg-violet-light text-violet',
+};
+
+function BudgetRow({ line, badge }: { line: BudgetLine; badge: string }) {
+  return (
+    <tr className="hover:bg-paper/50 transition-colors">
+      <td className="border-b border-rule-2 border-r border-rule-2 px-3 py-2.5">
+        <span className={`inline-block rounded px-1.5 py-0.5 font-mono text-[10.5px] font-semibold ${BADGE_COLORS[badge] || 'bg-enabel-light text-enabel-dark'}`}>
+          {line.code}
+        </span>
+      </td>
+      <td className="border-b border-rule-2 border-r px-3 py-2.5">{line.desc}</td>
+      <td className="border-b border-rule-2 border-r px-3 py-2.5 text-muted-foreground">{line.unite}</td>
+      <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono">{line.qty}</td>
+      <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono">{fmt(line.montant)}</td>
+      <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono">{line.allocation}%</td>
+      <td className="border-b border-rule-2 px-3 py-2.5 text-right font-mono font-semibold">{fmt(lineTotal(line))} €</td>
+    </tr>
+  );
+}
