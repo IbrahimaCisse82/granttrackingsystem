@@ -1,5 +1,6 @@
 import { useAppStore } from '@/lib/store';
-import { Save, Download, Bell, User } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { Save, Download, Bell, User, LogOut } from 'lucide-react';
 
 const SECTION_LABELS: Record<string, string> = {
   infos: 'Informations générales',
@@ -13,6 +14,7 @@ const SECTION_LABELS: Record<string, string> = {
 
 export default function Topbar() {
   const { currentPage, currentProjectId, currentTab, projects, setPage } = useAppStore();
+  const { user, role, signOut } = useAuth();
   const project = projects.find(p => p.id === currentProjectId);
 
   return (
@@ -54,11 +56,14 @@ export default function Topbar() {
           <Bell className="w-4 h-4" />
           <span className="absolute -right-0.5 -top-0.5 w-2 h-2 rounded-full bg-primary" />
         </button>
-        <div className="flex items-center gap-2 rounded-md border border-rule bg-paper px-2.5 py-1 cursor-pointer hover:bg-rule transition-colors">
+        <div className="flex items-center gap-2 rounded-md border border-rule bg-paper px-2.5 py-1">
           <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
             <User className="w-3.5 h-3.5 text-primary-foreground" />
           </div>
-          <span className="text-xs font-medium text-ink-3">Admin</span>
+          <span className="text-xs font-medium text-ink-3">{role ?? '…'}</span>
+          <button onClick={signOut} className="ml-1 p-1 rounded hover:bg-muted transition-colors" title="Déconnexion">
+            <LogOut className="w-3.5 h-3.5 text-muted-foreground" />
+          </button>
         </div>
       </div>
     </header>
