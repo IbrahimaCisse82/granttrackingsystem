@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
-import { Users, Shield, Eye, Briefcase, UserCheck, ChevronDown } from 'lucide-react';
+import { Users, Shield, Eye, Briefcase, UserCheck, ChevronDown, Plus, X } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
 
 type AppRole = Database['public']['Enums']['app_role'];
@@ -13,7 +13,6 @@ interface UserWithRole {
   last_name: string;
   organization: string;
   phone: string;
-  email: string;
   role: AppRole;
   created_at: string;
 }
@@ -30,36 +29,31 @@ export default function AdminUsers() {
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [showInvite, setShowInvite] = useState(false);
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteForm, setInviteForm] = useState({
+    email: '', password: '', first_name: '', last_name: '', role: 'beneficiaire' as AppRole,
+  });
 
   const isAdmin = currentRole === 'admin';
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  useEffect(() => { fetchUsers(); }, []);
 
   const fetchUsers = async () => {
     setLoading(true);
-    // Fetch profiles with their roles
     const { data: profiles, error: pErr } = await supabase.from('profiles').select('*');
     const { data: roles, error: rErr } = await supabase.from('user_roles').select('*');
-
     if (pErr || rErr) {
       toast({ title: 'Erreur', description: 'Impossible de charger les utilisateurs.', variant: 'destructive' });
       setLoading(false);
       return;
     }
-
     const merged: UserWithRole[] = (profiles ?? []).map(p => {
       const userRole = roles?.find(r => r.user_id === p.user_id);
       return {
-        user_id: p.user_id,
-        first_name: p.first_name,
-        last_name: p.last_name,
-        organization: p.organization,
-        phone: p.phone,
-        email: '', // email comes from auth, not accessible via RLS
-        role: (userRole?.role ?? 'beneficiaire') as AppRole,
-        created_at: p.created_at,
+        user_id: p.user_id, first_name: p.first_name, last_name: p.last_name,
+        organization: p.organization, phone: p.phone,
+        role: (userRole?.role ?? 'beneficiaire') as AppRole, created_at: p.created_at,
       };
     });
     setUsers(merged);
@@ -67,11 +61,7 @@ export default function AdminUsers() {
   };
 
   const changeRole = async (userId: string, newRole: AppRole) => {
-    const { error } = await supabase
-      .from('user_roles')
-      .update({ role: newRole })
-      .eq('user_id', userId);
-    
+    const { error } = await supabase.from('user_roles').update({ role: newRole }).eq('user_id', userId);
     if (error) {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     } else {
@@ -79,6 +69,28 @@ export default function AdminUsers() {
       setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, role: newRole } : u));
     }
     setEditingUserId(null);
+  };
+
+  const handleInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInviteLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await supabase.functions.invoke('invite-user', {
+        body: inviteForm,
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (res.error || res.data?.error) {
+        throw new Error(res.data?.error || res.error?.message || 'Erreur inconnue');
+      }
+      toast({ title: 'Utilisateur créé', description: `${inviteForm.email} a été ajouté avec le rôle ${ROLE_CONFIG[inviteForm.role].label}.` });
+      setShowInvite(false);
+      setInviteForm({ email: '', password: '', first_name: '', last_name: '', role: 'beneficiaire' });
+      fetchUsers();
+    } catch (err: any) {
+      toast({ title: 'Erreur', description: err.message, variant: 'destructive' });
+    }
+    setInviteLoading(false);
   };
 
   if (!isAdmin) {
@@ -91,6 +103,8 @@ export default function AdminUsers() {
     );
   }
 
+  const inputClass = "w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20";
+
   return (
     <div>
       <div className="flex items-start justify-between mb-6">
@@ -98,7 +112,60 @@ export default function AdminUsers() {
           <h1 className="text-xl font-bold tracking-tight text-foreground">Gestion des utilisateurs</h1>
           <p className="text-xs text-muted-foreground mt-1">Gérez les accès et les rôles des membres de la plateforme</p>
         </div>
+        <button onClick={() => setShowInvite(true)}
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-[hsl(var(--enabel-dark))] transition-colors">
+          <Plus className="w-4 h-4" /> Ajouter un utilisateur
+        </button>
       </div>
+
+      {/* Invite modal */}
+      {showInvite && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-card rounded-2xl border border-border p-6 w-full max-w-md shadow-lg mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-semibold text-foreground">Nouvel utilisateur</h2>
+              <button onClick={() => setShowInvite(false)} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
+            </div>
+            <form onSubmit={handleInvite} className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1">Prénom</label>
+                  <input type="text" required value={inviteForm.first_name}
+                    onChange={e => setInviteForm(f => ({ ...f, first_name: e.target.value }))} className={inputClass} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1">Nom</label>
+                  <input type="text" required value={inviteForm.last_name}
+                    onChange={e => setInviteForm(f => ({ ...f, last_name: e.target.value }))} className={inputClass} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1">Email</label>
+                <input type="email" required value={inviteForm.email}
+                  onChange={e => setInviteForm(f => ({ ...f, email: e.target.value }))} className={inputClass} />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1">Mot de passe initial</label>
+                <input type="password" required minLength={6} value={inviteForm.password}
+                  onChange={e => setInviteForm(f => ({ ...f, password: e.target.value }))} className={inputClass} />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1">Rôle</label>
+                <select value={inviteForm.role} onChange={e => setInviteForm(f => ({ ...f, role: e.target.value as AppRole }))}
+                  className={inputClass}>
+                  {(Object.keys(ROLE_CONFIG) as AppRole[]).map(r => (
+                    <option key={r} value={r}>{ROLE_CONFIG[r].label}</option>
+                  ))}
+                </select>
+              </div>
+              <button type="submit" disabled={inviteLoading}
+                className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:bg-[hsl(var(--enabel-dark))] transition-colors disabled:opacity-50">
+                {inviteLoading ? 'Création…' : 'Créer le compte'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Role summary cards */}
       <div className="grid grid-cols-4 gap-3.5 mb-6">
@@ -108,9 +175,7 @@ export default function AdminUsers() {
           return (
             <div key={role} className="rounded-[10px] border border-border bg-card p-4">
               <div className="flex items-center gap-2 mb-2">
-                <div className="rounded-md p-1.5" style={{ background: config.color + '18', color: config.color }}>
-                  {config.icon}
-                </div>
+                <div className="rounded-md p-1.5" style={{ background: config.color + '18', color: config.color }}>{config.icon}</div>
                 <span className="text-xs font-medium text-muted-foreground">{config.label}</span>
               </div>
               <p className="text-2xl font-bold font-mono text-foreground">{count}</p>
@@ -125,7 +190,6 @@ export default function AdminUsers() {
           <Users className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm font-semibold text-foreground">Utilisateurs ({users.length})</span>
         </div>
-        
         {loading ? (
           <div className="p-8 text-center text-sm text-muted-foreground">Chargement…</div>
         ) : users.length === 0 ? (
@@ -170,14 +234,10 @@ export default function AdminUsers() {
                           ))}
                         </div>
                       ) : (
-                        <button
-                          onClick={() => setEditingUserId(u.user_id)}
+                        <button onClick={() => setEditingUserId(u.user_id)}
                           className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors hover:opacity-80"
-                          style={{ background: config.color + '15', color: config.color }}
-                        >
-                          {config.icon}
-                          {config.label}
-                          <ChevronDown className="w-3 h-3" />
+                          style={{ background: config.color + '15', color: config.color }}>
+                          {config.icon} {config.label} <ChevronDown className="w-3 h-3" />
                         </button>
                       )}
                     </td>
