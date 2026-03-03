@@ -1,4 +1,4 @@
-import { Project, BudgetLine, lineTotal, fmt } from '@/lib/mock-data';
+import { Project, BudgetLine, lineTotal, fmt, fmtFCFA, EUR_TO_FCFA } from '@/lib/mock-data';
 
 export default function ProjectBudget({ project }: { project: Project }) {
   const linesA = project.budgetLines.filter(l => l.section === 'A');
@@ -13,6 +13,7 @@ export default function ProjectBudget({ project }: { project: Project }) {
         <div>
           <h1 className="text-xl font-bold tracking-tight">Budget — Annexe 1b</h1>
           <p className="text-xs text-muted-foreground mt-1">{project.org} · Répartition des dépenses estimées</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">Taux de conversion : 1 € = {fmtFCFA(EUR_TO_FCFA)} FCFA</p>
         </div>
         <button className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-enabel-dark transition-colors">
           + Coût opérationnel
@@ -24,7 +25,7 @@ export default function ProjectBudget({ project }: { project: Project }) {
           <table className="w-full text-[12.5px]">
             <thead>
               <tr className="bg-ink-2">
-                {['Code', 'Poste budgétaire', 'Unité', 'Qté', 'Montant unitaire', 'Alloc. %', 'Total EUR'].map(h => (
+                {['Code', 'Poste budgétaire', 'Unité', 'Qté', 'Montant unit. (FCFA)', 'Alloc. %', 'Total FCFA', 'Total EUR'].map(h => (
                   <th key={h} className="whitespace-nowrap border-r border-sidebar-foreground/5 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-wider text-sidebar-foreground/70 font-mono last:border-r-0">
                     {h}
                   </th>
@@ -36,19 +37,22 @@ export default function ProjectBudget({ project }: { project: Project }) {
               {linesA.map((l, i) => <BudgetRow key={i} line={l} badge={project.color.badge} />)}
               <tr className="bg-ink text-sidebar-foreground font-mono font-bold text-xs">
                 <td colSpan={6} className="px-3 py-2 border-r border-sidebar-foreground/10">SOUS-TOTAL A</td>
-                <td className="px-3 py-2 text-right">{fmt(totalA)} €</td>
+                <td className="px-3 py-2 text-right border-r border-sidebar-foreground/10">{fmtFCFA(totalA * EUR_TO_FCFA)} F</td>
+                <td className="px-3 py-2 text-right text-sidebar-foreground/60">{fmt(totalA)} €</td>
               </tr>
 
               <SectionRow label="B — FRAIS DE GESTION" amber />
               {linesB.map((l, i) => <BudgetRow key={i} line={l} badge="b-amber" />)}
               <tr className="bg-ink text-sidebar-foreground font-mono font-bold text-xs">
                 <td colSpan={6} className="px-3 py-2 border-r border-sidebar-foreground/10">SOUS-TOTAL B</td>
-                <td className="px-3 py-2 text-right">{fmt(totalB)} €</td>
+                <td className="px-3 py-2 text-right border-r border-sidebar-foreground/10">{fmtFCFA(totalB * EUR_TO_FCFA)} F</td>
+                <td className="px-3 py-2 text-right text-sidebar-foreground/60">{fmt(totalB)} €</td>
               </tr>
 
               <tr className="bg-ink text-sidebar-foreground font-mono font-bold text-sm">
                 <td colSpan={6} className="px-3 py-3 border-r border-sidebar-foreground/10">TOTAL GÉNÉRAL</td>
-                <td className="px-3 py-3 text-right">{fmt(grand)} €</td>
+                <td className="px-3 py-3 text-right border-r border-sidebar-foreground/10">{fmtFCFA(grand * EUR_TO_FCFA)} F</td>
+                <td className="px-3 py-3 text-right text-sidebar-foreground/60">{fmt(grand)} €</td>
               </tr>
             </tbody>
           </table>
@@ -61,7 +65,7 @@ export default function ProjectBudget({ project }: { project: Project }) {
 function SectionRow({ label, amber }: { label: string; amber?: boolean }) {
   return (
     <tr className={amber ? 'bg-amber-light' : 'bg-enabel-light'}>
-      <td colSpan={7} className={`px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider ${amber ? 'text-amber' : 'text-enabel-dark'}`}>
+      <td colSpan={8} className={`px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider ${amber ? 'text-amber' : 'text-enabel-dark'}`}>
         {label}
       </td>
     </tr>
@@ -76,6 +80,10 @@ const BADGE_COLORS: Record<string, string> = {
 };
 
 function BudgetRow({ line, badge }: { line: BudgetLine; badge: string }) {
+  const totalEur = lineTotal(line);
+  const totalFcfa = totalEur * EUR_TO_FCFA;
+  const montantFcfa = line.montant * EUR_TO_FCFA;
+
   return (
     <tr className="hover:bg-paper/50 transition-colors">
       <td className="border-b border-rule-2 border-r border-rule-2 px-3 py-2.5">
@@ -86,9 +94,10 @@ function BudgetRow({ line, badge }: { line: BudgetLine; badge: string }) {
       <td className="border-b border-rule-2 border-r px-3 py-2.5">{line.desc}</td>
       <td className="border-b border-rule-2 border-r px-3 py-2.5 text-muted-foreground">{line.unite}</td>
       <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono">{line.qty}</td>
-      <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono">{fmt(line.montant)}</td>
+      <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono">{fmtFCFA(montantFcfa)}</td>
       <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono">{line.allocation}%</td>
-      <td className="border-b border-rule-2 px-3 py-2.5 text-right font-mono font-semibold">{fmt(lineTotal(line))} €</td>
+      <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono font-semibold">{fmtFCFA(totalFcfa)} F</td>
+      <td className="border-b border-rule-2 px-3 py-2.5 text-right font-mono text-muted-foreground">{fmt(totalEur)} €</td>
     </tr>
   );
 }
