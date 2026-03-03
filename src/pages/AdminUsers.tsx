@@ -2,8 +2,12 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
-import { Users, Shield, Eye, Briefcase, UserCheck, ChevronDown, Plus, X } from 'lucide-react';
+import { Users, Shield, Eye, Briefcase, UserCheck, ChevronDown, Plus, X, Trash2, Ban, CheckCircle, MoreHorizontal } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 type AppRole = Database['public']['Enums']['app_role'];
 
@@ -25,7 +29,7 @@ const ROLE_CONFIG: Record<AppRole, { label: string; icon: React.ReactNode; color
 };
 
 export default function AdminUsers() {
-  const { role: currentRole } = useAuth();
+  const { role: currentRole, user } = useAuth();
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
@@ -34,10 +38,24 @@ export default function AdminUsers() {
   const [inviteForm, setInviteForm] = useState({
     email: '', password: '', first_name: '', last_name: '', role: 'beneficiaire' as AppRole,
   });
+  const [actionMenuId, setActionMenuId] = useState<string | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; action: 'delete' | 'disable' | 'enable'; userId: string; userName: string }>({
+    open: false, action: 'delete', userId: '', userName: '',
+  });
+  const [actionLoading, setActionLoading] = useState(false);
 
   const isAdmin = currentRole === 'admin';
 
   useEffect(() => { fetchUsers(); }, []);
+
+  // Close menus on outside click
+  useEffect(() => {
+    const handler = () => { setActionMenuId(null); setEditingUserId(null); };
+    if (actionMenuId || editingUserId) {
+      document.addEventListener('click', handler);
+      return () => document.removeEventListener('click', handler);
+    }
+  }, [actionMenuId, editingUserId]);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -91,6 +109,35 @@ export default function AdminUsers() {
       toast({ title: 'Erreur', description: err.message, variant: 'destructive' });
     }
     setInviteLoading(false);
+  };
+
+  const handleUserAction = async () => {
+    setActionLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await supabase.functions.invoke('manage-user', {
+        body: { action: confirmDialog.action, user_id: confirmDialog.userId },
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (res.error || res.data?.error) {
+        throw new Error(res.data?.error || res.error?.message || 'Erreur inconnue');
+      }
+      const messages = {
+        delete: 'Utilisateur supprimé avec succès',
+        disable: 'Utilisateur désactivé avec succès',
+        enable: 'Utilisateur réactivé avec succès',
+      };
+      toast({ title: messages[confirmDialog.action] });
+      if (confirmDialog.action === 'delete') {
+        setUsers(prev => prev.filter(u => u.user_id !== confirmDialog.userId));
+      } else {
+        fetchUsers();
+      }
+    } catch (err: any) {
+      toast({ title: 'Erreur', description: err.message, variant: 'destructive' });
+    }
+    setActionLoading(false);
+    setConfirmDialog(prev => ({ ...prev, open: false }));
   };
 
   if (!isAdmin) {
@@ -167,6 +214,40 @@ export default function AdminUsers() {
         </div>
       )}
 
+      {/* Confirmation dialog */}
+      <AlertDialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, open }))}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmDialog.action === 'delete' && 'Supprimer l\'utilisateur'}
+              {confirmDialog.action === 'disable' && 'Désactiver l\'utilisateur'}
+              {confirmDialog.action === 'enable' && 'Réactiver l\'utilisateur'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDialog.action === 'delete' && (
+                <>Êtes-vous sûr de vouloir supprimer <strong>{confirmDialog.userName}</strong> ? Cette action est irréversible et toutes ses données seront perdues.</>
+              )}
+              {confirmDialog.action === 'disable' && (
+                <>Êtes-vous sûr de vouloir désactiver <strong>{confirmDialog.userName}</strong> ? L'utilisateur ne pourra plus se connecter.</>
+              )}
+              {confirmDialog.action === 'enable' && (
+                <>Réactiver <strong>{confirmDialog.userName}</strong> ? L'utilisateur pourra à nouveau se connecter.</>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={actionLoading}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleUserAction}
+              disabled={actionLoading}
+              className={confirmDialog.action === 'delete' ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''}
+            >
+              {actionLoading ? 'En cours…' : confirmDialog.action === 'delete' ? 'Supprimer' : confirmDialog.action === 'disable' ? 'Désactiver' : 'Réactiver'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Role summary cards */}
       <div className="grid grid-cols-4 gap-3.5 mb-6">
         {(Object.keys(ROLE_CONFIG) as AppRole[]).map(role => {
@@ -203,11 +284,13 @@ export default function AdminUsers() {
                 <th className="text-left px-4 py-2.5 font-medium">Téléphone</th>
                 <th className="text-left px-4 py-2.5 font-medium">Rôle</th>
                 <th className="text-left px-4 py-2.5 font-medium">Inscrit le</th>
+                <th className="text-right px-4 py-2.5 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
               {users.map(u => {
                 const config = ROLE_CONFIG[u.role];
+                const isSelf = u.user_id === user?.id;
                 return (
                   <tr key={u.user_id} className="border-t border-border hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3">
@@ -216,7 +299,10 @@ export default function AdminUsers() {
                           {u.first_name?.[0]?.toUpperCase() || '?'}{u.last_name?.[0]?.toUpperCase() || ''}
                         </div>
                         <div>
-                          <p className="font-medium text-foreground">{u.first_name} {u.last_name}</p>
+                          <p className="font-medium text-foreground">
+                            {u.first_name} {u.last_name}
+                            {isSelf && <span className="ml-1.5 text-[10px] text-muted-foreground">(vous)</span>}
+                          </p>
                           <p className="text-xs text-muted-foreground font-mono">{u.user_id.slice(0, 8)}…</p>
                         </div>
                       </div>
@@ -225,7 +311,7 @@ export default function AdminUsers() {
                     <td className="px-4 py-3 text-muted-foreground font-mono text-xs">{u.phone || '—'}</td>
                     <td className="px-4 py-3">
                       {editingUserId === u.user_id ? (
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1" onClick={e => e.stopPropagation()}>
                           {(Object.keys(ROLE_CONFIG) as AppRole[]).map(r => (
                             <button key={r} onClick={() => changeRole(u.user_id, r)}
                               className={`text-left text-xs px-2 py-1 rounded hover:bg-muted transition-colors ${r === u.role ? 'font-bold bg-muted' : ''}`}>
@@ -234,7 +320,7 @@ export default function AdminUsers() {
                           ))}
                         </div>
                       ) : (
-                        <button onClick={() => setEditingUserId(u.user_id)}
+                        <button onClick={(e) => { e.stopPropagation(); setEditingUserId(u.user_id); }}
                           className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors hover:opacity-80"
                           style={{ background: config.color + '15', color: config.color }}>
                           {config.icon} {config.label} <ChevronDown className="w-3 h-3" />
@@ -243,6 +329,53 @@ export default function AdminUsers() {
                     </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground font-mono">
                       {new Date(u.created_at).toLocaleDateString('fr-FR')}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      {!isSelf && (
+                        <div className="relative inline-block">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setActionMenuId(actionMenuId === u.user_id ? null : u.user_id); }}
+                            className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                          >
+                            <MoreHorizontal className="w-4 h-4" />
+                          </button>
+                          {actionMenuId === u.user_id && (
+                            <div
+                              className="absolute right-0 top-full mt-1 z-50 w-44 rounded-lg border border-border bg-card shadow-lg py-1"
+                              onClick={e => e.stopPropagation()}
+                            >
+                              <button
+                                onClick={() => {
+                                  setActionMenuId(null);
+                                  setConfirmDialog({ open: true, action: 'disable', userId: u.user_id, userName: `${u.first_name} ${u.last_name}` });
+                                }}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-muted transition-colors"
+                              >
+                                <Ban className="w-3.5 h-3.5 text-amber-500" /> Désactiver
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setActionMenuId(null);
+                                  setConfirmDialog({ open: true, action: 'enable', userId: u.user_id, userName: `${u.first_name} ${u.last_name}` });
+                                }}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-muted transition-colors"
+                              >
+                                <CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Réactiver
+                              </button>
+                              <div className="border-t border-border my-1" />
+                              <button
+                                onClick={() => {
+                                  setActionMenuId(null);
+                                  setConfirmDialog({ open: true, action: 'delete', userId: u.user_id, userName: `${u.first_name} ${u.last_name}` });
+                                }}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-destructive hover:bg-destructive/10 transition-colors"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" /> Supprimer
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </td>
                   </tr>
                 );
