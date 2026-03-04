@@ -1,8 +1,6 @@
 import { create } from 'zustand';
-import { Project, MOCK_PROJECTS } from './mock-data';
 
 interface AppState {
-  projects: Project[];
   currentProjectId: string | null;
   currentTab: string;
   currentPage: 'portfolio' | 'project' | 'tutoriel' | 'admin';
@@ -14,13 +12,10 @@ interface AppState {
   openProjectTab: (id: string, tab: string) => void;
   toggleSidebarProject: (id: string) => void;
   setSidebarSearch: (q: string) => void;
-  addProject: (p: Project) => void;
-  deleteProject: (id: string) => void;
-  updateProject: (id: string, updater: (p: Project) => Project) => void;
+  closeProject: (id: string) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-  projects: MOCK_PROJECTS,
   currentProjectId: null,
   currentTab: 'infos',
   currentPage: 'portfolio',
@@ -54,18 +49,13 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   
   setSidebarSearch: (q) => set({ sidebarSearch: q }),
-  
-  addProject: (p) => set({ projects: [...get().projects, p] }),
-  
-  deleteProject: (id) => {
+
+  closeProject: (id) => {
+    const { currentProjectId, openProjectIds } = get();
     set({
-      projects: get().projects.filter(p => p.id !== id),
-      currentProjectId: get().currentProjectId === id ? null : get().currentProjectId,
-      currentPage: get().currentProjectId === id ? 'portfolio' : get().currentPage,
+      openProjectIds: openProjectIds.filter(x => x !== id),
+      currentProjectId: currentProjectId === id ? null : currentProjectId,
+      currentPage: currentProjectId === id ? 'portfolio' : get().currentPage,
     });
   },
-  
-  updateProject: (id, updater) => set({
-    projects: get().projects.map(p => p.id === id ? updater(p) : p),
-  }),
 }));

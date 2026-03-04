@@ -50,6 +50,78 @@ export type Database = {
         }
         Relationships: []
       }
+      projects: {
+        Row: {
+          amendements: Json
+          budget_lines: Json
+          color: Json
+          convention: string
+          created_at: string
+          debut: string
+          devise: string
+          fiches: Json
+          fin: string
+          id: string
+          infos: Json
+          org: string
+          org_type: string
+          pays: string
+          periodicite: string
+          reports: Json
+          risque: string
+          taux: number
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amendements?: Json
+          budget_lines?: Json
+          color?: Json
+          convention?: string
+          created_at?: string
+          debut?: string
+          devise?: string
+          fiches?: Json
+          fin?: string
+          id?: string
+          infos?: Json
+          org?: string
+          org_type?: string
+          pays?: string
+          periodicite?: string
+          reports?: Json
+          risque?: string
+          taux?: number
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amendements?: Json
+          budget_lines?: Json
+          color?: Json
+          convention?: string
+          created_at?: string
+          debut?: string
+          devise?: string
+          fiches?: Json
+          fin?: string
+          id?: string
+          infos?: Json
+          org?: string
+          org_type?: string
+          pays?: string
+          periodicite?: string
+          reports?: Json
+          risque?: string
+          taux?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string

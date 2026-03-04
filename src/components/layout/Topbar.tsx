@@ -1,4 +1,5 @@
 import { useAppStore } from '@/lib/store';
+import { useProjects } from '@/hooks/useProjects';
 import { useAuth } from '@/hooks/useAuth';
 import { Save, Download, Bell, User, LogOut } from 'lucide-react';
 
@@ -13,7 +14,8 @@ const SECTION_LABELS: Record<string, string> = {
 };
 
 export default function Topbar() {
-  const { currentPage, currentProjectId, currentTab, projects, setPage } = useAppStore();
+  const { currentPage, currentProjectId, currentTab, setPage } = useAppStore();
+  const { projects } = useProjects();
   const { user, role, signOut } = useAuth();
   const project = projects.find(p => p.id === currentProjectId);
 

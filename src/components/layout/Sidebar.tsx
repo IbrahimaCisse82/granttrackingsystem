@@ -1,4 +1,5 @@
 import { useAppStore } from '@/lib/store';
+import { useProjects } from '@/hooks/useProjects';
 import { ChevronRight, LayoutDashboard, BookOpen, Users, Search } from 'lucide-react';
 import logo from '@/assets/logo-growhub.png';
 
@@ -17,7 +18,8 @@ const SECTION_TABS = [
 ];
 
 export default function Sidebar() {
-  const { projects, currentPage, currentProjectId, currentTab, openProjectIds, setPage, openProjectTab, toggleSidebarProject, sidebarSearch, setSidebarSearch } = useAppStore();
+  const { currentPage, currentProjectId, currentTab, openProjectIds, setPage, openProjectTab, toggleSidebarProject, sidebarSearch, setSidebarSearch } = useAppStore();
+  const { projects } = useProjects();
 
   return (
     <aside className="fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col overflow-y-auto bg-sidebar border-r border-sidebar-border/5">

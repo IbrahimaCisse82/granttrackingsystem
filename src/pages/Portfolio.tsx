@@ -1,11 +1,19 @@
-import { useAppStore } from '@/lib/store';
 import { calcBudgetTotal, calcDepensesTotal, fmt } from '@/lib/mock-data';
+import { useProjects } from '@/hooks/useProjects';
 import MetricCard from '@/components/MetricCard';
 import ProjectCard from '@/components/ProjectCard';
-import { Plus, FolderOpen } from 'lucide-react';
+import { Plus, FolderOpen, Loader2 } from 'lucide-react';
 
 export default function Portfolio() {
-  const { projects } = useAppStore();
+  const { projects, isLoading } = useProjects();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   const totalBudget = projects.reduce((s, p) => s + calcBudgetTotal(p), 0);
   const totalDepenses = projects.reduce((s, p) => s + calcDepensesTotal(p), 0);
