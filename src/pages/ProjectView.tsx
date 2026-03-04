@@ -1,4 +1,5 @@
 import { useAppStore } from '@/lib/store';
+import { useProjects } from '@/hooks/useProjects';
 import ProjectInfos from '@/components/project/ProjectInfos';
 import ProjectBudget from '@/components/project/ProjectBudget';
 import ProjectFiche from '@/components/project/ProjectFiche';
@@ -6,7 +7,8 @@ import ProjectReport from '@/components/project/ProjectReport';
 import ProjectTransactions from '@/components/project/ProjectTransactions';
 
 export default function ProjectView() {
-  const { currentProjectId, currentTab, projects } = useAppStore();
+  const { currentProjectId, currentTab } = useAppStore();
+  const { projects } = useProjects();
   const project = projects.find(p => p.id === currentProjectId);
 
   if (!project) {

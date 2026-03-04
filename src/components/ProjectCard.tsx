@@ -1,5 +1,6 @@
 import { Project, calcBudgetTotal, calcDepensesTotal, fmt } from '@/lib/mock-data';
 import { useAppStore } from '@/lib/store';
+import { useProjects } from '@/hooks/useProjects';
 
 const RISK_STYLES: Record<string, string> = {
   'Faible risque': 'bg-emerald-light text-emerald',
@@ -9,7 +10,8 @@ const RISK_STYLES: Record<string, string> = {
 };
 
 export default function ProjectCard({ project }: { project: Project }) {
-  const { openProject, deleteProject } = useAppStore();
+  const { openProject } = useAppStore();
+  const { deleteProject } = useProjects();
   const budget = calcBudgetTotal(project);
   const depenses = calcDepensesTotal(project);
   const pct = budget > 0 ? Math.min(100, Math.round(depenses / budget * 100)) : 0;
