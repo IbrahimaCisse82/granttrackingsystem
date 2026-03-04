@@ -2,6 +2,7 @@ import { calcBudgetTotal, calcDepensesTotal, fmt } from '@/lib/mock-data';
 import { useProjects } from '@/hooks/useProjects';
 import MetricCard from '@/components/MetricCard';
 import ProjectCard from '@/components/ProjectCard';
+import CreateProjectDialog from '@/components/CreateProjectDialog';
 import { Plus, FolderOpen, Loader2 } from 'lucide-react';
 
 export default function Portfolio() {
@@ -27,9 +28,7 @@ export default function Portfolio() {
           <h1 className="text-xl font-bold tracking-tight text-foreground">Portefeuille global</h1>
           <p className="text-xs text-muted-foreground mt-1">Vue d'ensemble de tous les projets de subvention Grow Hub SARL</p>
         </div>
-        <button className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3.5 py-2 text-xs font-medium text-primary-foreground transition-colors hover:bg-enabel-dark">
-          <Plus className="w-3.5 h-3.5" /> Nouveau projet
-        </button>
+        <CreateProjectDialog />
       </div>
 
       {/* Metrics */}
@@ -50,9 +49,11 @@ export default function Portfolio() {
           <FolderOpen className="w-12 h-12 text-dim mb-4" />
           <p className="text-sm font-semibold text-foreground mb-1">Aucun projet</p>
           <p className="text-xs text-muted-foreground mb-4">Créez votre premier projet de subvention</p>
-          <button className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-xs font-medium text-primary-foreground">
-            <Plus className="w-3.5 h-3.5" /> Créer un projet
-          </button>
+          <CreateProjectDialog trigger={
+            <button className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-xs font-medium text-primary-foreground">
+              <Plus className="w-3.5 h-3.5" /> Créer un projet
+            </button>
+          } />
         </div>
       )}
     </div>
