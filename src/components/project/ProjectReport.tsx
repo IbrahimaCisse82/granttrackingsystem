@@ -1,5 +1,5 @@
-import { Project, lineTotal, fmt } from '@/lib/mock-data';
-import { useState } from 'react';
+import { Project, Report, lineTotal, fmt } from '@/lib/mock-data';
+import { useState, useCallback } from 'react';
 
 const STATUS_STYLES: Record<string, [string, string]> = {
   vide: ['bg-muted text-steel', 'Vide'],
@@ -8,13 +8,46 @@ const STATUS_STYLES: Record<string, [string, string]> = {
   valide: ['bg-emerald-light text-emerald', 'Validé'],
 };
 
-export default function ProjectReport({ project, reportIndex }: { project: Project; reportIndex: number }) {
+interface Props {
+  project: Project;
+  reportIndex: number;
+  onSave: (partial: Partial<Project>) => void;
+}
+
+export default function ProjectReport({ project, reportIndex, onSave }: Props) {
   const [activeTab, setActiveTab] = useState<'engaged' | 'prevues' | 'reconcil'>('engaged');
-  const report = project.reports[reportIndex];
+  const report = project.reports?.[reportIndex];
+
+  const updateReport = useCallback((patch: Partial<Report>) => {
+    if (!report) return;
+    const newReports = [...project.reports];
+    newReports[reportIndex] = { ...newReports[reportIndex], ...patch };
+    onSave({ reports: newReports });
+  }, [project.reports, reportIndex, onSave, report]);
+
+  const handleDateChange = useCallback((field: 'dateSubmit' | 'periodeDebut' | 'periodeFin', value: string) => {
+    updateReport({ [field]: value });
+  }, [updateReport]);
+
+  const handleDepChange = useCallback((code: string, value: number) => {
+    if (!report) return;
+    updateReport({ depenses: { ...report.depenses, [code]: value } });
+  }, [updateReport, report]);
+
+  const handleExplChange = useCallback((code: string, value: string) => {
+    if (!report) return;
+    updateReport({ explanation: { ...report.explanation, [code]: value } });
+  }, [updateReport, report]);
+
+  const handleStatusChange = useCallback((status: Report['status']) => {
+    updateReport({ status });
+  }, [updateReport]);
+
+  if (!report) return <p className="p-8 text-muted-foreground">Rapport non disponible.</p>;
+
   const n = reportIndex + 1;
   const padded = String(n).padStart(3, '0');
   const [badgeClass, badgeLabel] = STATUS_STYLES[report.status] || STATUS_STYLES.vide;
-
   const depByCode = report.depenses || {};
   const totalBudget = project.budgetLines.reduce((s, l) => s + lineTotal(l), 0);
   const totalDep = Object.values(depByCode).reduce((s, v) => s + v, 0);
@@ -37,8 +70,8 @@ export default function ProjectReport({ project, reportIndex }: { project: Proje
           <p className="text-xs text-muted-foreground mt-1">{project.org} · Dépenses engagées, prévues et réconciliation</p>
         </div>
         <div className="flex gap-2">
-          <button className="rounded-md border border-rule bg-card px-3 py-1.5 text-xs font-medium text-steel hover:bg-paper">Marquer En cours</button>
-          <button className="rounded-md bg-teal px-3 py-1.5 text-xs font-medium text-primary-foreground hover:brightness-110 transition-all">Soumettre le rapport</button>
+          <button onClick={() => handleStatusChange('en_cours')} className="rounded-md border border-rule bg-card px-3 py-1.5 text-xs font-medium text-steel hover:bg-paper">Marquer En cours</button>
+          <button onClick={() => handleStatusChange('soumis')} className="rounded-md bg-teal px-3 py-1.5 text-xs font-medium text-primary-foreground hover:brightness-110 transition-all">Soumettre le rapport</button>
         </div>
       </div>
 
@@ -47,15 +80,15 @@ export default function ProjectReport({ project, reportIndex }: { project: Proje
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-[11.5px] font-medium text-steel mb-1">Date de soumission</label>
-            <input type="date" defaultValue={report.dateSubmit} className="w-full rounded-md border border-[#CBD5E0] bg-card px-3 py-2 text-xs font-mono outline-none focus:border-primary" />
+            <input type="date" defaultValue={report.dateSubmit} key={report.dateSubmit} onChange={e => handleDateChange('dateSubmit', e.target.value)} className="w-full rounded-md border border-[#CBD5E0] bg-card px-3 py-2 text-xs font-mono outline-none focus:border-primary" />
           </div>
           <div>
             <label className="block text-[11.5px] font-medium text-steel mb-1">Période — début</label>
-            <input type="date" defaultValue={report.periodeDebut} className="w-full rounded-md border border-[#CBD5E0] bg-card px-3 py-2 text-xs font-mono outline-none focus:border-primary" />
+            <input type="date" defaultValue={report.periodeDebut} key={report.periodeDebut} onChange={e => handleDateChange('periodeDebut', e.target.value)} className="w-full rounded-md border border-[#CBD5E0] bg-card px-3 py-2 text-xs font-mono outline-none focus:border-primary" />
           </div>
           <div>
             <label className="block text-[11.5px] font-medium text-steel mb-1">Période — fin</label>
-            <input type="date" defaultValue={report.periodeFin} className="w-full rounded-md border border-[#CBD5E0] bg-card px-3 py-2 text-xs font-mono outline-none focus:border-primary" />
+            <input type="date" defaultValue={report.periodeFin} key={report.periodeFin} onChange={e => handleDateChange('periodeFin', e.target.value)} className="w-full rounded-md border border-[#CBD5E0] bg-card px-3 py-2 text-xs font-mono outline-none focus:border-primary" />
           </div>
         </div>
       </div>
@@ -89,9 +122,19 @@ export default function ProjectReport({ project, reportIndex }: { project: Proje
               </thead>
               <tbody>
                 <tr className="bg-enabel-light"><td colSpan={7} className="px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-enabel-dark">A — COÛTS OPÉRATIONNELS</td></tr>
-                {project.budgetLines.filter(l => l.section === 'A').map((l, i) => <DepRow key={i} line={l} dep={depByCode[l.code] || 0} badge={project.color.badge} expl={report.explanation?.[l.code] || ''} />)}
+                {project.budgetLines.filter(l => l.section === 'A').map((l, i) => (
+                  <DepRow key={i} line={l} dep={depByCode[l.code] || 0} badge={project.color.badge} expl={report.explanation?.[l.code] || ''}
+                    onDepChange={v => handleDepChange(l.code, v)}
+                    onExplChange={v => handleExplChange(l.code, v)}
+                  />
+                ))}
                 <tr className="bg-amber-light"><td colSpan={7} className="px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-amber">B — FRAIS DE GESTION</td></tr>
-                {project.budgetLines.filter(l => l.section === 'B').map((l, i) => <DepRow key={i} line={l} dep={depByCode[l.code] || 0} badge="b-amber" expl={report.explanation?.[l.code] || ''} />)}
+                {project.budgetLines.filter(l => l.section === 'B').map((l, i) => (
+                  <DepRow key={i} line={l} dep={depByCode[l.code] || 0} badge="b-amber" expl={report.explanation?.[l.code] || ''}
+                    onDepChange={v => handleDepChange(l.code, v)}
+                    onExplChange={v => handleExplChange(l.code, v)}
+                  />
+                ))}
                 <tr className="bg-ink text-sidebar-foreground font-mono font-bold text-xs">
                   <td colSpan={3} className="px-3 py-2">TOTAL</td>
                   <td className="px-3 py-2 text-right">{fmt(totalDep)} €</td>
@@ -163,7 +206,11 @@ const BADGE_COLORS: Record<string, string> = {
   'b-violet': 'bg-violet-light text-violet',
 };
 
-function DepRow({ line, dep, badge, expl }: { line: any; dep: number; badge: string; expl: string }) {
+function DepRow({ line, dep, badge, expl, onDepChange, onExplChange }: {
+  line: any; dep: number; badge: string; expl: string;
+  onDepChange: (v: number) => void;
+  onExplChange: (v: string) => void;
+}) {
   const bud = lineTotal(line);
   const solde = bud - dep;
   const soldePct = bud > 0 ? (solde / bud * 100).toFixed(1) + '%' : '—';
@@ -175,10 +222,16 @@ function DepRow({ line, dep, badge, expl }: { line: any; dep: number; badge: str
       </td>
       <td className="border-b border-rule-2 border-r px-3 py-2.5">{line.desc}</td>
       <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono">{fmt(bud)}</td>
-      <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono font-semibold">{fmt(dep)}</td>
+      <td className="border-b border-rule-2 border-r px-3 py-2.5">
+        <input type="number" defaultValue={dep} key={dep} onChange={e => onDepChange(Number(e.target.value) || 0)}
+          className="w-full text-right font-mono text-[12.5px] font-semibold rounded border border-[#CBD5E0] bg-card px-2 py-1 outline-none focus:border-primary" />
+      </td>
       <td className={`border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono ${solde < 0 ? 'text-rose' : ''}`}>{fmt(solde)}</td>
       <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right text-muted-foreground">{soldePct}</td>
-      <td className="border-b border-rule-2 px-3 py-2.5 text-muted-foreground italic text-[11px]">{expl || '—'}</td>
+      <td className="border-b border-rule-2 px-3 py-2.5">
+        <input type="text" defaultValue={expl} key={expl} onChange={e => onExplChange(e.target.value)} placeholder="—"
+          className="w-full text-[11px] italic text-muted-foreground rounded border border-transparent bg-transparent px-1 py-0.5 outline-none focus:border-[#CBD5E0] focus:bg-card" />
+      </td>
     </tr>
   );
 }

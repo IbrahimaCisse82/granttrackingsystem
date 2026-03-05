@@ -1,11 +1,36 @@
 import { Project, BudgetLine, lineTotal, fmt, fmtFCFA, EUR_TO_FCFA } from '@/lib/mock-data';
+import { useCallback } from 'react';
 
-export default function ProjectBudget({ project }: { project: Project }) {
+interface Props {
+  project: Project;
+  onSave: (partial: Partial<Project>) => void;
+}
+
+export default function ProjectBudget({ project, onSave }: Props) {
   const linesA = project.budgetLines.filter(l => l.section === 'A');
   const linesB = project.budgetLines.filter(l => l.section === 'B');
   const totalA = linesA.reduce((s, l) => s + lineTotal(l), 0);
   const totalB = linesB.reduce((s, l) => s + lineTotal(l), 0);
   const grand = totalA + totalB;
+
+  const updateLine = useCallback((index: number, patch: Partial<BudgetLine>) => {
+    const newLines = project.budgetLines.map((l, i) => i === index ? { ...l, ...patch } : l);
+    onSave({ budgetLines: newLines });
+  }, [project.budgetLines, onSave]);
+
+  const addLine = useCallback((section: 'A' | 'B') => {
+    const count = project.budgetLines.filter(l => l.section === section).length;
+    const newLine: BudgetLine = {
+      code: `${section}${count + 1}`,
+      section,
+      desc: '',
+      unite: 'Forfait',
+      qty: 1,
+      montant: 0,
+      allocation: 100,
+    };
+    onSave({ budgetLines: [...project.budgetLines, newLine] });
+  }, [project.budgetLines, onSave]);
 
   return (
     <div>
@@ -15,7 +40,7 @@ export default function ProjectBudget({ project }: { project: Project }) {
           <p className="text-xs text-muted-foreground mt-1">{project.org} · Répartition des dépenses estimées</p>
           <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">Taux de conversion : 1 € = {fmtFCFA(EUR_TO_FCFA)} FCFA</p>
         </div>
-        <button className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-enabel-dark transition-colors">
+        <button onClick={() => addLine('A')} className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-enabel-dark transition-colors">
           + Coût opérationnel
         </button>
       </div>
@@ -34,7 +59,10 @@ export default function ProjectBudget({ project }: { project: Project }) {
             </thead>
             <tbody>
               <SectionRow label="A — COÛTS OPÉRATIONNELS" />
-              {linesA.map((l, i) => <BudgetRow key={i} line={l} badge={project.color.badge} />)}
+              {linesA.map((l, i) => {
+                const globalIdx = project.budgetLines.indexOf(l);
+                return <BudgetRow key={globalIdx} line={l} badge={project.color.badge} onUpdate={patch => updateLine(globalIdx, patch)} />;
+              })}
               <tr className="bg-ink text-sidebar-foreground font-mono font-bold text-xs">
                 <td colSpan={6} className="px-3 py-2 border-r border-sidebar-foreground/10">SOUS-TOTAL A</td>
                 <td className="px-3 py-2 text-right border-r border-sidebar-foreground/10">{fmtFCFA(totalA * EUR_TO_FCFA)} F</td>
@@ -42,7 +70,10 @@ export default function ProjectBudget({ project }: { project: Project }) {
               </tr>
 
               <SectionRow label="B — FRAIS DE GESTION" amber />
-              {linesB.map((l, i) => <BudgetRow key={i} line={l} badge="b-amber" />)}
+              {linesB.map((l, i) => {
+                const globalIdx = project.budgetLines.indexOf(l);
+                return <BudgetRow key={globalIdx} line={l} badge="b-amber" onUpdate={patch => updateLine(globalIdx, patch)} />;
+              })}
               <tr className="bg-ink text-sidebar-foreground font-mono font-bold text-xs">
                 <td colSpan={6} className="px-3 py-2 border-r border-sidebar-foreground/10">SOUS-TOTAL B</td>
                 <td className="px-3 py-2 text-right border-r border-sidebar-foreground/10">{fmtFCFA(totalB * EUR_TO_FCFA)} F</td>
@@ -79,7 +110,7 @@ const BADGE_COLORS: Record<string, string> = {
   'b-violet': 'bg-violet-light text-violet',
 };
 
-function BudgetRow({ line, badge }: { line: BudgetLine; badge: string }) {
+function BudgetRow({ line, badge, onUpdate }: { line: BudgetLine; badge: string; onUpdate: (patch: Partial<BudgetLine>) => void }) {
   const totalEur = lineTotal(line);
   const totalFcfa = totalEur * EUR_TO_FCFA;
   const montantFcfa = line.montant * EUR_TO_FCFA;
@@ -91,11 +122,26 @@ function BudgetRow({ line, badge }: { line: BudgetLine; badge: string }) {
           {line.code}
         </span>
       </td>
-      <td className="border-b border-rule-2 border-r px-3 py-2.5">{line.desc}</td>
-      <td className="border-b border-rule-2 border-r px-3 py-2.5 text-muted-foreground">{line.unite}</td>
-      <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono">{line.qty}</td>
-      <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono">{fmtFCFA(montantFcfa)}</td>
-      <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono">{line.allocation}%</td>
+      <td className="border-b border-rule-2 border-r px-3 py-2.5">
+        <input type="text" defaultValue={line.desc} key={line.desc} onChange={e => onUpdate({ desc: e.target.value })}
+          className="w-full bg-transparent outline-none focus:bg-card focus:border-[#CBD5E0] rounded px-1" />
+      </td>
+      <td className="border-b border-rule-2 border-r px-3 py-2.5">
+        <input type="text" defaultValue={line.unite} key={line.unite} onChange={e => onUpdate({ unite: e.target.value })}
+          className="w-20 bg-transparent text-muted-foreground outline-none focus:bg-card rounded px-1" />
+      </td>
+      <td className="border-b border-rule-2 border-r px-3 py-2.5">
+        <input type="number" defaultValue={line.qty} key={line.qty} onChange={e => onUpdate({ qty: Number(e.target.value) || 0 })}
+          className="w-16 text-right font-mono bg-transparent outline-none focus:bg-card rounded px-1" />
+      </td>
+      <td className="border-b border-rule-2 border-r px-3 py-2.5">
+        <input type="number" defaultValue={montantFcfa} key={montantFcfa} onChange={e => onUpdate({ montant: (Number(e.target.value) || 0) / EUR_TO_FCFA })}
+          className="w-28 text-right font-mono bg-transparent outline-none focus:bg-card rounded px-1" />
+      </td>
+      <td className="border-b border-rule-2 border-r px-3 py-2.5">
+        <input type="number" defaultValue={line.allocation} key={line.allocation} onChange={e => onUpdate({ allocation: Number(e.target.value) || 0 })}
+          className="w-16 text-right font-mono bg-transparent outline-none focus:bg-card rounded px-1" />
+      </td>
       <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono font-semibold">{fmtFCFA(totalFcfa)} F</td>
       <td className="border-b border-rule-2 px-3 py-2.5 text-right font-mono text-muted-foreground">{fmt(totalEur)} €</td>
     </tr>

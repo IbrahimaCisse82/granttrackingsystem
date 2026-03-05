@@ -1,9 +1,46 @@
-import { Project, fmt } from '@/lib/mock-data';
+import { Project, Transaction, fmt } from '@/lib/mock-data';
 import MetricCard from '@/components/MetricCard';
+import { useCallback } from 'react';
 
-export default function ProjectTransactions({ project, reportIndex }: { project: Project; reportIndex: number }) {
-  const report = project.reports[reportIndex];
-  const transactions = report.transactions || [];
+interface Props {
+  project: Project;
+  reportIndex: number;
+  onSave: (partial: Partial<Project>) => void;
+}
+
+export default function ProjectTransactions({ project, reportIndex, onSave }: Props) {
+  const report = project.reports?.[reportIndex];
+  const transactions = report?.transactions || [];
+
+  const updateTransactions = useCallback((newTx: Transaction[]) => {
+    if (!report) return;
+    const newReports = [...project.reports];
+    newReports[reportIndex] = { ...newReports[reportIndex], transactions: newTx };
+    onSave({ reports: newReports });
+  }, [project.reports, reportIndex, onSave, report]);
+
+  const addTransaction = useCallback(() => {
+    const newTx: Transaction = {
+      id: crypto.randomUUID(),
+      code: '',
+      date: new Date().toISOString().slice(0, 10),
+      voucher: '',
+      beneficiaire: '',
+      montantDevise: 0,
+      tauxChange: project.taux,
+      montantEUR: 0,
+      description: '',
+    };
+    updateTransactions([...transactions, newTx]);
+  }, [transactions, updateTransactions, project.taux]);
+
+  const updateTx = useCallback((index: number, patch: Partial<Transaction>) => {
+    const newTx = transactions.map((t, i) => i === index ? { ...t, ...patch } : t);
+    updateTransactions(newTx);
+  }, [transactions, updateTransactions]);
+
+  if (!report) return <p className="p-8 text-muted-foreground">Rapport non disponible.</p>;
+
   const n = reportIndex + 1;
   const totalEUR = transactions.reduce((s, t) => s + (t.montantEUR || 0), 0);
   const totalDepenses = Object.values(report.depenses || {}).reduce((s, v) => s + v, 0);
@@ -16,7 +53,7 @@ export default function ProjectTransactions({ project, reportIndex }: { project:
           <h1 className="text-xl font-bold tracking-tight">Liste des transactions — REP {String(n).padStart(2, '0')}</h1>
           <p className="text-xs text-muted-foreground mt-1">{project.org} · {transactions.length} transaction(s)</p>
         </div>
-        <button className="rounded-md bg-teal px-3 py-1.5 text-xs font-medium text-primary-foreground hover:brightness-110 transition-all">
+        <button onClick={addTransaction} className="rounded-md bg-teal px-3 py-1.5 text-xs font-medium text-primary-foreground hover:brightness-110 transition-all">
           + Ajouter
         </button>
       </div>
@@ -42,15 +79,37 @@ export default function ProjectTransactions({ project, reportIndex }: { project:
                 <tr key={t.id} className="hover:bg-paper/50 transition-colors">
                   <td className="border-b border-rule-2 border-r px-3 py-2.5 font-mono text-[11px] text-dim">{i + 1}</td>
                   <td className="border-b border-rule-2 border-r px-3 py-2.5">
-                    <span className="inline-block rounded px-1.5 py-0.5 font-mono text-[10.5px] font-semibold bg-enabel-light text-enabel-dark">{t.code}</span>
+                    <input type="text" defaultValue={t.code} key={t.code} onChange={e => updateTx(i, { code: e.target.value })}
+                      className="w-20 font-mono text-[10.5px] font-semibold bg-enabel-light text-enabel-dark rounded px-1.5 py-0.5 outline-none focus:bg-card focus:border-[#CBD5E0]" />
                   </td>
-                  <td className="border-b border-rule-2 border-r px-3 py-2.5 font-mono text-xs">{t.date}</td>
-                  <td className="border-b border-rule-2 border-r px-3 py-2.5 font-mono text-xs">{t.voucher}</td>
-                  <td className="border-b border-rule-2 border-r px-3 py-2.5">{t.beneficiaire}</td>
-                  <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono">{fmt(t.montantDevise)}</td>
-                  <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono">{t.tauxChange}</td>
-                  <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono font-semibold text-primary">{fmt(t.montantEUR)} €</td>
-                  <td className="border-b border-rule-2 px-3 py-2.5 text-muted-foreground">{t.description}</td>
+                  <td className="border-b border-rule-2 border-r px-3 py-2.5">
+                    <input type="date" defaultValue={t.date} key={t.date} onChange={e => updateTx(i, { date: e.target.value })}
+                      className="w-full bg-transparent font-mono text-xs outline-none focus:bg-card rounded px-1" />
+                  </td>
+                  <td className="border-b border-rule-2 border-r px-3 py-2.5">
+                    <input type="text" defaultValue={t.voucher} key={t.voucher} onChange={e => updateTx(i, { voucher: e.target.value })}
+                      className="w-full bg-transparent font-mono text-xs outline-none focus:bg-card rounded px-1" />
+                  </td>
+                  <td className="border-b border-rule-2 border-r px-3 py-2.5">
+                    <input type="text" defaultValue={t.beneficiaire} key={t.beneficiaire} onChange={e => updateTx(i, { beneficiaire: e.target.value })}
+                      className="w-full bg-transparent outline-none focus:bg-card rounded px-1" />
+                  </td>
+                  <td className="border-b border-rule-2 border-r px-3 py-2.5">
+                    <input type="number" defaultValue={t.montantDevise} key={t.montantDevise} onChange={e => updateTx(i, { montantDevise: Number(e.target.value) || 0 })}
+                      className="w-24 text-right font-mono bg-transparent outline-none focus:bg-card rounded px-1" />
+                  </td>
+                  <td className="border-b border-rule-2 border-r px-3 py-2.5">
+                    <input type="number" defaultValue={t.tauxChange} key={t.tauxChange} onChange={e => updateTx(i, { tauxChange: Number(e.target.value) || 0 })}
+                      className="w-20 text-right font-mono bg-transparent outline-none focus:bg-card rounded px-1" />
+                  </td>
+                  <td className="border-b border-rule-2 border-r px-3 py-2.5">
+                    <input type="number" defaultValue={t.montantEUR} key={t.montantEUR} onChange={e => updateTx(i, { montantEUR: Number(e.target.value) || 0 })}
+                      className="w-24 text-right font-mono font-semibold text-primary bg-transparent outline-none focus:bg-card rounded px-1" />
+                  </td>
+                  <td className="border-b border-rule-2 px-3 py-2.5">
+                    <input type="text" defaultValue={t.description} key={t.description} onChange={e => updateTx(i, { description: e.target.value })}
+                      className="w-full bg-transparent text-muted-foreground outline-none focus:bg-card rounded px-1" />
+                  </td>
                 </tr>
               )) : (
                 <tr>
