@@ -1,7 +1,18 @@
-import { Project, fmt } from '@/lib/mock-data';
+import { Project, FicheVersement, fmt } from '@/lib/mock-data';
+import { useCallback } from 'react';
 
-export default function ProjectFiche({ project }: { project: Project }) {
+interface Props {
+  project: Project;
+  onSave: (partial: Partial<Project>) => void;
+}
+
+export default function ProjectFiche({ project, onSave }: Props) {
   const versements = project.fiches.versements;
+
+  const updateVersement = useCallback((index: number, patch: Partial<FicheVersement>) => {
+    const newV = versements.map((v, i) => i === index ? { ...v, ...patch } : v);
+    onSave({ fiches: { ...project.fiches, versements: newV } });
+  }, [versements, project.fiches, onSave]);
 
   return (
     <div>
@@ -26,13 +37,34 @@ export default function ProjectFiche({ project }: { project: Project }) {
               {versements.map((v, i) => (
                 <tr key={i} className="hover:bg-paper/50 transition-colors">
                   <td className="border-b border-rule-2 border-r px-3 py-2.5 font-semibold">Rapport N° {String(i + 1).padStart(3, '0')}</td>
-                  <td className="border-b border-rule-2 border-r px-3 py-2.5 text-muted-foreground">{v.periode}</td>
-                  <td className="border-b border-rule-2 border-r px-3 py-2.5 font-mono text-xs">{v.dateSoumission || '—'}</td>
-                  <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono">{v.montantDeclare ? fmt(v.montantDeclare) + ' €' : '—'}</td>
-                  <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono">{v.montantValide ? fmt(v.montantValide) + ' €' : '—'}</td>
-                  <td className="border-b border-rule-2 border-r px-3 py-2.5">{v.versement}</td>
-                  <td className="border-b border-rule-2 border-r px-3 py-2.5 font-mono text-xs">{v.datePaiement || '—'}</td>
-                  <td className="border-b border-rule-2 px-3 py-2.5 text-right font-mono font-semibold text-emerald">{v.montantRecu ? fmt(v.montantRecu) + ' €' : '—'}</td>
+                  <td className="border-b border-rule-2 border-r px-3 py-2.5">
+                    <input type="text" defaultValue={v.periode} key={v.periode} onChange={e => updateVersement(i, { periode: e.target.value })}
+                      className="w-full bg-transparent text-muted-foreground outline-none focus:bg-card rounded px-1" />
+                  </td>
+                  <td className="border-b border-rule-2 border-r px-3 py-2.5">
+                    <input type="date" defaultValue={v.dateSoumission} key={v.dateSoumission} onChange={e => updateVersement(i, { dateSoumission: e.target.value })}
+                      className="w-full bg-transparent font-mono text-xs outline-none focus:bg-card rounded px-1" />
+                  </td>
+                  <td className="border-b border-rule-2 border-r px-3 py-2.5">
+                    <input type="number" defaultValue={v.montantDeclare} key={v.montantDeclare} onChange={e => updateVersement(i, { montantDeclare: Number(e.target.value) || 0 })}
+                      className="w-full text-right font-mono bg-transparent outline-none focus:bg-card rounded px-1" />
+                  </td>
+                  <td className="border-b border-rule-2 border-r px-3 py-2.5">
+                    <input type="number" defaultValue={v.montantValide} key={v.montantValide} onChange={e => updateVersement(i, { montantValide: Number(e.target.value) || 0 })}
+                      className="w-full text-right font-mono bg-transparent outline-none focus:bg-card rounded px-1" />
+                  </td>
+                  <td className="border-b border-rule-2 border-r px-3 py-2.5">
+                    <input type="text" defaultValue={v.versement} key={v.versement} onChange={e => updateVersement(i, { versement: e.target.value })}
+                      className="w-full bg-transparent outline-none focus:bg-card rounded px-1" />
+                  </td>
+                  <td className="border-b border-rule-2 border-r px-3 py-2.5">
+                    <input type="date" defaultValue={v.datePaiement} key={v.datePaiement} onChange={e => updateVersement(i, { datePaiement: e.target.value })}
+                      className="w-full bg-transparent font-mono text-xs outline-none focus:bg-card rounded px-1" />
+                  </td>
+                  <td className="border-b border-rule-2 px-3 py-2.5">
+                    <input type="number" defaultValue={v.montantRecu} key={v.montantRecu} onChange={e => updateVersement(i, { montantRecu: Number(e.target.value) || 0 })}
+                      className="w-full text-right font-mono font-semibold text-emerald bg-transparent outline-none focus:bg-card rounded px-1" />
+                  </td>
                 </tr>
               ))}
             </tbody>
