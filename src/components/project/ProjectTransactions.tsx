@@ -1,6 +1,7 @@
 import { Project, Transaction, fmt } from '@/lib/mock-data';
 import MetricCard from '@/components/MetricCard';
 import { useCallback } from 'react';
+import { Trash2 } from 'lucide-react';
 
 interface Props {
   project: Project;
@@ -35,8 +36,22 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
   }, [transactions, updateTransactions, project.taux]);
 
   const updateTx = useCallback((index: number, patch: Partial<Transaction>) => {
-    const newTx = transactions.map((t, i) => i === index ? { ...t, ...patch } : t);
+    const newTx = transactions.map((t, i) => {
+      if (i !== index) return t;
+      const updated = { ...t, ...patch };
+      // Auto-calculate montantEUR when montantDevise or tauxChange changes
+      if (patch.montantDevise !== undefined || patch.tauxChange !== undefined) {
+        const devise = patch.montantDevise !== undefined ? patch.montantDevise : t.montantDevise;
+        const taux = patch.tauxChange !== undefined ? patch.tauxChange : t.tauxChange;
+        updated.montantEUR = taux > 0 ? Math.round((devise / taux) * 100) / 100 : 0;
+      }
+      return updated;
+    });
     updateTransactions(newTx);
+  }, [transactions, updateTransactions]);
+
+  const removeTx = useCallback((index: number) => {
+    updateTransactions(transactions.filter((_, i) => i !== index));
   }, [transactions, updateTransactions]);
 
   if (!report) return <p className="p-8 text-muted-foreground">Rapport non disponible.</p>;
@@ -69,18 +84,21 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
           <table className="w-full text-[12.5px]">
             <thead>
               <tr className="bg-ink-2">
-                {['#', 'Code budget.', 'Date', 'N° Voucher', 'Bénéficiaire', 'Montant devise', 'Taux', 'Montant EUR', 'Description'].map(h => (
+                {['#', 'Code budget.', 'Date', 'N° Voucher', 'Bénéficiaire', 'Montant devise', 'Taux', 'Montant EUR', 'Description', ''].map(h => (
                   <th key={h} className="whitespace-nowrap border-r border-sidebar-foreground/5 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-wider text-sidebar-foreground/70 font-mono last:border-r-0">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {transactions.length > 0 ? transactions.map((t, i) => (
-                <tr key={t.id} className="hover:bg-paper/50 transition-colors">
+                <tr key={t.id} className="hover:bg-paper/50 transition-colors group">
                   <td className="border-b border-rule-2 border-r px-3 py-2.5 font-mono text-[11px] text-dim">{i + 1}</td>
                   <td className="border-b border-rule-2 border-r px-3 py-2.5">
-                    <input type="text" defaultValue={t.code} key={t.code} onChange={e => updateTx(i, { code: e.target.value })}
-                      className="w-20 font-mono text-[10.5px] font-semibold bg-enabel-light text-enabel-dark rounded px-1.5 py-0.5 outline-none focus:bg-card focus:border-[#CBD5E0]" />
+                    <select value={t.code} onChange={e => updateTx(i, { code: e.target.value })}
+                      className="font-mono text-[10.5px] font-semibold bg-enabel-light text-enabel-dark rounded px-1.5 py-0.5 outline-none border-none">
+                      <option value="">—</option>
+                      {project.budgetLines.map(bl => <option key={bl.code} value={bl.code}>{bl.code}</option>)}
+                    </select>
                   </td>
                   <td className="border-b border-rule-2 border-r px-3 py-2.5">
                     <input type="date" defaultValue={t.date} key={t.date} onChange={e => updateTx(i, { date: e.target.value })}
@@ -95,31 +113,35 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
                       className="w-full bg-transparent outline-none focus:bg-card rounded px-1" />
                   </td>
                   <td className="border-b border-rule-2 border-r px-3 py-2.5">
-                    <input type="number" defaultValue={t.montantDevise} key={t.montantDevise} onChange={e => updateTx(i, { montantDevise: Number(e.target.value) || 0 })}
+                    <input type="number" defaultValue={t.montantDevise} key={`d-${t.montantDevise}`} onChange={e => updateTx(i, { montantDevise: Number(e.target.value) || 0 })}
                       className="w-24 text-right font-mono bg-transparent outline-none focus:bg-card rounded px-1" />
                   </td>
                   <td className="border-b border-rule-2 border-r px-3 py-2.5">
-                    <input type="number" defaultValue={t.tauxChange} key={t.tauxChange} onChange={e => updateTx(i, { tauxChange: Number(e.target.value) || 0 })}
+                    <input type="number" defaultValue={t.tauxChange} key={`t-${t.tauxChange}`} onChange={e => updateTx(i, { tauxChange: Number(e.target.value) || 0 })}
                       className="w-20 text-right font-mono bg-transparent outline-none focus:bg-card rounded px-1" />
                   </td>
-                  <td className="border-b border-rule-2 border-r px-3 py-2.5">
-                    <input type="number" defaultValue={t.montantEUR} key={t.montantEUR} onChange={e => updateTx(i, { montantEUR: Number(e.target.value) || 0 })}
-                      className="w-24 text-right font-mono font-semibold text-primary bg-transparent outline-none focus:bg-card rounded px-1" />
+                  <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono font-semibold text-primary">
+                    {fmt(t.montantEUR)} €
                   </td>
-                  <td className="border-b border-rule-2 px-3 py-2.5">
+                  <td className="border-b border-rule-2 border-r px-3 py-2.5">
                     <input type="text" defaultValue={t.description} key={t.description} onChange={e => updateTx(i, { description: e.target.value })}
                       className="w-full bg-transparent text-muted-foreground outline-none focus:bg-card rounded px-1" />
+                  </td>
+                  <td className="border-b border-rule-2 px-3 py-2.5">
+                    <button onClick={() => removeTx(i)} className="opacity-0 group-hover:opacity-100 text-dim hover:text-rose transition-all">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </td>
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={9} className="px-3 py-8 text-center text-dim italic">Aucune transaction. Cliquez sur "+ Ajouter".</td>
+                  <td colSpan={10} className="px-3 py-8 text-center text-dim italic">Aucune transaction. Cliquez sur "+ Ajouter".</td>
                 </tr>
               )}
               <tr className="bg-ink text-sidebar-foreground font-mono font-bold text-xs">
                 <td colSpan={7} className="px-3 py-2">TOTAL</td>
                 <td className="px-3 py-2 text-right">{fmt(totalEUR)} €</td>
-                <td></td>
+                <td colSpan={2}></td>
               </tr>
             </tbody>
           </table>
