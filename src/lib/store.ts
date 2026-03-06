@@ -3,7 +3,7 @@ import { create } from 'zustand';
 interface AppState {
   currentProjectId: string | null;
   currentTab: string;
-  currentPage: 'portfolio' | 'project' | 'tutoriel' | 'admin';
+  currentPage: 'portfolio' | 'project' | 'tutoriel' | 'admin' | 'dashboard' | 'profile';
   sidebarSearch: string;
   openProjectIds: string[];
   

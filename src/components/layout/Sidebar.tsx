@@ -1,12 +1,14 @@
 import { useAppStore } from '@/lib/store';
 import { useProjects } from '@/hooks/useProjects';
-import { ChevronRight, LayoutDashboard, BookOpen, Users, Search } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { ChevronRight, LayoutDashboard, BookOpen, Users, Search, BarChart3, UserCircle, FileEdit } from 'lucide-react';
 import logo from '@/assets/logo-growhub.png';
 
 const SECTION_TABS = [
   { id: 'infos', label: 'Informations générales', color: '#2563EB' },
   { id: 'budget', label: 'Budget (Annexe 1b)', color: '#B45309' },
   { id: 'fiche', label: 'Fiche récapitulative', color: '#0D9488' },
+  { id: 'amendements', label: 'Amendements', color: '#7C3AED' },
   { id: 'rapport-1', label: 'Rapport N° 001', color: '#065F46' },
   { id: 'trans-1', label: '↳ Transactions REP 01', color: '#059669' },
   { id: 'rapport-2', label: 'Rapport N° 002', color: '#1A5276' },
@@ -20,6 +22,7 @@ const SECTION_TABS = [
 export default function Sidebar() {
   const { currentPage, currentProjectId, currentTab, openProjectIds, setPage, openProjectTab, toggleSidebarProject, sidebarSearch, setSidebarSearch } = useAppStore();
   const { projects } = useProjects();
+  const { signOut } = useAuth();
 
   return (
     <aside className="fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col overflow-y-auto bg-sidebar border-r border-sidebar-border/5">
@@ -49,8 +52,10 @@ export default function Sidebar() {
       <div className="p-2.5 pt-3">
         <p className="px-2 pb-1.5 text-[9.5px] font-semibold uppercase tracking-[1.2px] text-sidebar-foreground/25">Navigation</p>
         <NavItem icon={<LayoutDashboard className="w-4 h-4" />} label="Portefeuille" active={currentPage === 'portfolio'} onClick={() => setPage('portfolio')} />
+        <NavItem icon={<BarChart3 className="w-4 h-4" />} label="Dashboard" active={currentPage === 'dashboard'} onClick={() => setPage('dashboard')} />
         <NavItem icon={<BookOpen className="w-4 h-4" />} label="Guide d'utilisation" active={currentPage === 'tutoriel'} onClick={() => setPage('tutoriel')} />
         <NavItem icon={<Users className="w-4 h-4" />} label="Gestion utilisateurs" active={currentPage === 'admin'} onClick={() => setPage('admin')} />
+        <NavItem icon={<UserCircle className="w-4 h-4" />} label="Mon profil" active={currentPage === 'profile'} onClick={() => setPage('profile')} />
       </div>
 
       {/* Projects */}
@@ -96,9 +101,14 @@ export default function Sidebar() {
       </div>
 
       {/* Footer */}
-      <div className="mt-auto border-t border-sidebar-foreground/5 p-4 text-[10.5px] leading-relaxed text-sidebar-foreground/20">
-        Grow Hub SARL · GH-GTS v3.0<br />
-        © 2024 — Tous droits réservés
+      <div className="mt-auto border-t border-sidebar-foreground/5 p-4">
+        <button onClick={signOut} className="w-full rounded-md border border-sidebar-foreground/10 px-3 py-1.5 text-[11px] text-sidebar-foreground/50 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground/70 transition-colors">
+          Déconnexion
+        </button>
+        <p className="mt-3 text-[10.5px] leading-relaxed text-sidebar-foreground/20">
+          Grow Hub SARL · GH-GTS v3.0<br />
+          © 2024 — Tous droits réservés
+        </p>
       </div>
     </aside>
   );
