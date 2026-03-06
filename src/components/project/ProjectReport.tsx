@@ -1,4 +1,4 @@
-import { Project, Report, lineTotal, fmt } from '@/lib/mock-data';
+import { Project, Report, lineTotal, fmt, calcDepensesTotal } from '@/lib/mock-data';
 import { useState, useCallback } from 'react';
 
 const STATUS_STYLES: Record<string, [string, string]> = {
@@ -39,6 +39,14 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
     updateReport({ explanation: { ...report.explanation, [code]: value } });
   }, [updateReport, report]);
 
+  const handlePrevChange = useCallback((code: string, period: string, value: number) => {
+    if (!report) return;
+    const previsions = { ...report.previsions };
+    if (!previsions[code]) previsions[code] = {};
+    previsions[code] = { ...previsions[code], [period]: value };
+    updateReport({ previsions });
+  }, [updateReport, report]);
+
   const handleStatusChange = useCallback((status: Report['status']) => {
     updateReport({ status });
   }, [updateReport]);
@@ -52,6 +60,14 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
   const totalBudget = project.budgetLines.reduce((s, l) => s + lineTotal(l), 0);
   const totalDep = Object.values(depByCode).reduce((s, v) => s + v, 0);
   const soldeGrand = totalBudget - totalDep;
+
+  // Cumulated expenses from previous reports
+  const prevReportsDep = project.reports.slice(0, reportIndex).reduce((s, r) =>
+    s + Object.values(r.depenses || {}).reduce((a, b) => a + b, 0), 0);
+  const cumulDep = prevReportsDep + totalDep;
+
+  // Periods for prévisions
+  const prevPeriods = ['P+1', 'P+2', 'P+3'];
 
   const tabs = [
     { id: 'engaged' as const, label: 'Dépenses engagées' },
@@ -80,15 +96,15 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-[11.5px] font-medium text-steel mb-1">Date de soumission</label>
-            <input type="date" defaultValue={report.dateSubmit} key={report.dateSubmit} onChange={e => handleDateChange('dateSubmit', e.target.value)} className="w-full rounded-md border border-[#CBD5E0] bg-card px-3 py-2 text-xs font-mono outline-none focus:border-primary" />
+            <input type="date" defaultValue={report.dateSubmit} key={report.dateSubmit} onChange={e => handleDateChange('dateSubmit', e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono outline-none focus:border-primary" />
           </div>
           <div>
             <label className="block text-[11.5px] font-medium text-steel mb-1">Période — début</label>
-            <input type="date" defaultValue={report.periodeDebut} key={report.periodeDebut} onChange={e => handleDateChange('periodeDebut', e.target.value)} className="w-full rounded-md border border-[#CBD5E0] bg-card px-3 py-2 text-xs font-mono outline-none focus:border-primary" />
+            <input type="date" defaultValue={report.periodeDebut} key={report.periodeDebut} onChange={e => handleDateChange('periodeDebut', e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono outline-none focus:border-primary" />
           </div>
           <div>
             <label className="block text-[11.5px] font-medium text-steel mb-1">Période — fin</label>
-            <input type="date" defaultValue={report.periodeFin} key={report.periodeFin} onChange={e => handleDateChange('periodeFin', e.target.value)} className="w-full rounded-md border border-[#CBD5E0] bg-card px-3 py-2 text-xs font-mono outline-none focus:border-primary" />
+            <input type="date" defaultValue={report.periodeFin} key={report.periodeFin} onChange={e => handleDateChange('periodeFin', e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono outline-none focus:border-primary" />
           </div>
         </div>
       </div>
@@ -108,36 +124,44 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
         ))}
       </div>
 
-      {/* Tab content */}
+      {/* Dépenses engagées */}
       {activeTab === 'engaged' && (
         <div className="overflow-hidden rounded-[10px] border border-rule bg-card">
           <div className="overflow-x-auto">
             <table className="w-full text-[12.5px]">
               <thead>
                 <tr className="bg-ink-2">
-                  {['Code', 'Poste budgétaire', 'Budget total', 'Dépenses période', 'Solde €', 'Solde %', 'Explication'].map(h => (
+                  {['Code', 'Poste budgétaire', 'Budget total', 'Cumul antérieur', 'Dépenses période', 'Cumul total', 'Solde €', 'Solde %', 'Explication'].map(h => (
                     <th key={h} className="whitespace-nowrap border-r border-sidebar-foreground/5 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-wider text-sidebar-foreground/70 font-mono last:border-r-0">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                <tr className="bg-enabel-light"><td colSpan={7} className="px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-enabel-dark">A — COÛTS OPÉRATIONNELS</td></tr>
-                {project.budgetLines.filter(l => l.section === 'A').map((l, i) => (
-                  <DepRow key={i} line={l} dep={depByCode[l.code] || 0} badge={project.color.badge} expl={report.explanation?.[l.code] || ''}
-                    onDepChange={v => handleDepChange(l.code, v)}
-                    onExplChange={v => handleExplChange(l.code, v)}
-                  />
-                ))}
-                <tr className="bg-amber-light"><td colSpan={7} className="px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-amber">B — FRAIS DE GESTION</td></tr>
-                {project.budgetLines.filter(l => l.section === 'B').map((l, i) => (
-                  <DepRow key={i} line={l} dep={depByCode[l.code] || 0} badge="b-amber" expl={report.explanation?.[l.code] || ''}
-                    onDepChange={v => handleDepChange(l.code, v)}
-                    onExplChange={v => handleExplChange(l.code, v)}
-                  />
-                ))}
+                <tr className="bg-enabel-light"><td colSpan={9} className="px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-enabel-dark">A — COÛTS OPÉRATIONNELS</td></tr>
+                {project.budgetLines.filter(l => l.section === 'A').map((l, i) => {
+                  const prevDep = project.reports.slice(0, reportIndex).reduce((s, r) => s + ((r.depenses || {})[l.code] || 0), 0);
+                  return (
+                    <DepRow key={i} line={l} dep={depByCode[l.code] || 0} prevDep={prevDep} badge={project.color.badge} expl={report.explanation?.[l.code] || ''}
+                      onDepChange={v => handleDepChange(l.code, v)}
+                      onExplChange={v => handleExplChange(l.code, v)}
+                    />
+                  );
+                })}
+                <tr className="bg-amber-light"><td colSpan={9} className="px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-amber">B — FRAIS DE GESTION</td></tr>
+                {project.budgetLines.filter(l => l.section === 'B').map((l, i) => {
+                  const prevDep = project.reports.slice(0, reportIndex).reduce((s, r) => s + ((r.depenses || {})[l.code] || 0), 0);
+                  return (
+                    <DepRow key={i} line={l} dep={depByCode[l.code] || 0} prevDep={prevDep} badge="b-amber" expl={report.explanation?.[l.code] || ''}
+                      onDepChange={v => handleDepChange(l.code, v)}
+                      onExplChange={v => handleExplChange(l.code, v)}
+                    />
+                  );
+                })}
                 <tr className="bg-ink text-sidebar-foreground font-mono font-bold text-xs">
                   <td colSpan={3} className="px-3 py-2">TOTAL</td>
+                  <td className="px-3 py-2 text-right">{fmt(prevReportsDep)} €</td>
                   <td className="px-3 py-2 text-right">{fmt(totalDep)} €</td>
+                  <td className="px-3 py-2 text-right">{fmt(cumulDep)} €</td>
                   <td className="px-3 py-2 text-right">{fmt(soldeGrand)} €</td>
                   <td colSpan={2} className="px-3 py-2">—</td>
                 </tr>
@@ -147,25 +171,104 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
         </div>
       )}
 
+      {/* Dépenses prévues */}
+      {activeTab === 'prevues' && (
+        <div className="overflow-hidden rounded-[10px] border border-rule bg-card">
+          <div className="overflow-x-auto">
+            <table className="w-full text-[12.5px]">
+              <thead>
+                <tr className="bg-ink-2">
+                  <th className="whitespace-nowrap border-r border-sidebar-foreground/5 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-wider text-sidebar-foreground/70 font-mono">Code</th>
+                  <th className="whitespace-nowrap border-r border-sidebar-foreground/5 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-wider text-sidebar-foreground/70 font-mono">Poste budgétaire</th>
+                  <th className="whitespace-nowrap border-r border-sidebar-foreground/5 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-wider text-sidebar-foreground/70 font-mono">Solde disponible</th>
+                  {prevPeriods.map(p => (
+                    <th key={p} className="whitespace-nowrap border-r border-sidebar-foreground/5 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-wider text-sidebar-foreground/70 font-mono last:border-r-0">Prév. {p}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="bg-enabel-light"><td colSpan={3 + prevPeriods.length} className="px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-enabel-dark">A — COÛTS OPÉRATIONNELS</td></tr>
+                {project.budgetLines.filter(l => l.section === 'A').map((l, i) => {
+                  const bud = lineTotal(l);
+                  const cumDep = project.reports.slice(0, reportIndex + 1).reduce((s, r) => s + ((r.depenses || {})[l.code] || 0), 0);
+                  const solde = bud - cumDep;
+                  return (
+                    <PrevRow key={i} line={l} solde={solde} badge={project.color.badge} periods={prevPeriods} previsions={report.previsions?.[l.code] || {}}
+                      onPrevChange={(period, value) => handlePrevChange(l.code, period, value)} />
+                  );
+                })}
+                <tr className="bg-amber-light"><td colSpan={3 + prevPeriods.length} className="px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-amber">B — FRAIS DE GESTION</td></tr>
+                {project.budgetLines.filter(l => l.section === 'B').map((l, i) => {
+                  const bud = lineTotal(l);
+                  const cumDep = project.reports.slice(0, reportIndex + 1).reduce((s, r) => s + ((r.depenses || {})[l.code] || 0), 0);
+                  const solde = bud - cumDep;
+                  return (
+                    <PrevRow key={i} line={l} solde={solde} badge="b-amber" periods={prevPeriods} previsions={report.previsions?.[l.code] || {}}
+                      onPrevChange={(period, value) => handlePrevChange(l.code, period, value)} />
+                  );
+                })}
+                <tr className="bg-ink text-sidebar-foreground font-mono font-bold text-xs">
+                  <td colSpan={3} className="px-3 py-2">TOTAL PRÉVISIONS</td>
+                  {prevPeriods.map(p => {
+                    const total = project.budgetLines.reduce((s, l) => s + ((report.previsions?.[l.code] || {})[p] || 0), 0);
+                    return <td key={p} className="px-3 py-2 text-right">{fmt(total)} €</td>;
+                  })}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Réconciliation */}
       {activeTab === 'reconcil' && (
         <div>
-          <div className="grid grid-cols-3 gap-4 mb-4">
+          {/* Summary cards */}
+          <div className="grid grid-cols-4 gap-3.5 mb-4">
             <div className="relative overflow-hidden rounded-[10px] border border-rule bg-card p-4">
               <p className="text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">Budget total</p>
               <p className="mt-1.5 font-mono text-[22px] font-semibold">{fmt(totalBudget)} €</p>
               <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary" />
             </div>
             <div className="relative overflow-hidden rounded-[10px] border border-rule bg-card p-4">
-              <p className="text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">Dépenses engagées</p>
-              <p className="mt-1.5 font-mono text-[22px] font-semibold">{fmt(totalDep)} €</p>
+              <p className="text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">Dépenses cumulées</p>
+              <p className="mt-1.5 font-mono text-[22px] font-semibold">{fmt(cumulDep)} €</p>
               <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-amber" />
             </div>
             <div className="relative overflow-hidden rounded-[10px] border border-rule bg-card p-4">
               <p className="text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">Solde disponible</p>
-              <p className="mt-1.5 font-mono text-[22px] font-semibold">{fmt(soldeGrand)} €</p>
+              <p className="mt-1.5 font-mono text-[22px] font-semibold">{fmt(totalBudget - cumulDep)} €</p>
               <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-emerald" />
             </div>
+            <div className="relative overflow-hidden rounded-[10px] border border-rule bg-card p-4">
+              <p className="text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">Taux consommation</p>
+              <p className="mt-1.5 font-mono text-[22px] font-semibold">{totalBudget > 0 ? Math.round(cumulDep / totalBudget * 100) : 0}%</p>
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-violet" />
+            </div>
           </div>
+
+          {/* Reconciliation table */}
+          <div className="overflow-hidden rounded-[10px] border border-rule bg-card mb-4">
+            <div className="border-b border-rule px-4 py-3">
+              <h3 className="text-[13px] font-semibold">Tableau de réconciliation</h3>
+            </div>
+            <div className="p-4">
+              <table className="w-full text-[12.5px]">
+                <tbody>
+                  <ReconcilRow label="A. Budget total approuvé" value={totalBudget} />
+                  <ReconcilRow label="B. Avance(s) reçue(s)" value={project.fiches.versements.reduce((s, v) => s + (v.montantRecu || 0), 0)} />
+                  <ReconcilRow label="C. Intérêts bancaires" value={0} editable note="Si applicable" />
+                  <ReconcilRow label="D. Autres revenus" value={0} editable />
+                  <ReconcilRow label="E. Total fonds disponibles (B+C+D)" value={project.fiches.versements.reduce((s, v) => s + (v.montantRecu || 0), 0)} bold />
+                  <ReconcilRow label="F. Dépenses éligibles cumulées" value={cumulDep} />
+                  <ReconcilRow label="G. Solde en caisse/banque (E-F)" value={project.fiches.versements.reduce((s, v) => s + (v.montantRecu || 0), 0) - cumulDep} bold highlight />
+                  <ReconcilRow label="H. Montant dû par le bailleur (A-E)" value={totalBudget - project.fiches.versements.reduce((s, v) => s + (v.montantRecu || 0), 0)} />
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Progress bars */}
           <div className="rounded-[10px] border border-rule bg-card">
             <div className="border-b border-rule px-4 py-3">
               <h3 className="text-[13px] font-semibold">Progression par poste</h3>
@@ -173,26 +276,21 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
             <div className="p-4 space-y-3">
               {project.budgetLines.map((l, i) => {
                 const bud = lineTotal(l);
-                const dep = depByCode[l.code] || 0;
-                const pct = bud > 0 ? Math.min(100, Math.round(dep / bud * 100)) : 0;
+                const cumDep = project.reports.reduce((s, r) => s + ((r.depenses || {})[l.code] || 0), 0);
+                const pct = bud > 0 ? Math.min(100, Math.round(cumDep / bud * 100)) : 0;
                 return (
                   <div key={i} className="flex items-center gap-3">
                     <span className="w-44 shrink-0 text-xs text-steel truncate">{l.code} — {l.desc}</span>
                     <div className="flex-1 h-[5px] rounded-full bg-rule overflow-hidden">
                       <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: project.color.stripe }} />
                     </div>
+                    <span className="w-20 text-right font-mono text-xs text-ink-3">{fmt(cumDep)} / {fmt(bud)}</span>
                     <span className="w-12 text-right font-mono text-xs text-ink-3">{pct}%</span>
                   </div>
                 );
               })}
             </div>
           </div>
-        </div>
-      )}
-
-      {activeTab === 'prevues' && (
-        <div className="rounded-[10px] border border-rule bg-card p-8 text-center text-sm text-muted-foreground italic">
-          Section des dépenses prévues — à compléter pour les périodes suivantes.
         </div>
       )}
     </div>
@@ -206,13 +304,14 @@ const BADGE_COLORS: Record<string, string> = {
   'b-violet': 'bg-violet-light text-violet',
 };
 
-function DepRow({ line, dep, badge, expl, onDepChange, onExplChange }: {
-  line: any; dep: number; badge: string; expl: string;
+function DepRow({ line, dep, prevDep, badge, expl, onDepChange, onExplChange }: {
+  line: any; dep: number; prevDep: number; badge: string; expl: string;
   onDepChange: (v: number) => void;
   onExplChange: (v: string) => void;
 }) {
   const bud = lineTotal(line);
-  const solde = bud - dep;
+  const cumul = prevDep + dep;
+  const solde = bud - cumul;
   const soldePct = bud > 0 ? (solde / bud * 100).toFixed(1) + '%' : '—';
 
   return (
@@ -222,15 +321,55 @@ function DepRow({ line, dep, badge, expl, onDepChange, onExplChange }: {
       </td>
       <td className="border-b border-rule-2 border-r px-3 py-2.5">{line.desc}</td>
       <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono">{fmt(bud)}</td>
+      <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono text-dim">{fmt(prevDep)}</td>
       <td className="border-b border-rule-2 border-r px-3 py-2.5">
         <input type="number" defaultValue={dep} key={dep} onChange={e => onDepChange(Number(e.target.value) || 0)}
-          className="w-full text-right font-mono text-[12.5px] font-semibold rounded border border-[#CBD5E0] bg-card px-2 py-1 outline-none focus:border-primary" />
+          className="w-full text-right font-mono text-[12.5px] font-semibold rounded border border-input bg-background px-2 py-1 outline-none focus:border-primary" />
       </td>
+      <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono font-semibold">{fmt(cumul)}</td>
       <td className={`border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono ${solde < 0 ? 'text-rose' : ''}`}>{fmt(solde)}</td>
       <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right text-muted-foreground">{soldePct}</td>
       <td className="border-b border-rule-2 px-3 py-2.5">
         <input type="text" defaultValue={expl} key={expl} onChange={e => onExplChange(e.target.value)} placeholder="—"
-          className="w-full text-[11px] italic text-muted-foreground rounded border border-transparent bg-transparent px-1 py-0.5 outline-none focus:border-[#CBD5E0] focus:bg-card" />
+          className="w-full text-[11px] italic text-muted-foreground rounded border border-transparent bg-transparent px-1 py-0.5 outline-none focus:border-input focus:bg-background" />
+      </td>
+    </tr>
+  );
+}
+
+function PrevRow({ line, solde, badge, periods, previsions, onPrevChange }: {
+  line: any; solde: number; badge: string; periods: string[]; previsions: Record<string, number>;
+  onPrevChange: (period: string, value: number) => void;
+}) {
+  return (
+    <tr className="hover:bg-paper/50 transition-colors">
+      <td className="border-b border-rule-2 border-r px-3 py-2.5">
+        <span className={`inline-block rounded px-1.5 py-0.5 font-mono text-[10.5px] font-semibold ${BADGE_COLORS[badge] || 'bg-enabel-light text-enabel-dark'}`}>{line.code}</span>
+      </td>
+      <td className="border-b border-rule-2 border-r px-3 py-2.5">{line.desc}</td>
+      <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono">{fmt(solde)}</td>
+      {periods.map(p => (
+        <td key={p} className="border-b border-rule-2 border-r px-3 py-2.5 last:border-r-0">
+          <input type="number" defaultValue={previsions[p] || 0} key={`${line.code}-${p}-${previsions[p]}`}
+            onChange={e => onPrevChange(p, Number(e.target.value) || 0)}
+            className="w-full text-right font-mono text-[12.5px] rounded border border-input bg-background px-2 py-1 outline-none focus:border-primary" />
+        </td>
+      ))}
+    </tr>
+  );
+}
+
+function ReconcilRow({ label, value, bold, highlight, editable, note }: {
+  label: string; value: number; bold?: boolean; highlight?: boolean; editable?: boolean; note?: string;
+}) {
+  return (
+    <tr className={`${highlight ? 'bg-enabel-light' : ''} border-b border-rule-2`}>
+      <td className={`px-3 py-2.5 ${bold ? 'font-semibold' : ''}`}>
+        {label}
+        {note && <span className="ml-2 text-[10px] text-dim italic">{note}</span>}
+      </td>
+      <td className={`px-3 py-2.5 text-right font-mono w-40 ${bold ? 'font-bold' : ''} ${value < 0 ? 'text-rose' : ''}`}>
+        {fmt(value)} €
       </td>
     </tr>
   );

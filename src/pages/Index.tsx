@@ -4,6 +4,9 @@ import AppLayout from '@/components/layout/AppLayout';
 import Portfolio from '@/pages/Portfolio';
 import ProjectView from '@/pages/ProjectView';
 import AdminUsers from '@/pages/AdminUsers';
+import Dashboard from '@/pages/Dashboard';
+import Profile from '@/pages/Profile';
+import Guide from '@/pages/Guide';
 import Auth from '@/pages/Auth';
 
 export default function Index() {
@@ -24,12 +27,9 @@ export default function Index() {
     <AppLayout>
       {currentPage === 'portfolio' && <Portfolio />}
       {currentPage === 'project' && <ProjectView />}
-      {currentPage === 'tutoriel' && (
-        <div className="text-center py-20 text-muted-foreground">
-          <h1 className="text-xl font-bold text-foreground mb-2">Guide d'utilisation</h1>
-          <p className="text-sm">Section en cours de développement.</p>
-        </div>
-      )}
+      {currentPage === 'dashboard' && <Dashboard />}
+      {currentPage === 'profile' && <Profile />}
+      {currentPage === 'tutoriel' && <Guide />}
       {currentPage === 'admin' && <AdminUsers />}
     </AppLayout>
   );

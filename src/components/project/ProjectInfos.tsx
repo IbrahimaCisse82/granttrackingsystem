@@ -10,6 +10,15 @@ function calcDuree(debut: string, fin: string): string {
   return `${months} mois`;
 }
 
+function calcRisqueLevel(score: string): string {
+  const n = parseFloat(score);
+  if (isNaN(n)) return '';
+  if (n <= 25) return 'Faible risque';
+  if (n <= 50) return 'Risque modéré';
+  if (n <= 75) return 'Risque important';
+  return 'Risque élevé';
+}
+
 const RISK_STYLES: Record<string, string> = {
   'Faible risque': 'bg-emerald-light text-emerald',
   'Risque modéré': 'bg-teal-light text-teal',
@@ -31,6 +40,11 @@ export default function ProjectInfos({ project, onSave }: Props) {
 
   const handleInfoField = useCallback((key: keyof Project['infos'], value: string) => {
     onSave({ infos: { ...project.infos, [key]: value } });
+  }, [onSave, project.infos]);
+
+  const handleScoreChange = useCallback((value: string) => {
+    const risque = calcRisqueLevel(value);
+    onSave({ infos: { ...project.infos, scoreRisque: value }, risque });
   }, [onSave, project.infos]);
 
   return (
@@ -82,7 +96,7 @@ export default function ProjectInfos({ project, onSave }: Props) {
             <div className="rounded-md border border-primary/30 bg-enabel-light px-3 py-2 font-mono text-xs text-primary">{duree}</div>
           </div>
           <Field label="Périodicité" value={project.periodicite} onChange={v => handleField('periodicite', v)} />
-          <Field label="Score de risque (%)" value={project.infos.scoreRisque} onChange={v => handleInfoField('scoreRisque', v)} />
+          <Field label="Score de risque (%)" value={project.infos.scoreRisque} onChange={handleScoreChange} />
           <div>
             <label className="block text-[11.5px] font-medium text-steel mb-1">Niveau de risque (auto)</label>
             <div className={`inline-block rounded px-2 py-1 font-mono text-[10.5px] font-semibold ${RISK_STYLES[project.risque] || 'bg-muted text-steel'}`}>
@@ -115,9 +129,9 @@ function Field({ label, value, required, type, onChange }: { label: string; valu
       <input
         type={type || 'text'}
         defaultValue={value}
-        key={value} // reset when server data changes
+        key={value}
         onChange={e => onChange?.(e.target.value)}
-        className="w-full rounded-md border border-[#CBD5E0] bg-card px-3 py-2 text-[13px] text-foreground outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/10"
+        className="w-full rounded-md border border-input bg-background px-3 py-2 text-[13px] text-foreground outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/10"
       />
     </div>
   );

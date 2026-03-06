@@ -1,6 +1,10 @@
 import { Project, calcBudgetTotal, calcDepensesTotal, fmt } from '@/lib/mock-data';
 import { useAppStore } from '@/lib/store';
 import { useProjects } from '@/hooks/useProjects';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const RISK_STYLES: Record<string, string> = {
   'Faible risque': 'bg-emerald-light text-emerald',
@@ -69,12 +73,30 @@ export default function ProjectCard({ project }: { project: Project }) {
           >
             Ouvrir
           </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); deleteProject(project.id); }}
-            className="rounded border border-rose-light bg-rose-light px-2 py-1 text-[11px] font-semibold text-rose transition-colors hover:bg-rose/10"
-          >
-            ✕
-          </button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button
+                onClick={(e) => e.stopPropagation()}
+                className="rounded border border-rose-light bg-rose-light px-2 py-1 text-[11px] font-semibold text-rose transition-colors hover:bg-rose/10"
+              >
+                ✕
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent onClick={e => e.stopPropagation()}>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Supprimer ce projet ?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Êtes-vous sûr de vouloir supprimer <strong>{project.org}</strong> ({project.convention}) ? Cette action est irréversible et toutes les données du projet seront perdues.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                <AlertDialogAction onClick={() => deleteProject(project.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Supprimer
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </div>
