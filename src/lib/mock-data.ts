@@ -8,6 +8,14 @@ export interface BudgetLine {
   allocation: number;
 }
 
+export interface Attachment {
+  name: string;
+  url: string;
+  path: string;
+  size: number;
+  uploadedAt: string;
+}
+
 export interface Transaction {
   id: string;
   code: string;
@@ -18,6 +26,7 @@ export interface Transaction {
   tauxChange: number;
   montantEUR: number;
   description: string;
+  attachments?: Attachment[];
 }
 
 export interface Report {

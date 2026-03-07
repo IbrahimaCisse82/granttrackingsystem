@@ -1,7 +1,9 @@
-import { Project, Transaction, fmt } from '@/lib/mock-data';
+import { Project, Transaction, Attachment, fmt } from '@/lib/mock-data';
 import MetricCard from '@/components/MetricCard';
-import { useCallback } from 'react';
-import { Trash2 } from 'lucide-react';
+import { useCallback, useRef, useState } from 'react';
+import { Trash2, Paperclip, Upload, X, FileText, Download } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface Props {
   project: Project;
@@ -12,6 +14,9 @@ interface Props {
 export default function ProjectTransactions({ project, reportIndex, onSave }: Props) {
   const report = project.reports?.[reportIndex];
   const transactions = report?.transactions || [];
+  const [uploading, setUploading] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activeUploadTxId, setActiveUploadTxId] = useState<string | null>(null);
 
   const updateTransactions = useCallback((newTx: Transaction[]) => {
     if (!report) return;
@@ -31,6 +36,7 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
       tauxChange: project.taux,
       montantEUR: 0,
       description: '',
+      attachments: [],
     };
     updateTransactions([...transactions, newTx]);
   }, [transactions, updateTransactions, project.taux]);
@@ -39,7 +45,6 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
     const newTx = transactions.map((t, i) => {
       if (i !== index) return t;
       const updated = { ...t, ...patch };
-      // Auto-calculate montantEUR when montantDevise or tauxChange changes
       if (patch.montantDevise !== undefined || patch.tauxChange !== undefined) {
         const devise = patch.montantDevise !== undefined ? patch.montantDevise : t.montantDevise;
         const taux = patch.tauxChange !== undefined ? patch.tauxChange : t.tauxChange;
@@ -54,6 +59,95 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
     updateTransactions(transactions.filter((_, i) => i !== index));
   }, [transactions, updateTransactions]);
 
+  const handleUploadClick = (txId: string) => {
+    setActiveUploadTxId(txId);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0 || !activeUploadTxId) return;
+
+    const txIndex = transactions.findIndex(t => t.id === activeUploadTxId);
+    if (txIndex === -1) return;
+
+    setUploading(activeUploadTxId);
+
+    try {
+      const newAttachments: Attachment[] = [];
+
+      for (const file of Array.from(files)) {
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error(`${file.name} dépasse 10 Mo`);
+          continue;
+        }
+
+        const ext = file.name.split('.').pop();
+        const path = `${project.id}/${reportIndex}/${activeUploadTxId}/${crypto.randomUUID()}.${ext}`;
+
+        const { error } = await supabase.storage
+          .from('transaction-attachments')
+          .upload(path, file);
+
+        if (error) {
+          toast.error(`Erreur upload ${file.name}: ${error.message}`);
+          continue;
+        }
+
+        const { data: urlData } = supabase.storage
+          .from('transaction-attachments')
+          .getPublicUrl(path);
+
+        newAttachments.push({
+          name: file.name,
+          url: urlData.publicUrl,
+          path,
+          size: file.size,
+          uploadedAt: new Date().toISOString(),
+        });
+      }
+
+      if (newAttachments.length > 0) {
+        const tx = transactions[txIndex];
+        const existingAttachments = tx.attachments || [];
+        updateTx(txIndex, { attachments: [...existingAttachments, ...newAttachments] });
+        toast.success(`${newAttachments.length} fichier(s) ajouté(s)`);
+      }
+    } catch (err) {
+      toast.error('Erreur lors du téléversement');
+    } finally {
+      setUploading(null);
+      setActiveUploadTxId(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const removeAttachment = async (txIndex: number, attIndex: number) => {
+    const tx = transactions[txIndex];
+    const att = tx.attachments?.[attIndex];
+    if (!att) return;
+
+    const { error } = await supabase.storage
+      .from('transaction-attachments')
+      .remove([att.path]);
+
+    if (error) {
+      toast.error('Erreur suppression fichier');
+      return;
+    }
+
+    const newAttachments = [...(tx.attachments || [])];
+    newAttachments.splice(attIndex, 1);
+    updateTx(txIndex, { attachments: newAttachments });
+    toast.success('Fichier supprimé');
+  };
+
+  const formatSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} o`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+  };
+
   if (!report) return <p className="p-8 text-muted-foreground">Rapport non disponible.</p>;
 
   const n = reportIndex + 1;
@@ -63,6 +157,15 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
 
   return (
     <div>
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+
       <div className="flex items-start justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold tracking-tight">Liste des transactions — REP {String(n).padStart(2, '0')}</h1>
@@ -84,7 +187,7 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
           <table className="w-full text-[12.5px]">
             <thead>
               <tr className="bg-ink-2">
-                {['#', 'Code budget.', 'Date', 'N° Voucher', 'Bénéficiaire', 'Montant devise', 'Taux', 'Montant EUR', 'Description', ''].map(h => (
+                {['#', 'Code budget.', 'Date', 'N° Voucher', 'Bénéficiaire', 'Montant devise', 'Taux', 'Montant EUR', 'Description', 'Pièces', ''].map(h => (
                   <th key={h} className="whitespace-nowrap border-r border-sidebar-foreground/5 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-wider text-sidebar-foreground/70 font-mono last:border-r-0">{h}</th>
                 ))}
               </tr>
@@ -127,6 +230,45 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
                     <input type="text" defaultValue={t.description} key={t.description} onChange={e => updateTx(i, { description: e.target.value })}
                       className="w-full bg-transparent text-muted-foreground outline-none focus:bg-card rounded px-1" />
                   </td>
+                  <td className="border-b border-rule-2 border-r px-3 py-2.5">
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleUploadClick(t.id)}
+                        disabled={uploading === t.id}
+                        className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
+                        title="Ajouter une pièce justificative"
+                      >
+                        {uploading === t.id ? (
+                          <span className="animate-spin w-3.5 h-3.5 border border-primary border-t-transparent rounded-full inline-block" />
+                        ) : (
+                          <Upload className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                      {(t.attachments?.length || 0) > 0 && (
+                        <span className="bg-primary/10 text-primary text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                          {t.attachments!.length}
+                        </span>
+                      )}
+                    </div>
+                    {(t.attachments?.length || 0) > 0 && (
+                      <div className="mt-1.5 space-y-1">
+                        {t.attachments!.map((att, ai) => (
+                          <div key={ai} className="flex items-center gap-1 text-[9px] bg-muted/50 rounded px-1.5 py-0.5 group/att">
+                            <FileText className="w-3 h-3 text-muted-foreground shrink-0" />
+                            <a href={att.url} target="_blank" rel="noopener noreferrer"
+                              className="truncate max-w-[80px] hover:text-primary transition-colors" title={att.name}>
+                              {att.name}
+                            </a>
+                            <span className="text-muted-foreground shrink-0">({formatSize(att.size)})</span>
+                            <button onClick={() => removeAttachment(i, ai)}
+                              className="opacity-0 group-hover/att:opacity-100 text-destructive hover:text-destructive/80 transition-all shrink-0 ml-auto">
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </td>
                   <td className="border-b border-rule-2 px-3 py-2.5">
                     <button onClick={() => removeTx(i)} className="opacity-0 group-hover:opacity-100 text-dim hover:text-rose transition-all">
                       <Trash2 className="w-3.5 h-3.5" />
@@ -135,13 +277,13 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={10} className="px-3 py-8 text-center text-dim italic">Aucune transaction. Cliquez sur "+ Ajouter".</td>
+                  <td colSpan={11} className="px-3 py-8 text-center text-dim italic">Aucune transaction. Cliquez sur "+ Ajouter".</td>
                 </tr>
               )}
               <tr className="bg-ink text-sidebar-foreground font-mono font-bold text-xs">
                 <td colSpan={7} className="px-3 py-2">TOTAL</td>
                 <td className="px-3 py-2 text-right">{fmt(totalEUR)} €</td>
-                <td colSpan={2}></td>
+                <td colSpan={3}></td>
               </tr>
             </tbody>
           </table>
