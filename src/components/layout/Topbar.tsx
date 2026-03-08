@@ -48,11 +48,6 @@ export default function Topbar() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Dark mode toggle
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode);
-    localStorage.setItem('gh-gts-dark-mode', String(darkMode));
-  }, [darkMode]);
 
   const handleSave = () => {
     triggerForceSave();
