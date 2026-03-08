@@ -148,7 +148,21 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
     return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
   };
 
-  if (!report) return <p className="p-8 text-muted-foreground">Rapport non disponible.</p>;
+  if (!report) {
+    const initReport = () => {
+      const newReports = [...(project.reports || [])];
+      while (newReports.length <= reportIndex) newReports.push(createEmptyReport());
+      onSave({ reports: newReports });
+    };
+    return (
+      <div className="p-8 text-center">
+        <p className="text-muted-foreground mb-4">Rapport non disponible.</p>
+        <button onClick={initReport} className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90">
+          Initialiser le rapport
+        </button>
+      </div>
+    );
+  }
 
   const n = reportIndex + 1;
   const totalEUR = transactions.reduce((s, t) => s + (t.montantEUR || 0), 0);
