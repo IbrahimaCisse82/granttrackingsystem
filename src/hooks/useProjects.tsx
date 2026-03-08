@@ -5,7 +5,7 @@ import type { Project } from '@/lib/mock-data';
 import { toast } from 'sonner';
 
 // Map DB row to Project interface
-function rowToProject(row: any): Project {
+function rowToProject(row: any): Project & { userId: string } {
   return {
     id: row.id,
     convention: row.convention,
@@ -26,6 +26,7 @@ function rowToProject(row: any): Project {
     amendements: row.amendements as Project['amendements'],
     infos: row.infos as Project['infos'],
     createdAt: new Date(row.created_at).getTime(),
+    userId: row.user_id,
   };
 }
 
