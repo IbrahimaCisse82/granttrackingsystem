@@ -6,6 +6,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { useNotifications } from '@/hooks/useNotifications';
 
 interface Props {
   project: Project;
