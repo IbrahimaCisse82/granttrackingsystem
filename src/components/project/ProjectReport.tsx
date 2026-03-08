@@ -19,6 +19,7 @@ interface Props {
 export default function ProjectReport({ project, reportIndex, onSave, readOnly }: Props) {
   const [activeTab, setActiveTab] = useState<'engaged' | 'prevues' | 'reconcil'>('engaged');
   const report = project.reports?.[reportIndex];
+  const { addNotification } = useNotifications();
 
   const updateReport = useCallback((patch: Partial<Report>) => {
     if (readOnly || !report) return;
