@@ -1,4 +1,4 @@
-import { Project, Report, lineTotal, fmt, calcDepensesTotal } from '@/lib/mock-data';
+import { Project, Report, lineTotal, fmt, calcDepensesTotal, createEmptyReport } from '@/lib/mock-data';
 import { useState, useCallback } from 'react';
 
 const STATUS_STYLES: Record<string, [string, string]> = {
