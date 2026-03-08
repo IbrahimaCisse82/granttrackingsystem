@@ -1,6 +1,7 @@
 import { useAppStore } from '@/lib/store';
 import { useProjects } from '@/hooks/useProjects';
 import { useAutoSave } from '@/hooks/useAutoSave';
+import { useReadOnly } from '@/hooks/useReadOnly';
 import ProjectInfos from '@/components/project/ProjectInfos';
 import ProjectBudget from '@/components/project/ProjectBudget';
 import ProjectFiche from '@/components/project/ProjectFiche';
@@ -8,45 +9,61 @@ import ProjectReport from '@/components/project/ProjectReport';
 import ProjectTransactions from '@/components/project/ProjectTransactions';
 import ProjectAmendements from '@/components/project/ProjectAmendements';
 import SaveIndicator from '@/components/SaveIndicator';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import { getReportCount } from '@/lib/mock-data';
 import type { Project } from '@/lib/mock-data';
 
 export default function ProjectView() {
-  const { currentProjectId, currentTab } = useAppStore();
+  const { currentProjectId, currentTab, forceSaveCounter } = useAppStore();
   const { projects, updateProject } = useProjects();
   const project = projects.find(p => p.id === currentProjectId);
   const [saving, setSaving] = useState(false);
   const autoSave = useAutoSave(currentProjectId || '');
+  const readOnly = useReadOnly((project as any)?.userId);
+
+  // Force save from Topbar
+  useEffect(() => {
+    if (forceSaveCounter > 0 && currentProjectId) {
+      // trigger immediate flush by saving empty partial
+      setSaving(true);
+      setTimeout(() => setSaving(false), 1200);
+    }
+  }, [forceSaveCounter, currentProjectId]);
 
   const save = useCallback((partial: Partial<Project>) => {
+    if (readOnly) return;
     setSaving(true);
     autoSave(partial);
-    // Reset saving indicator after debounce + network
     setTimeout(() => setSaving(false), 1200);
-  }, [autoSave]);
+  }, [autoSave, readOnly]);
 
   if (!project) {
     return <p className="p-8 text-muted-foreground">Projet introuvable.</p>;
   }
 
+  const reportCount = getReportCount(project.periodicite);
+
+  // Build dynamic tab map
   const tabMap: Record<string, React.ReactNode> = {
-    infos: <ProjectInfos project={project} onSave={save} />,
-    budget: <ProjectBudget project={project} onSave={save} />,
-    fiche: <ProjectFiche project={project} onSave={save} />,
-    amendements: <ProjectAmendements project={project} onSave={save} />,
-    'rapport-1': <ProjectReport project={project} reportIndex={0} onSave={save} />,
-    'rapport-2': <ProjectReport project={project} reportIndex={1} onSave={save} />,
-    'rapport-3': <ProjectReport project={project} reportIndex={2} onSave={save} />,
-    'rapport-4': <ProjectReport project={project} reportIndex={3} onSave={save} />,
-    'trans-1': <ProjectTransactions project={project} reportIndex={0} onSave={save} />,
-    'trans-2': <ProjectTransactions project={project} reportIndex={1} onSave={save} />,
-    'trans-3': <ProjectTransactions project={project} reportIndex={2} onSave={save} />,
-    'trans-4': <ProjectTransactions project={project} reportIndex={3} onSave={save} />,
+    infos: <ProjectInfos project={project} onSave={save} readOnly={readOnly} />,
+    budget: <ProjectBudget project={project} onSave={save} readOnly={readOnly} />,
+    fiche: <ProjectFiche project={project} onSave={save} readOnly={readOnly} />,
+    amendements: <ProjectAmendements project={project} onSave={save} readOnly={readOnly} />,
   };
+
+  for (let i = 1; i <= reportCount; i++) {
+    tabMap[`rapport-${i}`] = <ProjectReport project={project} reportIndex={i - 1} onSave={save} readOnly={readOnly} />;
+    tabMap[`trans-${i}`] = <ProjectTransactions project={project} reportIndex={i - 1} onSave={save} readOnly={readOnly} />;
+  }
 
   return (
     <div>
-      <div className="flex justify-end mb-2">
+      <div className="flex items-center justify-end gap-3 mb-2">
+        {readOnly && (
+          <span className="rounded-md bg-amber-light px-2.5 py-1 text-[11px] font-semibold text-amber">
+            🔒 Mode lecture seule
+          </span>
+        )}
         <SaveIndicator saving={saving} />
       </div>
       {tabMap[currentTab] || <p className="p-8 text-muted-foreground italic">Section à venir.</p>}

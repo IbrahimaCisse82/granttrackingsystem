@@ -12,18 +12,19 @@ interface Props {
   project: Project;
   reportIndex: number;
   onSave: (partial: Partial<Project>) => void;
+  readOnly?: boolean;
 }
 
-export default function ProjectReport({ project, reportIndex, onSave }: Props) {
+export default function ProjectReport({ project, reportIndex, onSave, readOnly }: Props) {
   const [activeTab, setActiveTab] = useState<'engaged' | 'prevues' | 'reconcil'>('engaged');
   const report = project.reports?.[reportIndex];
 
   const updateReport = useCallback((patch: Partial<Report>) => {
-    if (!report) return;
+    if (readOnly || !report) return;
     const newReports = [...project.reports];
     newReports[reportIndex] = { ...newReports[reportIndex], ...patch };
     onSave({ reports: newReports });
-  }, [project.reports, reportIndex, onSave, report]);
+  }, [project.reports, reportIndex, onSave, report, readOnly]);
 
   const handleDateChange = useCallback((field: 'dateSubmit' | 'periodeDebut' | 'periodeFin', value: string) => {
     updateReport({ [field]: value });
@@ -53,6 +54,7 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
 
   if (!report) {
     const initReport = () => {
+      if (readOnly) return;
       const newReports = [...(project.reports || [])];
       while (newReports.length <= reportIndex) newReports.push(createEmptyReport());
       onSave({ reports: newReports });
@@ -60,9 +62,11 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
     return (
       <div className="p-8 text-center">
         <p className="text-muted-foreground mb-4">Rapport non disponible.</p>
-        <button onClick={initReport} className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90">
-          Initialiser le rapport
-        </button>
+        {!readOnly && (
+          <button onClick={initReport} className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90">
+            Initialiser le rapport
+          </button>
+        )}
       </div>
     );
   }
@@ -75,12 +79,10 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
   const totalDep = Object.values(depByCode).reduce((s, v) => s + v, 0);
   const soldeGrand = totalBudget - totalDep;
 
-  // Cumulated expenses from previous reports
   const prevReportsDep = project.reports.slice(0, reportIndex).reduce((s, r) =>
     s + Object.values(r.depenses || {}).reduce((a, b) => a + b, 0), 0);
   const cumulDep = prevReportsDep + totalDep;
 
-  // Periods for prévisions
   const prevPeriods = ['P+1', 'P+2', 'P+3'];
 
   const tabs = [
@@ -99,10 +101,12 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
           </div>
           <p className="text-xs text-muted-foreground mt-1">{project.org} · Dépenses engagées, prévues et réconciliation</p>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => handleStatusChange('en_cours')} className="rounded-md border border-rule bg-card px-3 py-1.5 text-xs font-medium text-steel hover:bg-paper">Marquer En cours</button>
-          <button onClick={() => handleStatusChange('soumis')} className="rounded-md bg-teal px-3 py-1.5 text-xs font-medium text-primary-foreground hover:brightness-110 transition-all">Soumettre le rapport</button>
-        </div>
+        {!readOnly && (
+          <div className="flex gap-2">
+            <button onClick={() => handleStatusChange('en_cours')} className="rounded-md border border-rule bg-card px-3 py-1.5 text-xs font-medium text-steel hover:bg-paper">Marquer En cours</button>
+            <button onClick={() => handleStatusChange('soumis')} className="rounded-md bg-teal px-3 py-1.5 text-xs font-medium text-primary-foreground hover:brightness-110 transition-all">Soumettre le rapport</button>
+          </div>
+        )}
       </div>
 
       {/* Period info */}
@@ -110,15 +114,15 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-[11.5px] font-medium text-steel mb-1">Date de soumission</label>
-            <input type="date" defaultValue={report.dateSubmit} key={report.dateSubmit} onChange={e => handleDateChange('dateSubmit', e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono outline-none focus:border-primary" />
+            <input type="date" defaultValue={report.dateSubmit} key={report.dateSubmit} disabled={readOnly} onChange={e => handleDateChange('dateSubmit', e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono outline-none focus:border-primary disabled:opacity-60 disabled:cursor-not-allowed" />
           </div>
           <div>
             <label className="block text-[11.5px] font-medium text-steel mb-1">Période — début</label>
-            <input type="date" defaultValue={report.periodeDebut} key={report.periodeDebut} onChange={e => handleDateChange('periodeDebut', e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono outline-none focus:border-primary" />
+            <input type="date" defaultValue={report.periodeDebut} key={report.periodeDebut} disabled={readOnly} onChange={e => handleDateChange('periodeDebut', e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono outline-none focus:border-primary disabled:opacity-60 disabled:cursor-not-allowed" />
           </div>
           <div>
             <label className="block text-[11.5px] font-medium text-steel mb-1">Période — fin</label>
-            <input type="date" defaultValue={report.periodeFin} key={report.periodeFin} onChange={e => handleDateChange('periodeFin', e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono outline-none focus:border-primary" />
+            <input type="date" defaultValue={report.periodeFin} key={report.periodeFin} disabled={readOnly} onChange={e => handleDateChange('periodeFin', e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono outline-none focus:border-primary disabled:opacity-60 disabled:cursor-not-allowed" />
           </div>
         </div>
       </div>
@@ -158,6 +162,7 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
                     <DepRow key={i} line={l} dep={depByCode[l.code] || 0} prevDep={prevDep} badge={project.color.badge} expl={report.explanation?.[l.code] || ''}
                       onDepChange={v => handleDepChange(l.code, v)}
                       onExplChange={v => handleExplChange(l.code, v)}
+                      readOnly={readOnly}
                     />
                   );
                 })}
@@ -168,6 +173,7 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
                     <DepRow key={i} line={l} dep={depByCode[l.code] || 0} prevDep={prevDep} badge="b-amber" expl={report.explanation?.[l.code] || ''}
                       onDepChange={v => handleDepChange(l.code, v)}
                       onExplChange={v => handleExplChange(l.code, v)}
+                      readOnly={readOnly}
                     />
                   );
                 })}
@@ -208,7 +214,7 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
                   const solde = bud - cumDep;
                   return (
                     <PrevRow key={i} line={l} solde={solde} badge={project.color.badge} periods={prevPeriods} previsions={report.previsions?.[l.code] || {}}
-                      onPrevChange={(period, value) => handlePrevChange(l.code, period, value)} />
+                      onPrevChange={(period, value) => handlePrevChange(l.code, period, value)} readOnly={readOnly} />
                   );
                 })}
                 <tr className="bg-amber-light"><td colSpan={3 + prevPeriods.length} className="px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-amber">B — FRAIS DE GESTION</td></tr>
@@ -218,7 +224,7 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
                   const solde = bud - cumDep;
                   return (
                     <PrevRow key={i} line={l} solde={solde} badge="b-amber" periods={prevPeriods} previsions={report.previsions?.[l.code] || {}}
-                      onPrevChange={(period, value) => handlePrevChange(l.code, period, value)} />
+                      onPrevChange={(period, value) => handlePrevChange(l.code, period, value)} readOnly={readOnly} />
                   );
                 })}
                 <tr className="bg-ink text-sidebar-foreground font-mono font-bold text-xs">
@@ -237,7 +243,6 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
       {/* Réconciliation */}
       {activeTab === 'reconcil' && (
         <div>
-          {/* Summary cards */}
           <div className="grid grid-cols-4 gap-3.5 mb-4">
             <div className="relative overflow-hidden rounded-[10px] border border-rule bg-card p-4">
               <p className="text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">Budget total</p>
@@ -261,7 +266,6 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
             </div>
           </div>
 
-          {/* Reconciliation table */}
           <div className="overflow-hidden rounded-[10px] border border-rule bg-card mb-4">
             <div className="border-b border-rule px-4 py-3">
               <h3 className="text-[13px] font-semibold">Tableau de réconciliation</h3>
@@ -282,7 +286,6 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
             </div>
           </div>
 
-          {/* Progress bars */}
           <div className="rounded-[10px] border border-rule bg-card">
             <div className="border-b border-rule px-4 py-3">
               <h3 className="text-[13px] font-semibold">Progression par poste</h3>
@@ -318,10 +321,11 @@ const BADGE_COLORS: Record<string, string> = {
   'b-violet': 'bg-violet-light text-violet',
 };
 
-function DepRow({ line, dep, prevDep, badge, expl, onDepChange, onExplChange }: {
+function DepRow({ line, dep, prevDep, badge, expl, onDepChange, onExplChange, readOnly }: {
   line: any; dep: number; prevDep: number; badge: string; expl: string;
   onDepChange: (v: number) => void;
   onExplChange: (v: string) => void;
+  readOnly?: boolean;
 }) {
   const bud = lineTotal(line);
   const cumul = prevDep + dep;
@@ -337,23 +341,24 @@ function DepRow({ line, dep, prevDep, badge, expl, onDepChange, onExplChange }: 
       <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono">{fmt(bud)}</td>
       <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono text-dim">{fmt(prevDep)}</td>
       <td className="border-b border-rule-2 border-r px-3 py-2.5">
-        <input type="number" defaultValue={dep} key={dep} onChange={e => onDepChange(Number(e.target.value) || 0)}
-          className="w-full text-right font-mono text-[12.5px] font-semibold rounded border border-input bg-background px-2 py-1 outline-none focus:border-primary" />
+        <input type="number" defaultValue={dep} key={dep} disabled={readOnly} onChange={e => onDepChange(Number(e.target.value) || 0)}
+          className="w-full text-right font-mono text-[12.5px] font-semibold rounded border border-input bg-background px-2 py-1 outline-none focus:border-primary disabled:opacity-60 disabled:cursor-not-allowed" />
       </td>
       <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono font-semibold">{fmt(cumul)}</td>
       <td className={`border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono ${solde < 0 ? 'text-rose' : ''}`}>{fmt(solde)}</td>
       <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right text-muted-foreground">{soldePct}</td>
       <td className="border-b border-rule-2 px-3 py-2.5">
-        <input type="text" defaultValue={expl} key={expl} onChange={e => onExplChange(e.target.value)} placeholder="—"
-          className="w-full text-[11px] italic text-muted-foreground rounded border border-transparent bg-transparent px-1 py-0.5 outline-none focus:border-input focus:bg-background" />
+        <input type="text" defaultValue={expl} key={expl} disabled={readOnly} onChange={e => onExplChange(e.target.value)} placeholder="—"
+          className="w-full text-[11px] italic text-muted-foreground rounded border border-transparent bg-transparent px-1 py-0.5 outline-none focus:border-input focus:bg-background disabled:opacity-60 disabled:cursor-not-allowed" />
       </td>
     </tr>
   );
 }
 
-function PrevRow({ line, solde, badge, periods, previsions, onPrevChange }: {
+function PrevRow({ line, solde, badge, periods, previsions, onPrevChange, readOnly }: {
   line: any; solde: number; badge: string; periods: string[]; previsions: Record<string, number>;
   onPrevChange: (period: string, value: number) => void;
+  readOnly?: boolean;
 }) {
   return (
     <tr className="hover:bg-paper/50 transition-colors">
@@ -365,8 +370,9 @@ function PrevRow({ line, solde, badge, periods, previsions, onPrevChange }: {
       {periods.map(p => (
         <td key={p} className="border-b border-rule-2 border-r px-3 py-2.5 last:border-r-0">
           <input type="number" defaultValue={previsions[p] || 0} key={`${line.code}-${p}-${previsions[p]}`}
+            disabled={readOnly}
             onChange={e => onPrevChange(p, Number(e.target.value) || 0)}
-            className="w-full text-right font-mono text-[12.5px] rounded border border-input bg-background px-2 py-1 outline-none focus:border-primary" />
+            className="w-full text-right font-mono text-[12.5px] rounded border border-input bg-background px-2 py-1 outline-none focus:border-primary disabled:opacity-60 disabled:cursor-not-allowed" />
         </td>
       ))}
     </tr>
