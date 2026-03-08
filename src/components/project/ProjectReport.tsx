@@ -51,7 +51,21 @@ export default function ProjectReport({ project, reportIndex, onSave }: Props) {
     updateReport({ status });
   }, [updateReport]);
 
-  if (!report) return <p className="p-8 text-muted-foreground">Rapport non disponible.</p>;
+  if (!report) {
+    const initReport = () => {
+      const newReports = [...(project.reports || [])];
+      while (newReports.length <= reportIndex) newReports.push(createEmptyReport());
+      onSave({ reports: newReports });
+    };
+    return (
+      <div className="p-8 text-center">
+        <p className="text-muted-foreground mb-4">Rapport non disponible.</p>
+        <button onClick={initReport} className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90">
+          Initialiser le rapport
+        </button>
+      </div>
+    );
+  }
 
   const n = reportIndex + 1;
   const padded = String(n).padStart(3, '0');
