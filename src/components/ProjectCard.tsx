@@ -52,7 +52,7 @@ export default function ProjectCard({ project }: { project: Project }) {
             {project.risque || '—'}
           </span>
         </div>
-        <Row label="Rapports" value={`${rapSoumis} / 4 soumis`} />
+        <Row label="Rapports" value={`${rapSoumis} / ${getReportCount(project.periodicite)} soumis`} />
       </div>
 
       {/* Footer */}

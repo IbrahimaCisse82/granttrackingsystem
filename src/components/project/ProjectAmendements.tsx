@@ -74,29 +74,34 @@ export default function ProjectAmendements({ project, onSave, readOnly }: Props)
 
   const handleStatusChange = (idx: number, statut: Amendement['statut']) => {
     if (readOnly) return;
+    const am = amendements[idx];
     
     // If approving, apply delta lines to budget
     if (statut === 'approuve') {
-      const am = amendements[idx];
       if (am && am.lines.length > 0) {
         const newBudgetLines = [...project.budgetLines];
         for (const line of am.lines) {
           const budgetIdx = newBudgetLines.findIndex(bl => bl.code === line.code);
           if (budgetIdx >= 0) {
-            // Apply delta to the budget line montant
             newBudgetLines[budgetIdx] = {
               ...newBudgetLines[budgetIdx],
               montant: newBudgetLines[budgetIdx].montant + line.delta,
             };
           }
         }
-        // Save both amended budget and status change
         const newAm = amendements.map((a, i) => i === idx ? { ...a, statut } : a);
         onSave({ amendements: newAm, budgetLines: newBudgetLines });
         toast.success('Amendement approuvé et appliqué au budget');
+        addNotification({ type: 'amendement', title: `Addenda N° ${am.num} approuvé`, message: `L'amendement a été approuvé et appliqué au budget de ${project.org}.`, projectId: project.id });
         setConfirmAction(null);
         return;
       }
+    }
+    
+    if (statut === 'soumis') {
+      addNotification({ type: 'amendement', title: `Addenda N° ${am?.num} soumis`, message: `Un amendement a été soumis pour validation sur ${project.org}.`, projectId: project.id });
+    } else if (statut === 'rejete') {
+      addNotification({ type: 'amendement', title: `Addenda N° ${am?.num} rejeté`, message: `L'amendement a été rejeté sur ${project.org}.`, projectId: project.id });
     }
     
     updateAmendement(idx, { statut });
