@@ -1,7 +1,8 @@
 import { useAppStore } from '@/lib/store';
 import { useProjects } from '@/hooks/useProjects';
 import { useAuth } from '@/hooks/useAuth';
-import { useNotifications, AppNotification } from '@/hooks/useNotifications';
+import { useNotifications } from '@/hooks/useNotifications';
+import { useDarkMode } from '@/hooks/useDarkMode';
 import { Save, Download, Bell, User, LogOut, FileDown, FileSpreadsheet, Upload, Sun, Moon, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { exportBudgetPDF, exportReportPDF, exportTransactionsPDF } from '@/lib/export-pdf';
