@@ -1,5 +1,6 @@
 import { Project, Report, lineTotal, fmt, calcDepensesTotal, createEmptyReport } from '@/lib/mock-data';
 import { useState, useCallback } from 'react';
+import { useNotifications } from '@/hooks/useNotifications';
 
 const STATUS_STYLES: Record<string, [string, string]> = {
   vide: ['bg-muted text-steel', 'Vide'],
