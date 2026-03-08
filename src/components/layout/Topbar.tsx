@@ -177,7 +177,7 @@ export default function Topbar() {
         )}
 
         {/* Dark mode */}
-        <button onClick={() => setDarkMode(!darkMode)} className="rounded-md border border-rule bg-card p-1.5 text-steel hover:bg-paper transition-colors" title="Basculer thème">
+        <button onClick={toggleDarkMode} className="rounded-md border border-rule bg-card p-1.5 text-steel hover:bg-paper transition-colors" title="Basculer thème">
           {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
 
