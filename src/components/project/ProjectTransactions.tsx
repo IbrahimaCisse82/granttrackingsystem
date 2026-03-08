@@ -1,4 +1,4 @@
-import { Project, Transaction, Attachment, fmt } from '@/lib/mock-data';
+import { Project, Transaction, Attachment, fmt, createEmptyReport } from '@/lib/mock-data';
 import MetricCard from '@/components/MetricCard';
 import { useCallback, useRef, useState } from 'react';
 import { Trash2, Paperclip, Upload, X, FileText, Download } from 'lucide-react';
