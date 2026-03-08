@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export interface AppNotification {
   id: string;
@@ -19,27 +20,34 @@ interface NotificationState {
   unreadCount: () => number;
 }
 
-export const useNotifications = create<NotificationState>((set, get) => ({
-  notifications: [],
+export const useNotifications = create<NotificationState>()(
+  persist(
+    (set, get) => ({
+      notifications: [],
 
-  addNotification: (n) => set(state => ({
-    notifications: [{
-      ...n,
-      id: crypto.randomUUID(),
-      read: false,
-      createdAt: Date.now(),
-    }, ...state.notifications].slice(0, 50), // Keep last 50
-  })),
+      addNotification: (n) => set(state => ({
+        notifications: [{
+          ...n,
+          id: crypto.randomUUID(),
+          read: false,
+          createdAt: Date.now(),
+        }, ...state.notifications].slice(0, 50),
+      })),
 
-  markRead: (id) => set(state => ({
-    notifications: state.notifications.map(n => n.id === id ? { ...n, read: true } : n),
-  })),
+      markRead: (id) => set(state => ({
+        notifications: state.notifications.map(n => n.id === id ? { ...n, read: true } : n),
+      })),
 
-  markAllRead: () => set(state => ({
-    notifications: state.notifications.map(n => ({ ...n, read: true })),
-  })),
+      markAllRead: () => set(state => ({
+        notifications: state.notifications.map(n => ({ ...n, read: true })),
+      })),
 
-  clearAll: () => set({ notifications: [] }),
+      clearAll: () => set({ notifications: [] }),
 
-  unreadCount: () => get().notifications.filter(n => !n.read).length,
-}));
+      unreadCount: () => get().notifications.filter(n => !n.read).length,
+    }),
+    {
+      name: 'gh-gts-notifications',
+    }
+  )
+);
