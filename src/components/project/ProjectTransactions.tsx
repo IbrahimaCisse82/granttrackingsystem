@@ -9,9 +9,10 @@ interface Props {
   project: Project;
   reportIndex: number;
   onSave: (partial: Partial<Project>) => void;
+  readOnly?: boolean;
 }
 
-export default function ProjectTransactions({ project, reportIndex, onSave }: Props) {
+export default function ProjectTransactions({ project, reportIndex, onSave, readOnly }: Props) {
   const report = project.reports?.[reportIndex];
   const transactions = report?.transactions || [];
   const [uploading, setUploading] = useState<string | null>(null);
@@ -19,13 +20,14 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
   const [activeUploadTxId, setActiveUploadTxId] = useState<string | null>(null);
 
   const updateTransactions = useCallback((newTx: Transaction[]) => {
-    if (!report) return;
+    if (!report || readOnly) return;
     const newReports = [...project.reports];
     newReports[reportIndex] = { ...newReports[reportIndex], transactions: newTx };
     onSave({ reports: newReports });
-  }, [project.reports, reportIndex, onSave, report]);
+  }, [project.reports, reportIndex, onSave, report, readOnly]);
 
   const addTransaction = useCallback(() => {
+    if (readOnly) return;
     const newTx: Transaction = {
       id: crypto.randomUUID(),
       code: '',
@@ -39,9 +41,10 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
       attachments: [],
     };
     updateTransactions([...transactions, newTx]);
-  }, [transactions, updateTransactions, project.taux]);
+  }, [transactions, updateTransactions, project.taux, readOnly]);
 
   const updateTx = useCallback((index: number, patch: Partial<Transaction>) => {
+    if (readOnly) return;
     const newTx = transactions.map((t, i) => {
       if (i !== index) return t;
       const updated = { ...t, ...patch };
@@ -53,13 +56,15 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
       return updated;
     });
     updateTransactions(newTx);
-  }, [transactions, updateTransactions]);
+  }, [transactions, updateTransactions, readOnly]);
 
   const removeTx = useCallback((index: number) => {
+    if (readOnly) return;
     updateTransactions(transactions.filter((_, i) => i !== index));
-  }, [transactions, updateTransactions]);
+  }, [transactions, updateTransactions, readOnly]);
 
   const handleUploadClick = (txId: string) => {
+    if (readOnly) return;
     setActiveUploadTxId(txId);
     fileInputRef.current?.click();
   };
@@ -123,6 +128,7 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
   };
 
   const removeAttachment = async (txIndex: number, attIndex: number) => {
+    if (readOnly) return;
     const tx = transactions[txIndex];
     const att = tx.attachments?.[attIndex];
     if (!att) return;
@@ -150,6 +156,7 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
 
   if (!report) {
     const initReport = () => {
+      if (readOnly) return;
       const newReports = [...(project.reports || [])];
       while (newReports.length <= reportIndex) newReports.push(createEmptyReport());
       onSave({ reports: newReports });
@@ -157,9 +164,11 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
     return (
       <div className="p-8 text-center">
         <p className="text-muted-foreground mb-4">Rapport non disponible.</p>
-        <button onClick={initReport} className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90">
-          Initialiser le rapport
-        </button>
+        {!readOnly && (
+          <button onClick={initReport} className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90">
+            Initialiser le rapport
+          </button>
+        )}
       </div>
     );
   }
@@ -185,9 +194,11 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
           <h1 className="text-xl font-bold tracking-tight">Liste des transactions — REP {String(n).padStart(2, '0')}</h1>
           <p className="text-xs text-muted-foreground mt-1">{project.org} · {transactions.length} transaction(s)</p>
         </div>
-        <button onClick={addTransaction} className="rounded-md bg-teal px-3 py-1.5 text-xs font-medium text-primary-foreground hover:brightness-110 transition-all">
-          + Ajouter
-        </button>
+        {!readOnly && (
+          <button onClick={addTransaction} className="rounded-md bg-teal px-3 py-1.5 text-xs font-medium text-primary-foreground hover:brightness-110 transition-all">
+            + Ajouter
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-3 gap-3.5 mb-6">
@@ -201,7 +212,7 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
           <table className="w-full text-[12.5px]">
             <thead>
               <tr className="bg-ink-2">
-                {['#', 'Code budget.', 'Date', 'N° Voucher', 'Bénéficiaire', 'Montant devise', 'Taux', 'Montant EUR', 'Description', 'Pièces', ''].map(h => (
+                {['#', 'Code budget.', 'Date', 'N° Voucher', 'Bénéficiaire', 'Montant devise', 'Taux', 'Montant EUR', 'Description', 'Pièces', ...(readOnly ? [] : [''])].map(h => (
                   <th key={h} className="whitespace-nowrap border-r border-sidebar-foreground/5 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-wider text-sidebar-foreground/70 font-mono last:border-r-0">{h}</th>
                 ))}
               </tr>
@@ -211,53 +222,55 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
                 <tr key={t.id} className="hover:bg-paper/50 transition-colors group">
                   <td className="border-b border-rule-2 border-r px-3 py-2.5 font-mono text-[11px] text-dim">{i + 1}</td>
                   <td className="border-b border-rule-2 border-r px-3 py-2.5">
-                    <select value={t.code} onChange={e => updateTx(i, { code: e.target.value })}
-                      className="font-mono text-[10.5px] font-semibold bg-enabel-light text-enabel-dark rounded px-1.5 py-0.5 outline-none border-none">
+                    <select value={t.code} disabled={readOnly} onChange={e => updateTx(i, { code: e.target.value })}
+                      className="font-mono text-[10.5px] font-semibold bg-enabel-light text-enabel-dark rounded px-1.5 py-0.5 outline-none border-none disabled:opacity-60 disabled:cursor-not-allowed">
                       <option value="">—</option>
                       {project.budgetLines.map(bl => <option key={bl.code} value={bl.code}>{bl.code}</option>)}
                     </select>
                   </td>
                   <td className="border-b border-rule-2 border-r px-3 py-2.5">
-                    <input type="date" defaultValue={t.date} key={t.date} onChange={e => updateTx(i, { date: e.target.value })}
-                      className="w-full bg-transparent font-mono text-xs outline-none focus:bg-card rounded px-1" />
+                    <input type="date" defaultValue={t.date} key={t.date} disabled={readOnly} onChange={e => updateTx(i, { date: e.target.value })}
+                      className="w-full bg-transparent font-mono text-xs outline-none focus:bg-card rounded px-1 disabled:opacity-60 disabled:cursor-not-allowed" />
                   </td>
                   <td className="border-b border-rule-2 border-r px-3 py-2.5">
-                    <input type="text" defaultValue={t.voucher} key={t.voucher} onChange={e => updateTx(i, { voucher: e.target.value })}
-                      className="w-full bg-transparent font-mono text-xs outline-none focus:bg-card rounded px-1" />
+                    <input type="text" defaultValue={t.voucher} key={t.voucher} disabled={readOnly} onChange={e => updateTx(i, { voucher: e.target.value })}
+                      className="w-full bg-transparent font-mono text-xs outline-none focus:bg-card rounded px-1 disabled:opacity-60 disabled:cursor-not-allowed" />
                   </td>
                   <td className="border-b border-rule-2 border-r px-3 py-2.5">
-                    <input type="text" defaultValue={t.beneficiaire} key={t.beneficiaire} onChange={e => updateTx(i, { beneficiaire: e.target.value })}
-                      className="w-full bg-transparent outline-none focus:bg-card rounded px-1" />
+                    <input type="text" defaultValue={t.beneficiaire} key={t.beneficiaire} disabled={readOnly} onChange={e => updateTx(i, { beneficiaire: e.target.value })}
+                      className="w-full bg-transparent outline-none focus:bg-card rounded px-1 disabled:opacity-60 disabled:cursor-not-allowed" />
                   </td>
                   <td className="border-b border-rule-2 border-r px-3 py-2.5">
-                    <input type="number" defaultValue={t.montantDevise} key={`d-${t.montantDevise}`} onChange={e => updateTx(i, { montantDevise: Number(e.target.value) || 0 })}
-                      className="w-24 text-right font-mono bg-transparent outline-none focus:bg-card rounded px-1" />
+                    <input type="number" defaultValue={t.montantDevise} key={`d-${t.montantDevise}`} disabled={readOnly} onChange={e => updateTx(i, { montantDevise: Number(e.target.value) || 0 })}
+                      className="w-24 text-right font-mono bg-transparent outline-none focus:bg-card rounded px-1 disabled:opacity-60 disabled:cursor-not-allowed" />
                   </td>
                   <td className="border-b border-rule-2 border-r px-3 py-2.5">
-                    <input type="number" defaultValue={t.tauxChange} key={`t-${t.tauxChange}`} onChange={e => updateTx(i, { tauxChange: Number(e.target.value) || 0 })}
-                      className="w-20 text-right font-mono bg-transparent outline-none focus:bg-card rounded px-1" />
+                    <input type="number" defaultValue={t.tauxChange} key={`t-${t.tauxChange}`} disabled={readOnly} onChange={e => updateTx(i, { tauxChange: Number(e.target.value) || 0 })}
+                      className="w-20 text-right font-mono bg-transparent outline-none focus:bg-card rounded px-1 disabled:opacity-60 disabled:cursor-not-allowed" />
                   </td>
                   <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono font-semibold text-primary">
                     {fmt(t.montantEUR)} €
                   </td>
                   <td className="border-b border-rule-2 border-r px-3 py-2.5">
-                    <input type="text" defaultValue={t.description} key={t.description} onChange={e => updateTx(i, { description: e.target.value })}
-                      className="w-full bg-transparent text-muted-foreground outline-none focus:bg-card rounded px-1" />
+                    <input type="text" defaultValue={t.description} key={t.description} disabled={readOnly} onChange={e => updateTx(i, { description: e.target.value })}
+                      className="w-full bg-transparent text-muted-foreground outline-none focus:bg-card rounded px-1 disabled:opacity-60 disabled:cursor-not-allowed" />
                   </td>
                   <td className="border-b border-rule-2 border-r px-3 py-2.5">
                     <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => handleUploadClick(t.id)}
-                        disabled={uploading === t.id}
-                        className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
-                        title="Ajouter une pièce justificative"
-                      >
-                        {uploading === t.id ? (
-                          <span className="animate-spin w-3.5 h-3.5 border border-primary border-t-transparent rounded-full inline-block" />
-                        ) : (
-                          <Upload className="w-3.5 h-3.5" />
-                        )}
-                      </button>
+                      {!readOnly && (
+                        <button
+                          onClick={() => handleUploadClick(t.id)}
+                          disabled={uploading === t.id}
+                          className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
+                          title="Ajouter une pièce justificative"
+                        >
+                          {uploading === t.id ? (
+                            <span className="animate-spin w-3.5 h-3.5 border border-primary border-t-transparent rounded-full inline-block" />
+                          ) : (
+                            <Upload className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      )}
                       {(t.attachments?.length || 0) > 0 && (
                         <span className="bg-primary/10 text-primary text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                           {t.attachments!.length}
@@ -274,20 +287,24 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
                               {att.name}
                             </a>
                             <span className="text-muted-foreground shrink-0">({formatSize(att.size)})</span>
-                            <button onClick={() => removeAttachment(i, ai)}
-                              className="opacity-0 group-hover/att:opacity-100 text-destructive hover:text-destructive/80 transition-all shrink-0 ml-auto">
-                              <X className="w-3 h-3" />
-                            </button>
+                            {!readOnly && (
+                              <button onClick={() => removeAttachment(i, ai)}
+                                className="opacity-0 group-hover/att:opacity-100 text-destructive hover:text-destructive/80 transition-all shrink-0 ml-auto">
+                                <X className="w-3 h-3" />
+                              </button>
+                            )}
                           </div>
                         ))}
                       </div>
                     )}
                   </td>
-                  <td className="border-b border-rule-2 px-3 py-2.5">
-                    <button onClick={() => removeTx(i)} className="opacity-0 group-hover:opacity-100 text-dim hover:text-rose transition-all">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </td>
+                  {!readOnly && (
+                    <td className="border-b border-rule-2 px-3 py-2.5">
+                      <button onClick={() => removeTx(i)} className="opacity-0 group-hover:opacity-100 text-dim hover:text-rose transition-all">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </td>
+                  )}
                 </tr>
               )) : (
                 <tr>
@@ -297,7 +314,7 @@ export default function ProjectTransactions({ project, reportIndex, onSave }: Pr
               <tr className="bg-ink text-sidebar-foreground font-mono font-bold text-xs">
                 <td colSpan={7} className="px-3 py-2">TOTAL</td>
                 <td className="px-3 py-2 text-right">{fmt(totalEUR)} €</td>
-                <td colSpan={3}></td>
+                <td colSpan={readOnly ? 2 : 3}></td>
               </tr>
             </tbody>
           </table>
