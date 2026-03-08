@@ -1,4 +1,4 @@
-import { Project, calcBudgetTotal, calcDepensesTotal, fmt } from '@/lib/mock-data';
+import { Project, calcBudgetTotal, calcDepensesTotal, fmt, getReportCount } from '@/lib/mock-data';
 import { useAppStore } from '@/lib/store';
 import { useProjects } from '@/hooks/useProjects';
 import {
