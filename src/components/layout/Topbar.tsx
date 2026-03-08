@@ -32,7 +32,12 @@ export default function Topbar() {
   const project = projects.find(p => p.id === currentProjectId);
   const [showNotifs, setShowNotifs] = useState(false);
   const [showExport, setShowExport] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('gh-gts-dark-mode') === 'true';
+    }
+    return false;
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
   const exportRef = useRef<HTMLDivElement>(null);
@@ -50,6 +55,7 @@ export default function Topbar() {
   // Dark mode toggle
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode);
+    localStorage.setItem('gh-gts-dark-mode', String(darkMode));
   }, [darkMode]);
 
   const handleSave = () => {
