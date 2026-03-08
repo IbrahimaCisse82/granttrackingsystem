@@ -25,6 +25,8 @@ export default function ProjectAmendements({ project, onSave, readOnly }: Props)
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [confirmAction, setConfirmAction] = useState<{ idx: number; action: string } | null>(null);
   const amendements = project.amendements || [];
+  const { addNotification } = useNotifications();
+  const amendements = project.amendements || [];
 
   const addAmendement = useCallback(() => {
     if (readOnly) return;
