@@ -30,15 +30,10 @@ export default function Topbar() {
   const { projects, addProject } = useProjects();
   const { role, signOut } = useAuth();
   const { notifications, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
+  const { darkMode, toggle: toggleDarkMode } = useDarkMode();
   const project = projects.find(p => p.id === currentProjectId);
   const [showNotifs, setShowNotifs] = useState(false);
   const [showExport, setShowExport] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('gh-gts-dark-mode') === 'true';
-    }
-    return false;
-  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
   const exportRef = useRef<HTMLDivElement>(null);
