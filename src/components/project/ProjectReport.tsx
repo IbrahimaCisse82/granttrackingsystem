@@ -1,5 +1,6 @@
 import { Project, Report, lineTotal, fmt, calcDepensesTotal, createEmptyReport } from '@/lib/mock-data';
 import { useState, useCallback } from 'react';
+import { useNotifications } from '@/hooks/useNotifications';
 
 const STATUS_STYLES: Record<string, [string, string]> = {
   vide: ['bg-muted text-steel', 'Vide'],
@@ -18,6 +19,7 @@ interface Props {
 export default function ProjectReport({ project, reportIndex, onSave, readOnly }: Props) {
   const [activeTab, setActiveTab] = useState<'engaged' | 'prevues' | 'reconcil'>('engaged');
   const report = project.reports?.[reportIndex];
+  const { addNotification } = useNotifications();
 
   const updateReport = useCallback((patch: Partial<Report>) => {
     if (readOnly || !report) return;
@@ -50,7 +52,11 @@ export default function ProjectReport({ project, reportIndex, onSave, readOnly }
 
   const handleStatusChange = useCallback((status: Report['status']) => {
     updateReport({ status });
-  }, [updateReport]);
+    const n = String(reportIndex + 1).padStart(3, '0');
+    if (status === 'soumis') {
+      addNotification({ type: 'rapport', title: `Rapport N° ${n} soumis`, message: `Le rapport financier a été soumis pour ${project.org}.`, projectId: project.id });
+    }
+  }, [updateReport, addNotification, reportIndex, project.org, project.id]);
 
   if (!report) {
     const initReport = () => {

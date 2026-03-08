@@ -1,12 +1,35 @@
-import { calcBudgetTotal, calcDepensesTotal, fmt } from '@/lib/mock-data';
+import { useState, useMemo } from 'react';
+import { calcBudgetTotal, calcDepensesTotal, fmt, getReportCount } from '@/lib/mock-data';
 import { useProjects } from '@/hooks/useProjects';
 import MetricCard from '@/components/MetricCard';
 import ProjectCard from '@/components/ProjectCard';
 import CreateProjectDialog from '@/components/CreateProjectDialog';
-import { Plus, FolderOpen, Loader2 } from 'lucide-react';
+import { Plus, FolderOpen, Loader2, Search, Filter, X } from 'lucide-react';
+
+const RISK_OPTIONS = ['Faible risque', 'Risque modéré', 'Risque important', 'Risque élevé'];
 
 export default function Portfolio() {
   const { projects, isLoading } = useProjects();
+  const [search, setSearch] = useState('');
+  const [riskFilter, setRiskFilter] = useState('');
+  const [paysFilter, setPaysFilter] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Unique countries
+  const countries = useMemo(() => [...new Set(projects.map(p => p.pays).filter(Boolean))].sort(), [projects]);
+
+  // Filtered projects
+  const filtered = useMemo(() => {
+    return projects.filter(p => {
+      const q = search.toLowerCase();
+      const matchSearch = !q || p.org.toLowerCase().includes(q) || p.convention.toLowerCase().includes(q) || p.title.toLowerCase().includes(q);
+      const matchRisk = !riskFilter || p.risque === riskFilter;
+      const matchPays = !paysFilter || p.pays === paysFilter;
+      return matchSearch && matchRisk && matchPays;
+    });
+  }, [projects, search, riskFilter, paysFilter]);
+
+  const hasFilters = !!riskFilter || !!paysFilter;
 
   if (isLoading) {
     return (
@@ -39,10 +62,74 @@ export default function Portfolio() {
         <MetricCard label="Rapports soumis" value={String(totalRapports)} note="sur tous les projets" accentColor="emerald" />
       </div>
 
+      {/* Search & Filters */}
+      {projects.length > 0 && (
+        <div className="mb-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Rechercher par organisation, convention ou titre…"
+                className="w-full rounded-lg border border-rule bg-card py-2 pl-9 pr-3 text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-colors"
+              />
+              {search && (
+                <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-dim hover:text-foreground">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            <button onClick={() => setShowFilters(!showFilters)}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                hasFilters ? 'border-primary bg-enabel-light text-primary' : 'border-rule bg-card text-steel hover:bg-paper'
+              }`}>
+              <Filter className="w-3.5 h-3.5" />
+              Filtres {hasFilters && `(${[riskFilter, paysFilter].filter(Boolean).length})`}
+            </button>
+          </div>
+
+          {showFilters && (
+            <div className="flex items-center gap-3 rounded-lg border border-rule bg-card p-3">
+              <div className="flex items-center gap-2">
+                <label className="text-[11px] font-medium text-steel whitespace-nowrap">Risque :</label>
+                <select value={riskFilter} onChange={e => setRiskFilter(e.target.value)}
+                  className="rounded-md border border-input bg-background px-2 py-1 text-xs outline-none focus:border-primary">
+                  <option value="">Tous</option>
+                  {RISK_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-[11px] font-medium text-steel whitespace-nowrap">Pays :</label>
+                <select value={paysFilter} onChange={e => setPaysFilter(e.target.value)}
+                  className="rounded-md border border-input bg-background px-2 py-1 text-xs outline-none focus:border-primary">
+                  <option value="">Tous</option>
+                  {countries.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              {hasFilters && (
+                <button onClick={() => { setRiskFilter(''); setPaysFilter(''); }}
+                  className="text-[11px] text-primary hover:underline ml-2">
+                  Réinitialiser
+                </button>
+              )}
+              <span className="ml-auto text-[11px] text-muted-foreground">{filtered.length} / {projects.length} projet(s)</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Project Grid */}
-      {projects.length > 0 ? (
+      {filtered.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {projects.map(p => <ProjectCard key={p.id} project={p} />)}
+          {filtered.map(p => <ProjectCard key={p.id} project={p} />)}
+        </div>
+      ) : projects.length > 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-[10px] border-2 border-dashed border-rule py-16 text-center">
+          <Search className="w-10 h-10 text-dim mb-3" />
+          <p className="text-sm font-semibold text-foreground mb-1">Aucun résultat</p>
+          <p className="text-xs text-muted-foreground">Modifiez vos critères de recherche ou filtres</p>
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center rounded-[10px] border-2 border-dashed border-rule py-20 text-center">
