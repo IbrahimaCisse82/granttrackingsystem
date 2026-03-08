@@ -52,7 +52,11 @@ export default function ProjectReport({ project, reportIndex, onSave, readOnly }
 
   const handleStatusChange = useCallback((status: Report['status']) => {
     updateReport({ status });
-  }, [updateReport]);
+    const n = String(reportIndex + 1).padStart(3, '0');
+    if (status === 'soumis') {
+      addNotification({ type: 'rapport', title: `Rapport N° ${n} soumis`, message: `Le rapport financier a été soumis pour ${project.org}.`, projectId: project.id });
+    }
+  }, [updateReport, addNotification, reportIndex, project.org, project.id]);
 
   if (!report) {
     const initReport = () => {
