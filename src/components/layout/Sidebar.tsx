@@ -1,23 +1,45 @@
 import { useAppStore } from '@/lib/store';
 import { useProjects } from '@/hooks/useProjects';
 import { useAuth } from '@/hooks/useAuth';
-import { ChevronRight, LayoutDashboard, BookOpen, Users, Search, BarChart3, UserCircle, FileEdit } from 'lucide-react';
+import { ChevronRight, LayoutDashboard, BookOpen, Users, Search, BarChart3, UserCircle } from 'lucide-react';
+import { getReportCount } from '@/lib/mock-data';
 import logo from '@/assets/logo-growhub.png';
 
-const SECTION_TABS = [
-  { id: 'infos', label: 'Informations générales', color: '#2563EB' },
-  { id: 'budget', label: 'Budget (Annexe 1b)', color: '#B45309' },
-  { id: 'fiche', label: 'Fiche récapitulative', color: '#0D9488' },
-  { id: 'amendements', label: 'Amendements', color: '#7C3AED' },
-  { id: 'rapport-1', label: 'Rapport N° 001', color: '#065F46' },
-  { id: 'trans-1', label: '↳ Transactions REP 01', color: '#059669' },
-  { id: 'rapport-2', label: 'Rapport N° 002', color: '#1A5276' },
-  { id: 'trans-2', label: '↳ Transactions REP 02', color: '#2980B9' },
-  { id: 'rapport-3', label: 'Rapport N° 003', color: '#5B21B6' },
-  { id: 'trans-3', label: '↳ Transactions REP 03', color: '#7C3AED' },
-  { id: 'rapport-4', label: 'Rapport N° 004', color: '#9F1239' },
-  { id: 'trans-4', label: '↳ Transactions REP 04', color: '#E11D48' },
-];
+function buildSectionTabs(periodicite: string) {
+  const count = getReportCount(periodicite);
+  const REPORT_COLORS = [
+    '#065F46', '#1A5276', '#5B21B6', '#9F1239',
+    '#0E7490', '#92400E', '#6D28D9', '#BE123C',
+    '#047857', '#1E40AF', '#7C3AED', '#E11D48',
+  ];
+  const TRANS_COLORS = [
+    '#059669', '#2980B9', '#7C3AED', '#E11D48',
+    '#06B6D4', '#D97706', '#8B5CF6', '#F43F5E',
+    '#10B981', '#3B82F6', '#A78BFA', '#FB7185',
+  ];
+
+  const base = [
+    { id: 'infos', label: 'Informations générales', color: '#2563EB' },
+    { id: 'budget', label: 'Budget (Annexe 1b)', color: '#B45309' },
+    { id: 'fiche', label: 'Fiche récapitulative', color: '#0D9488' },
+    { id: 'amendements', label: 'Amendements', color: '#7C3AED' },
+  ];
+
+  for (let i = 1; i <= count; i++) {
+    base.push({
+      id: `rapport-${i}`,
+      label: `Rapport N° ${String(i).padStart(3, '0')}`,
+      color: REPORT_COLORS[(i - 1) % REPORT_COLORS.length],
+    });
+    base.push({
+      id: `trans-${i}`,
+      label: `↳ Transactions REP ${String(i).padStart(2, '0')}`,
+      color: TRANS_COLORS[(i - 1) % TRANS_COLORS.length],
+    });
+  }
+
+  return base;
+}
 
 export default function Sidebar() {
   const { currentPage, currentProjectId, currentTab, openProjectIds, setPage, openProjectTab, toggleSidebarProject, sidebarSearch, setSidebarSearch } = useAppStore();
@@ -25,7 +47,7 @@ export default function Sidebar() {
   const { signOut } = useAuth();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col overflow-y-auto bg-sidebar border-r border-sidebar-border/5">
+    <aside className="fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col overflow-y-auto bg-sidebar border-r border-sidebar-border/5 print:hidden">
       {/* Brand */}
       <div className="border-b border-sidebar-border/10 p-5 pb-4">
         <div className="flex items-center gap-3 mb-3">
@@ -65,6 +87,7 @@ export default function Sidebar() {
         </p>
         {projects.filter(p => !sidebarSearch || p.org.toLowerCase().includes(sidebarSearch.toLowerCase())).map(proj => {
           const isOpen = openProjectIds.includes(proj.id);
+          const tabs = buildSectionTabs(proj.periodicite);
           return (
             <div key={proj.id} className="border-t border-sidebar-foreground/5 mt-1 pt-1">
               <button
@@ -79,7 +102,7 @@ export default function Sidebar() {
               </button>
               {isOpen && (
                 <div className="pb-2 pl-2">
-                  {SECTION_TABS.map(tab => (
+                  {tabs.map(tab => (
                     <button
                       key={tab.id}
                       onClick={() => openProjectTab(proj.id, tab.id)}

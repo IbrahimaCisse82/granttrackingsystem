@@ -119,4 +119,14 @@ export function createEmptyReport(): Report {
   };
 }
 
+export function getReportCount(periodicite: string): number {
+  switch (periodicite) {
+    case 'Mensuelle': return 12;
+    case 'Trimestrielle': return 4;
+    case 'Semestrielle': return 2;
+    case 'Annuelle': return 1;
+    default: return 4;
+  }
+}
+
 export const MOCK_PROJECTS: Project[] = [];

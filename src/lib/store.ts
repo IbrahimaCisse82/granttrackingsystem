@@ -6,6 +6,7 @@ interface AppState {
   currentPage: 'portfolio' | 'project' | 'tutoriel' | 'admin' | 'dashboard' | 'profile';
   sidebarSearch: string;
   openProjectIds: string[];
+  forceSaveCounter: number;
   
   setPage: (page: AppState['currentPage']) => void;
   openProject: (id: string, tab?: string) => void;
@@ -13,6 +14,7 @@ interface AppState {
   toggleSidebarProject: (id: string) => void;
   setSidebarSearch: (q: string) => void;
   closeProject: (id: string) => void;
+  triggerForceSave: () => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -21,6 +23,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   currentPage: 'portfolio',
   sidebarSearch: '',
   openProjectIds: [],
+  forceSaveCounter: 0,
 
   setPage: (page) => set({ currentPage: page }),
   
@@ -58,4 +61,6 @@ export const useAppStore = create<AppState>((set, get) => ({
       currentPage: currentProjectId === id ? 'portfolio' : get().currentPage,
     });
   },
+
+  triggerForceSave: () => set({ forceSaveCounter: get().forceSaveCounter + 1 }),
 }));

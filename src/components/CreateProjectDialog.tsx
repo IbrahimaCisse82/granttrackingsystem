@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useProjects } from '@/hooks/useProjects';
 import { Plus } from 'lucide-react';
 import type { Project } from '@/lib/mock-data';
-import { createEmptyReport } from '@/lib/mock-data';
+import { createEmptyReport, getReportCount } from '@/lib/mock-data';
 
 const COLORS = [
   { stripe: '#005B99', badge: 'b-blue' },
@@ -47,12 +47,15 @@ export default function CreateProjectDialog({ trigger }: { trigger?: React.React
     if (!form.convention.trim() || !form.org.trim() || !form.title.trim()) return;
 
     const colorIndex = Math.floor(Math.random() * COLORS.length);
+    const reportCount = getReportCount(form.periodicite);
+    const reports = Array.from({ length: reportCount }, () => createEmptyReport());
+
     const project: Omit<Project, 'id' | 'createdAt'> = {
       ...form,
       taux: Number(form.taux),
       color: COLORS[colorIndex],
       budgetLines: [],
-      reports: [createEmptyReport(), createEmptyReport(), createEmptyReport(), createEmptyReport()],
+      reports,
       fiches: { versements: [] },
       amendements: [],
       infos: { submitDate: '', preparedBy: '', version: '', scoreRisque: '' },
@@ -77,13 +80,10 @@ export default function CreateProjectDialog({ trigger }: { trigger?: React.React
           <DialogTitle>Créer un nouveau projet</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-          {/* Convention */}
           <div className="space-y-1.5">
             <Label htmlFor="convention">N° Convention *</Label>
             <Input id="convention" placeholder="Ex: CONV-2024-001" value={form.convention} onChange={e => set('convention', e.target.value)} required maxLength={50} />
           </div>
-
-          {/* Organisation */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="org">Organisation *</Label>
@@ -94,20 +94,14 @@ export default function CreateProjectDialog({ trigger }: { trigger?: React.React
               <Input id="orgType" placeholder="ONG, Association…" value={form.orgType} onChange={e => set('orgType', e.target.value)} maxLength={50} />
             </div>
           </div>
-
-          {/* Titre */}
           <div className="space-y-1.5">
             <Label htmlFor="title">Titre du projet *</Label>
             <Input id="title" placeholder="Intitulé du projet" value={form.title} onChange={e => set('title', e.target.value)} required maxLength={200} />
           </div>
-
-          {/* Pays */}
           <div className="space-y-1.5">
             <Label htmlFor="pays">Pays</Label>
             <Input id="pays" placeholder="Ex: Sénégal" value={form.pays} onChange={e => set('pays', e.target.value)} maxLength={50} />
           </div>
-
-          {/* Devise & Taux */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="devise">Devise</Label>
@@ -125,8 +119,6 @@ export default function CreateProjectDialog({ trigger }: { trigger?: React.React
               <Input id="taux" type="number" step="0.001" min="0" value={form.taux} onChange={e => set('taux', e.target.value)} />
             </div>
           </div>
-
-          {/* Dates */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="debut">Date de début</Label>
@@ -137,8 +129,6 @@ export default function CreateProjectDialog({ trigger }: { trigger?: React.React
               <Input id="fin" type="date" value={form.fin} onChange={e => set('fin', e.target.value)} />
             </div>
           </div>
-
-          {/* Risque & Périodicité */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Niveau de risque</Label>
@@ -159,7 +149,6 @@ export default function CreateProjectDialog({ trigger }: { trigger?: React.React
               </Select>
             </div>
           </div>
-
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>Annuler</Button>
             <Button type="submit" disabled={isAdding}>
