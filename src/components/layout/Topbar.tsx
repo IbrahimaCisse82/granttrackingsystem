@@ -1,7 +1,8 @@
 import { useAppStore } from '@/lib/store';
 import { useProjects } from '@/hooks/useProjects';
 import { useAuth } from '@/hooks/useAuth';
-import { useNotifications, AppNotification } from '@/hooks/useNotifications';
+import { useNotifications } from '@/hooks/useNotifications';
+import { useDarkMode } from '@/hooks/useDarkMode';
 import { Save, Download, Bell, User, LogOut, FileDown, FileSpreadsheet, Upload, Sun, Moon, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { exportBudgetPDF, exportReportPDF, exportTransactionsPDF } from '@/lib/export-pdf';
@@ -29,15 +30,10 @@ export default function Topbar() {
   const { projects, addProject } = useProjects();
   const { role, signOut } = useAuth();
   const { notifications, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
+  const { darkMode, toggle: toggleDarkMode } = useDarkMode();
   const project = projects.find(p => p.id === currentProjectId);
   const [showNotifs, setShowNotifs] = useState(false);
   const [showExport, setShowExport] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('gh-gts-dark-mode') === 'true';
-    }
-    return false;
-  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
   const exportRef = useRef<HTMLDivElement>(null);
@@ -52,11 +48,6 @@ export default function Topbar() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Dark mode toggle
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode);
-    localStorage.setItem('gh-gts-dark-mode', String(darkMode));
-  }, [darkMode]);
 
   const handleSave = () => {
     triggerForceSave();
@@ -186,7 +177,7 @@ export default function Topbar() {
         )}
 
         {/* Dark mode */}
-        <button onClick={() => setDarkMode(!darkMode)} className="rounded-md border border-rule bg-card p-1.5 text-steel hover:bg-paper transition-colors" title="Basculer thème">
+        <button onClick={toggleDarkMode} className="rounded-md border border-rule bg-card p-1.5 text-steel hover:bg-paper transition-colors" title="Basculer thème">
           {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
 
