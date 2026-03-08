@@ -112,7 +112,7 @@ const COLORS = [
   { stripe: '#065F46', badge: 'b-emerald' },
 ];
 
-function createEmptyReport(): Report {
+export function createEmptyReport(): Report {
   return {
     status: 'vide', dateSubmit: '', periodeDebut: '', periodeFin: '',
     depenses: {}, previsions: {}, explanation: {}, transactions: [],

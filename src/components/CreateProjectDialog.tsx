@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useProjects } from '@/hooks/useProjects';
 import { Plus } from 'lucide-react';
 import type { Project } from '@/lib/mock-data';
+import { createEmptyReport } from '@/lib/mock-data';
 
 const COLORS = [
   { stripe: '#005B99', badge: 'b-blue' },
@@ -51,7 +52,7 @@ export default function CreateProjectDialog({ trigger }: { trigger?: React.React
       taux: Number(form.taux),
       color: COLORS[colorIndex],
       budgetLines: [],
-      reports: [],
+      reports: [createEmptyReport(), createEmptyReport(), createEmptyReport(), createEmptyReport()],
       fiches: { versements: [] },
       amendements: [],
       infos: { submitDate: '', preparedBy: '', version: '', scoreRisque: '' },
