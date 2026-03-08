@@ -52,7 +52,7 @@ export default function CreateProjectDialog({ trigger }: { trigger?: React.React
       taux: Number(form.taux),
       color: COLORS[colorIndex],
       budgetLines: [],
-      reports: [],
+      reports: [createEmptyReport(), createEmptyReport(), createEmptyReport(), createEmptyReport()],
       fiches: { versements: [] },
       amendements: [],
       infos: { submitDate: '', preparedBy: '', version: '', scoreRisque: '' },
