@@ -1,11 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useAuditLog } from './useAuditLog';
 import type { Project } from '@/lib/mock-data';
 import { toast } from 'sonner';
 
 // Map DB row to Project interface
-function rowToProject(row: any): Project & { userId: string } {
+function rowToProject(row: any): Project & { userId: string; archived: boolean } {
   return {
     id: row.id,
     convention: row.convention,
@@ -27,6 +28,7 @@ function rowToProject(row: any): Project & { userId: string } {
     infos: row.infos as Project['infos'],
     createdAt: new Date(row.created_at).getTime(),
     userId: row.user_id,
+    archived: row.archived ?? false,
   };
 }
 
@@ -55,6 +57,7 @@ function projectToRow(p: Omit<Project, 'id' | 'createdAt'>, userId: string) {
 
 export function useProjects() {
   const { user } = useAuth();
+  const { log: auditLog } = useAuditLog();
   const queryClient = useQueryClient();
 
   const query = useQuery({
@@ -81,8 +84,9 @@ export function useProjects() {
       if (error) throw error;
       return rowToProject(data);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      auditLog('create', data.id, { description: `Projet ${data.org} créé` });
       toast.success('Projet créé');
     },
     onError: (e) => toast.error('Erreur: ' + e.message),
@@ -131,6 +135,19 @@ export function useProjects() {
     onError: (e) => toast.error('Erreur: ' + e.message),
   });
 
+  const archiveMutation = useMutation({
+    mutationFn: async ({ id, archived }: { id: string; archived: boolean }) => {
+      const { error } = await supabase.from('projects').update({ archived } as any).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: (_, { id, archived }) => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      auditLog(archived ? 'archive' : 'unarchive', id);
+      toast.success(archived ? 'Projet archivé' : 'Projet désarchivé');
+    },
+    onError: (e) => toast.error('Erreur: ' + e.message),
+  });
+
   return {
     projects: query.data || [],
     isLoading: query.isLoading,
@@ -143,6 +160,7 @@ export function useProjects() {
       return updateMutation.mutateAsync({ id, updates: updated });
     },
     deleteProject: deleteMutation.mutateAsync,
+    archiveProject: (id: string, archived: boolean) => archiveMutation.mutateAsync({ id, archived }),
     isAdding: addMutation.isPending,
   };
 }

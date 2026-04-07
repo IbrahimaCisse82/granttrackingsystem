@@ -1,7 +1,7 @@
 import { useAppStore } from '@/lib/store';
 import { useProjects } from '@/hooks/useProjects';
 import { useAuth } from '@/hooks/useAuth';
-import { ChevronRight, LayoutDashboard, BookOpen, Users, Search, BarChart3, UserCircle } from 'lucide-react';
+import { ChevronRight, LayoutDashboard, BookOpen, Users, Search, BarChart3, UserCircle, History } from 'lucide-react';
 import { getReportCount } from '@/lib/mock-data';
 import logo from '@/assets/logo-growhub.png';
 
@@ -77,6 +77,7 @@ export default function Sidebar() {
         <NavItem icon={<BarChart3 className="w-4 h-4" />} label="Dashboard" active={currentPage === 'dashboard'} onClick={() => setPage('dashboard')} />
         <NavItem icon={<BookOpen className="w-4 h-4" />} label="Guide d'utilisation" active={currentPage === 'tutoriel'} onClick={() => setPage('tutoriel')} />
         <NavItem icon={<Users className="w-4 h-4" />} label="Gestion utilisateurs" active={currentPage === 'admin'} onClick={() => setPage('admin')} />
+        <NavItem icon={<History className="w-4 h-4" />} label="Historique" active={currentPage === 'audit'} onClick={() => setPage('audit')} />
         <NavItem icon={<UserCircle className="w-4 h-4" />} label="Mon profil" active={currentPage === 'profile'} onClick={() => setPage('profile')} />
       </div>
 

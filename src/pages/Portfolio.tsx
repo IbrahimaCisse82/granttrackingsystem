@@ -4,7 +4,7 @@ import { useProjects } from '@/hooks/useProjects';
 import MetricCard from '@/components/MetricCard';
 import ProjectCard from '@/components/ProjectCard';
 import CreateProjectDialog from '@/components/CreateProjectDialog';
-import { Plus, FolderOpen, Loader2, Search, Filter, X } from 'lucide-react';
+import { Plus, FolderOpen, Loader2, Search, Filter, X, Archive } from 'lucide-react';
 
 const RISK_OPTIONS = ['Faible risque', 'Risque modéré', 'Risque important', 'Risque élevé'];
 
@@ -13,6 +13,7 @@ export default function Portfolio() {
   const [search, setSearch] = useState('');
   const [riskFilter, setRiskFilter] = useState('');
   const [paysFilter, setPaysFilter] = useState('');
+  const [showArchived, setShowArchived] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   // Unique countries
@@ -21,13 +22,16 @@ export default function Portfolio() {
   // Filtered projects
   const filtered = useMemo(() => {
     return projects.filter(p => {
+      const isArchived = (p as any).archived ?? false;
+      if (!showArchived && isArchived) return false;
+      if (showArchived && !isArchived) return false;
       const q = search.toLowerCase();
       const matchSearch = !q || p.org.toLowerCase().includes(q) || p.convention.toLowerCase().includes(q) || p.title.toLowerCase().includes(q);
       const matchRisk = !riskFilter || p.risque === riskFilter;
       const matchPays = !paysFilter || p.pays === paysFilter;
       return matchSearch && matchRisk && matchPays;
     });
-  }, [projects, search, riskFilter, paysFilter]);
+  }, [projects, search, riskFilter, paysFilter, showArchived]);
 
   const hasFilters = !!riskFilter || !!paysFilter;
 
@@ -39,9 +43,11 @@ export default function Portfolio() {
     );
   }
 
-  const totalBudget = projects.reduce((s, p) => s + calcBudgetTotal(p), 0);
-  const totalDepenses = projects.reduce((s, p) => s + calcDepensesTotal(p), 0);
-  const totalRapports = projects.reduce((s, p) => s + p.reports.filter(r => r.status === 'soumis' || r.status === 'valide').length, 0);
+  const activeProjects = projects.filter(p => !(p as any).archived);
+  const archivedProjects = projects.filter(p => (p as any).archived);
+  const totalBudget = activeProjects.reduce((s, p) => s + calcBudgetTotal(p), 0);
+  const totalDepenses = activeProjects.reduce((s, p) => s + calcDepensesTotal(p), 0);
+  const totalRapports = activeProjects.reduce((s, p) => s + p.reports.filter(r => r.status === 'soumis' || r.status === 'valide').length, 0);
 
   return (
     <div>
@@ -56,7 +62,7 @@ export default function Portfolio() {
 
       {/* Metrics */}
       <div className="grid grid-cols-4 gap-3.5 mb-6">
-        <MetricCard label="Projets actifs" value={String(projects.length)} note="en cours" accentColor="blue" />
+        <MetricCard label="Projets actifs" value={String(activeProjects.length)} note="en cours" accentColor="blue" />
         <MetricCard label="Budget total" value={`${fmt(totalBudget)} €`} note="consolidé" accentColor="teal" />
         <MetricCard label="Dépenses totales" value={`${fmt(totalDepenses)} €`} note="engagées" accentColor="amber" />
         <MetricCard label="Rapports soumis" value={String(totalRapports)} note="sur tous les projets" accentColor="emerald" />
@@ -81,6 +87,13 @@ export default function Portfolio() {
                 </button>
               )}
             </div>
+            <button onClick={() => setShowArchived(!showArchived)}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                showArchived ? 'border-amber bg-amber-light text-amber' : 'border-rule bg-card text-steel hover:bg-paper'
+              }`}>
+              <Archive className="w-3.5 h-3.5" />
+              Archivés ({archivedProjects.length})
+            </button>
             <button onClick={() => setShowFilters(!showFilters)}
               className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
                 hasFilters ? 'border-primary bg-enabel-light text-primary' : 'border-rule bg-card text-steel hover:bg-paper'

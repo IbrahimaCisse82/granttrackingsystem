@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          project_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          project_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          project_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          project_id: string
+          report_index: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          project_id: string
+          report_index?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          project_id?: string
+          report_index?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -89,6 +146,7 @@ export type Database = {
       projects: {
         Row: {
           amendements: Json
+          archived: boolean
           budget_lines: Json
           color: Json
           convention: string
@@ -112,6 +170,7 @@ export type Database = {
         }
         Insert: {
           amendements?: Json
+          archived?: boolean
           budget_lines?: Json
           color?: Json
           convention?: string
@@ -135,6 +194,7 @@ export type Database = {
         }
         Update: {
           amendements?: Json
+          archived?: boolean
           budget_lines?: Json
           color?: Json
           convention?: string

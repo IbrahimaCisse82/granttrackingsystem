@@ -1,13 +1,27 @@
+import { useState, useMemo } from 'react';
 import { useProjects } from '@/hooks/useProjects';
 import { calcBudgetTotal, calcDepensesTotal, fmt, lineTotal } from '@/lib/mock-data';
 import MetricCard from '@/components/MetricCard';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend } from 'recharts';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Filter } from 'lucide-react';
 
 const CHART_COLORS = ['hsl(204,100%,30%)', 'hsl(172,86%,32%)', 'hsl(28,91%,37%)', 'hsl(263,83%,42%)', 'hsl(343,86%,35%)', 'hsl(164,93%,20%)'];
 
 export default function Dashboard() {
-  const { projects, isLoading } = useProjects();
+  const { projects: allProjects, isLoading } = useProjects();
+  const [paysFilter, setPaysFilter] = useState('');
+  const [periodeFilter, setPeriodeFilter] = useState('');
+
+  const countries = useMemo(() => [...new Set(allProjects.map(p => p.pays).filter(Boolean))].sort(), [allProjects]);
+
+  const projects = useMemo(() => {
+    return allProjects.filter(p => {
+      if ((p as any).archived) return false;
+      if (paysFilter && p.pays !== paysFilter) return false;
+      if (periodeFilter && p.periodicite !== periodeFilter) return false;
+      return true;
+    });
+  }, [allProjects, paysFilter, periodeFilter]);
 
   if (isLoading) {
     return <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
@@ -65,8 +79,31 @@ export default function Dashboard() {
         <h1 className="text-xl font-bold tracking-tight text-foreground">Tableau de bord</h1>
         <p className="text-xs text-muted-foreground mt-1">Vue analytique consolidée de tous les projets</p>
       </div>
+      {/* Filters */}
+      <div className="flex items-center gap-3 mb-4 rounded-lg border border-rule bg-card p-3">
+        <Filter className="w-4 h-4 text-muted-foreground" />
+        <div className="flex items-center gap-2">
+          <label className="text-[11px] font-medium text-steel">Pays :</label>
+          <select value={paysFilter} onChange={e => setPaysFilter(e.target.value)}
+            className="rounded-md border border-input bg-background px-2 py-1 text-xs outline-none focus:border-primary">
+            <option value="">Tous</option>
+            {countries.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-[11px] font-medium text-steel">Périodicité :</label>
+          <select value={periodeFilter} onChange={e => setPeriodeFilter(e.target.value)}
+            className="rounded-md border border-input bg-background px-2 py-1 text-xs outline-none focus:border-primary">
+            <option value="">Toutes</option>
+            {['Mensuelle', 'Trimestrielle', 'Semestrielle', 'Annuelle'].map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+        </div>
+        {(paysFilter || periodeFilter) && (
+          <button onClick={() => { setPaysFilter(''); setPeriodeFilter(''); }} className="text-[11px] text-primary hover:underline ml-2">Réinitialiser</button>
+        )}
+        <span className="ml-auto text-[11px] text-muted-foreground">{projects.length} projet(s)</span>
+      </div>
 
-      {/* KPI */}
       <div className="grid grid-cols-4 gap-3.5 mb-6">
         <MetricCard label="Projets actifs" value={String(projects.length)} accentColor="blue" />
         <MetricCard label="Budget total" value={`${fmt(totalBudget)} €`} accentColor="teal" />
