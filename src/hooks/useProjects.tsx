@@ -140,8 +140,9 @@ export function useProjects() {
       const { error } = await supabase.from('projects').update({ archived } as any).eq('id', id);
       if (error) throw error;
     },
-    onSuccess: (_, { archived }) => {
+    onSuccess: (_, { id, archived }) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      auditLog(archived ? 'archive' : 'unarchive', id);
       toast.success(archived ? 'Projet archivé' : 'Projet désarchivé');
     },
     onError: (e) => toast.error('Erreur: ' + e.message),
