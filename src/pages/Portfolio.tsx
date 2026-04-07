@@ -43,9 +43,11 @@ export default function Portfolio() {
     );
   }
 
-  const totalBudget = projects.reduce((s, p) => s + calcBudgetTotal(p), 0);
-  const totalDepenses = projects.reduce((s, p) => s + calcDepensesTotal(p), 0);
-  const totalRapports = projects.reduce((s, p) => s + p.reports.filter(r => r.status === 'soumis' || r.status === 'valide').length, 0);
+  const activeProjects = projects.filter(p => !(p as any).archived);
+  const archivedProjects = projects.filter(p => (p as any).archived);
+  const totalBudget = activeProjects.reduce((s, p) => s + calcBudgetTotal(p), 0);
+  const totalDepenses = activeProjects.reduce((s, p) => s + calcDepensesTotal(p), 0);
+  const totalRapports = activeProjects.reduce((s, p) => s + p.reports.filter(r => r.status === 'soumis' || r.status === 'valide').length, 0);
 
   return (
     <div>
@@ -60,7 +62,7 @@ export default function Portfolio() {
 
       {/* Metrics */}
       <div className="grid grid-cols-4 gap-3.5 mb-6">
-        <MetricCard label="Projets actifs" value={String(projects.length)} note="en cours" accentColor="blue" />
+        <MetricCard label="Projets actifs" value={String(activeProjects.length)} note="en cours" accentColor="blue" />
         <MetricCard label="Budget total" value={`${fmt(totalBudget)} €`} note="consolidé" accentColor="teal" />
         <MetricCard label="Dépenses totales" value={`${fmt(totalDepenses)} €`} note="engagées" accentColor="amber" />
         <MetricCard label="Rapports soumis" value={String(totalRapports)} note="sur tous les projets" accentColor="emerald" />
@@ -85,6 +87,13 @@ export default function Portfolio() {
                 </button>
               )}
             </div>
+            <button onClick={() => setShowArchived(!showArchived)}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                showArchived ? 'border-amber bg-amber-light text-amber' : 'border-rule bg-card text-steel hover:bg-paper'
+              }`}>
+              <Archive className="w-3.5 h-3.5" />
+              Archivés ({archivedProjects.length})
+            </button>
             <button onClick={() => setShowFilters(!showFilters)}
               className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
                 hasFilters ? 'border-primary bg-enabel-light text-primary' : 'border-rule bg-card text-steel hover:bg-paper'
