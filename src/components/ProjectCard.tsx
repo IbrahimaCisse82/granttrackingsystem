@@ -1,6 +1,7 @@
 import { Project, calcBudgetTotal, calcDepensesTotal, fmt, getReportCount } from '@/lib/mock-data';
 import { useAppStore } from '@/lib/store';
 import { useProjects } from '@/hooks/useProjects';
+import { Archive, ArchiveRestore } from 'lucide-react';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -15,7 +16,8 @@ const RISK_STYLES: Record<string, string> = {
 
 export default function ProjectCard({ project }: { project: Project }) {
   const { openProject } = useAppStore();
-  const { deleteProject } = useProjects();
+  const { deleteProject, archiveProject } = useProjects();
+  const isArchived = (project as any).archived ?? false;
   const budget = calcBudgetTotal(project);
   const depenses = calcDepensesTotal(project);
   const pct = budget > 0 ? Math.min(100, Math.round(depenses / budget * 100)) : 0;
@@ -72,6 +74,13 @@ export default function ProjectCard({ project }: { project: Project }) {
             className="rounded border border-rule bg-card px-2.5 py-1 text-[11px] font-medium text-steel transition-colors hover:bg-paper hover:border-dim"
           >
             Ouvrir
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); archiveProject(project.id, !isArchived); }}
+            title={isArchived ? 'Désarchiver' : 'Archiver'}
+            className="rounded border border-rule bg-card px-2 py-1 text-[11px] text-steel transition-colors hover:bg-paper hover:border-dim"
+          >
+            {isArchived ? <ArchiveRestore className="w-3.5 h-3.5" /> : <Archive className="w-3.5 h-3.5" />}
           </button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
