@@ -1,6 +1,7 @@
 import { Project, Report, lineTotal, fmt, calcDepensesTotal, createEmptyReport } from '@/lib/mock-data';
 import { useState, useCallback } from 'react';
 import { useNotifications } from '@/hooks/useNotifications';
+import ReportComments from './ReportComments';
 
 const STATUS_STYLES: Record<string, [string, string]> = {
   vide: ['bg-muted text-steel', 'Vide'],
@@ -316,6 +317,9 @@ export default function ProjectReport({ project, reportIndex, onSave, readOnly }
           </div>
         </div>
       )}
+
+      {/* Comments */}
+      <ReportComments projectId={project.id} reportIndex={reportIndex} />
     </div>
   );
 }
