@@ -4,7 +4,7 @@ import { useProjects } from '@/hooks/useProjects';
 import MetricCard from '@/components/MetricCard';
 import ProjectCard from '@/components/ProjectCard';
 import CreateProjectDialog from '@/components/CreateProjectDialog';
-import { Plus, FolderOpen, Loader2, Search, Filter, X } from 'lucide-react';
+import { Plus, FolderOpen, Loader2, Search, Filter, X, Archive } from 'lucide-react';
 
 const RISK_OPTIONS = ['Faible risque', 'Risque modéré', 'Risque important', 'Risque élevé'];
 
@@ -13,6 +13,7 @@ export default function Portfolio() {
   const [search, setSearch] = useState('');
   const [riskFilter, setRiskFilter] = useState('');
   const [paysFilter, setPaysFilter] = useState('');
+  const [showArchived, setShowArchived] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   // Unique countries
@@ -21,13 +22,16 @@ export default function Portfolio() {
   // Filtered projects
   const filtered = useMemo(() => {
     return projects.filter(p => {
+      const isArchived = (p as any).archived ?? false;
+      if (!showArchived && isArchived) return false;
+      if (showArchived && !isArchived) return false;
       const q = search.toLowerCase();
       const matchSearch = !q || p.org.toLowerCase().includes(q) || p.convention.toLowerCase().includes(q) || p.title.toLowerCase().includes(q);
       const matchRisk = !riskFilter || p.risque === riskFilter;
       const matchPays = !paysFilter || p.pays === paysFilter;
       return matchSearch && matchRisk && matchPays;
     });
-  }, [projects, search, riskFilter, paysFilter]);
+  }, [projects, search, riskFilter, paysFilter, showArchived]);
 
   const hasFilters = !!riskFilter || !!paysFilter;
 
