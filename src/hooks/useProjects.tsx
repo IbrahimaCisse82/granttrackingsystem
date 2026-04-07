@@ -57,6 +57,7 @@ function projectToRow(p: Omit<Project, 'id' | 'createdAt'>, userId: string) {
 
 export function useProjects() {
   const { user } = useAuth();
+  const { log: auditLog } = useAuditLog();
   const queryClient = useQueryClient();
 
   const query = useQuery({
@@ -83,8 +84,9 @@ export function useProjects() {
       if (error) throw error;
       return rowToProject(data);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      auditLog('create', data.id, { description: `Projet ${data.org} créé` });
       toast.success('Projet créé');
     },
     onError: (e) => toast.error('Erreur: ' + e.message),
