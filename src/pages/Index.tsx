@@ -7,6 +7,7 @@ import AdminUsers from '@/pages/AdminUsers';
 import Dashboard from '@/pages/Dashboard';
 import Profile from '@/pages/Profile';
 import Guide from '@/pages/Guide';
+import AuditPage from '@/pages/AuditPage';
 import Auth from '@/pages/Auth';
 
 export default function Index() {
@@ -31,6 +32,7 @@ export default function Index() {
       {currentPage === 'profile' && <Profile />}
       {currentPage === 'tutoriel' && <Guide />}
       {currentPage === 'admin' && <AdminUsers />}
+      {currentPage === 'audit' && <AuditPage />}
     </AppLayout>
   );
 }
