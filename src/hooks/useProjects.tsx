@@ -27,6 +27,7 @@ function rowToProject(row: any): Project & { userId: string; archived: boolean }
     amendements: row.amendements as Project['amendements'],
     infos: row.infos as Project['infos'],
     indicators: row.indicators as any ?? [],
+    bailleurs: row.bailleurs as any ?? [],
     createdAt: new Date(row.created_at).getTime(),
     userId: row.user_id,
     archived: row.archived ?? false,
@@ -114,6 +115,7 @@ export function useProjects() {
       if (updates.amendements !== undefined) row.amendements = updates.amendements as any;
       if (updates.infos !== undefined) row.infos = updates.infos as any;
       if ((updates as any).indicators !== undefined) row.indicators = (updates as any).indicators as any;
+      if ((updates as any).bailleurs !== undefined) row.bailleurs = (updates as any).bailleurs as any;
 
       const { error } = await supabase
         .from('projects')
