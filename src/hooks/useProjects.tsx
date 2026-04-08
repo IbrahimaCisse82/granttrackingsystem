@@ -26,6 +26,7 @@ function rowToProject(row: any): Project & { userId: string; archived: boolean }
     fiches: row.fiches as Project['fiches'],
     amendements: row.amendements as Project['amendements'],
     infos: row.infos as Project['infos'],
+    indicators: row.indicators as any ?? [],
     createdAt: new Date(row.created_at).getTime(),
     userId: row.user_id,
     archived: row.archived ?? false,
