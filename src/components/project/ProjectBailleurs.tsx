@@ -227,7 +227,7 @@ export default function ProjectBailleurs({ project, onSave, readOnly }: Props) {
           <Textarea value={form.conditions} onChange={e => setForm({ ...form, conditions: e.target.value })} placeholder="Conditions de décaissement, obligations de reporting..." rows={2} />
         </div>
         <div className="flex justify-end gap-2">
-          <Button variant="outline" size="sm" onClick={() => { isEdit ? setEditId(null) : setShowAdd(false); setForm(emptyForm()); }}>
+          <Button variant="outline" size="sm" onClick={() => { if (isEdit) { setEditId(null); } else { setShowAdd(false); } setForm(emptyForm()); }}>
             <X className="w-4 h-4 mr-1" /> Annuler
           </Button>
           <Button size="sm" onClick={isEdit ? handleUpdate : handleAdd}>
