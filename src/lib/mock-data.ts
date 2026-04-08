@@ -78,6 +78,7 @@ export interface Project {
   fiches: { versements: FicheVersement[] };
   amendements: Amendement[];
   infos: { submitDate: string; preparedBy: string; version: string; scoreRisque: string };
+  indicators?: any[];
   createdAt: number;
 }
 

@@ -8,6 +8,7 @@ import ProjectFiche from '@/components/project/ProjectFiche';
 import ProjectReport from '@/components/project/ProjectReport';
 import ProjectTransactions from '@/components/project/ProjectTransactions';
 import ProjectAmendements from '@/components/project/ProjectAmendements';
+import ProjectIndicators from '@/components/project/ProjectIndicators';
 import SaveIndicator from '@/components/SaveIndicator';
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { getReportCount } from '@/lib/mock-data';
@@ -48,6 +49,7 @@ export default function ProjectView() {
     infos: <ProjectInfos project={project} onSave={save} readOnly={readOnly} />,
     budget: <ProjectBudget project={project} onSave={save} readOnly={readOnly} />,
     fiche: <ProjectFiche project={project} onSave={save} readOnly={readOnly} />,
+    indicateurs: <ProjectIndicators project={project} onSave={save} readOnly={readOnly} />,
     amendements: <ProjectAmendements project={project} onSave={save} readOnly={readOnly} />,
   };
 
