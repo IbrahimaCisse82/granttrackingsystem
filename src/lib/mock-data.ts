@@ -79,6 +79,7 @@ export interface Project {
   amendements: Amendement[];
   infos: { submitDate: string; preparedBy: string; version: string; scoreRisque: string };
   indicators?: any[];
+  bailleurs?: any[];
   createdAt: number;
 }
 

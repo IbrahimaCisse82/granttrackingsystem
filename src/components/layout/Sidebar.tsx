@@ -23,6 +23,7 @@ function buildSectionTabs(periodicite: string) {
     { id: 'budget', label: 'Budget (Annexe 1b)', color: '#B45309' },
     { id: 'fiche', label: 'Fiche récapitulative', color: '#0D9488' },
     { id: 'indicateurs', label: 'Suivi programmatique', color: '#059669' },
+    { id: 'bailleurs', label: 'Bailleurs / Financements', color: '#6366F1' },
     { id: 'amendements', label: 'Amendements', color: '#7C3AED' },
   ];
 

@@ -147,6 +147,7 @@ export type Database = {
         Row: {
           amendements: Json
           archived: boolean
+          bailleurs: Json
           budget_lines: Json
           color: Json
           convention: string
@@ -172,6 +173,7 @@ export type Database = {
         Insert: {
           amendements?: Json
           archived?: boolean
+          bailleurs?: Json
           budget_lines?: Json
           color?: Json
           convention?: string
@@ -197,6 +199,7 @@ export type Database = {
         Update: {
           amendements?: Json
           archived?: boolean
+          bailleurs?: Json
           budget_lines?: Json
           color?: Json
           convention?: string
