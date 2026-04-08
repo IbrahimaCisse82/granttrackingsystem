@@ -112,6 +112,7 @@ export function useProjects() {
       if (updates.fiches !== undefined) row.fiches = updates.fiches as any;
       if (updates.amendements !== undefined) row.amendements = updates.amendements as any;
       if (updates.infos !== undefined) row.infos = updates.infos as any;
+      if ((updates as any).indicators !== undefined) row.indicators = (updates as any).indicators as any;
 
       const { error } = await supabase
         .from('projects')
