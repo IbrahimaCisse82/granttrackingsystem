@@ -156,6 +156,7 @@ export type Database = {
           fiches: Json
           fin: string
           id: string
+          indicators: Json
           infos: Json
           org: string
           org_type: string
@@ -180,6 +181,7 @@ export type Database = {
           fiches?: Json
           fin?: string
           id?: string
+          indicators?: Json
           infos?: Json
           org?: string
           org_type?: string
@@ -204,6 +206,7 @@ export type Database = {
           fiches?: Json
           fin?: string
           id?: string
+          indicators?: Json
           infos?: Json
           org?: string
           org_type?: string
