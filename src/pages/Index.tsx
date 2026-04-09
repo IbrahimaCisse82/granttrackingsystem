@@ -1,4 +1,5 @@
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { useAppStore } from '@/lib/store';
 import AppLayout from '@/components/layout/AppLayout';
 import Portfolio from '@/pages/Portfolio';
@@ -9,12 +10,14 @@ import Profile from '@/pages/Profile';
 import Guide from '@/pages/Guide';
 import AuditPage from '@/pages/AuditPage';
 import Auth from '@/pages/Auth';
+import OrganizationOnboarding from '@/components/OrganizationOnboarding';
 
 export default function Index() {
   const { user, loading } = useAuth();
+  const { needsOnboarding, isLoading: orgLoading } = useOrganization();
   const { currentPage } = useAppStore();
 
-  if (loading) {
+  if (loading || (user && orgLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
@@ -23,6 +26,7 @@ export default function Index() {
   }
 
   if (!user) return <Auth />;
+  if (needsOnboarding) return <OrganizationOnboarding />;
 
   return (
     <AppLayout>
