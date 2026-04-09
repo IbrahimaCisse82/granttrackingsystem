@@ -49,7 +49,7 @@ export default function Sidebar() {
   const { currentPage, currentProjectId, currentTab, openProjectIds, setPage, openProjectTab, toggleSidebarProject, sidebarSearch, setSidebarSearch } = useAppStore();
   const { projects } = useProjects();
   const { signOut } = useAuth();
-  const { activeOrg } = useOrganization();
+  
 
   return (
     <aside className="fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col overflow-y-auto bg-sidebar border-r border-sidebar-border/5 print:hidden">
@@ -85,6 +85,7 @@ export default function Sidebar() {
         <NavItem icon={<Users className="w-4 h-4" />} label="Gestion utilisateurs" active={currentPage === 'admin'} onClick={() => setPage('admin')} />
         <NavItem icon={<History className="w-4 h-4" />} label="Historique" active={currentPage === 'audit'} onClick={() => setPage('audit')} />
         <NavItem icon={<Building2 className="w-4 h-4" />} label="Organisation" active={currentPage === 'organization'} onClick={() => setPage('organization')} />
+        <NavItem icon={<UserCircle className="w-4 h-4" />} label="Mon profil" active={currentPage === 'profile'} onClick={() => setPage('profile')} />
       </div>
 
       {/* Projects */}
