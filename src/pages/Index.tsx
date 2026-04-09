@@ -9,6 +9,7 @@ import Dashboard from '@/pages/Dashboard';
 import Profile from '@/pages/Profile';
 import Guide from '@/pages/Guide';
 import AuditPage from '@/pages/AuditPage';
+import OrganizationSettings from '@/pages/OrganizationSettings';
 import Auth from '@/pages/Auth';
 import OrganizationOnboarding from '@/components/OrganizationOnboarding';
 
@@ -37,6 +38,7 @@ export default function Index() {
       {currentPage === 'tutoriel' && <Guide />}
       {currentPage === 'admin' && <AdminUsers />}
       {currentPage === 'audit' && <AuditPage />}
+      {currentPage === 'organization' && <OrganizationSettings />}
     </AppLayout>
   );
 }
