@@ -1,7 +1,7 @@
 import { useAppStore } from '@/lib/store';
 import { useProjects } from '@/hooks/useProjects';
 import { useAuth } from '@/hooks/useAuth';
-import { useOrganization } from '@/hooks/useOrganization';
+
 import { ChevronRight, LayoutDashboard, BookOpen, Users, Search, BarChart3, UserCircle, History, Building2 } from 'lucide-react';
 import { getReportCount } from '@/lib/mock-data';
 import OrgSwitcher from '@/components/OrgSwitcher';
