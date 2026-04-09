@@ -151,8 +151,39 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Charts row 2 */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Charts row 2: Bailleurs pie + Timeline */}
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        {/* Répartition par bailleur */}
+        {(() => {
+          const bailleurData: Record<string, number> = {};
+          projects.forEach(p => {
+            ((p as any).bailleurs || []).forEach((b: any) => {
+              const name = b.nom || 'Inconnu';
+              bailleurData[name] = (bailleurData[name] || 0) + Number(b.contribution || 0);
+            });
+          });
+          const data = Object.entries(bailleurData).map(([name, value]) => ({ name, value: Math.round(value) })).filter(d => d.value > 0);
+          const total = data.reduce((s, d) => s + d.value, 0);
+          return (
+            <div className="rounded-[10px] border border-rule bg-card p-4">
+              <h3 className="text-[13px] font-semibold mb-4">Répartition des financements par bailleur</h3>
+              {data.length > 0 ? (
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={85} label={({ name, percent }) => `${name.length > 18 ? name.slice(0, 18) + '…' : name} (${(percent * 100).toFixed(0)}%)`} labelLine={{ strokeWidth: 1 }}>
+                      {data.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip formatter={(v: number) => `${fmt(v)} €`} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-sm text-muted-foreground italic text-center py-12">Aucun bailleur enregistré</p>
+              )}
+              {total > 0 && <p className="text-[11px] text-muted-foreground text-center mt-1">Total : {fmt(total)} €</p>}
+            </div>
+          );
+        })()}
         {/* Timeline */}
         <div className="rounded-[10px] border border-rule bg-card p-4">
           <h3 className="text-[13px] font-semibold mb-4">Évolution des dépenses</h3>
