@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
     const { data: roleData } = await adminClient.from("user_roles").select("role").eq("user_id", caller.id).single();
     if (roleData?.role !== "admin") throw new Error("Accès réservé aux administrateurs");
 
-    const { email, first_name, last_name, role, password } = await req.json();
+    const { email, first_name, last_name, role, password, organization_id } = await req.json();
     if (!email || !password) throw new Error("Email et mot de passe requis");
 
     // Create user with admin API
@@ -46,6 +46,15 @@ Deno.serve(async (req) => {
     // Update role if not default
     if (role && role !== "beneficiaire" && newUser.user) {
       await adminClient.from("user_roles").update({ role }).eq("user_id", newUser.user.id);
+    }
+
+    // Add to organization if specified
+    if (organization_id && newUser.user) {
+      await adminClient.from("organization_members").insert({
+        organization_id,
+        user_id: newUser.user.id,
+        role: "member",
+      });
     }
 
     return new Response(JSON.stringify({ success: true, user_id: newUser.user?.id }), {
