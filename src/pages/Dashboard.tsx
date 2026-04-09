@@ -201,7 +201,10 @@ export default function Dashboard() {
             <p className="text-sm text-muted-foreground italic text-center py-12">Aucune donnée de période</p>
           )}
         </div>
+      </div>
 
+      {/* Charts row 3: Risk */}
+      <div className="grid grid-cols-2 gap-4">
         {/* Risk distribution */}
         <div className="rounded-[10px] border border-rule bg-card p-4">
           <h3 className="text-[13px] font-semibold mb-4">Distribution des risques</h3>
