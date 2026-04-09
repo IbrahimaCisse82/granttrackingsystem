@@ -1,12 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useOrganization } from './useOrganization';
 import { useAuditLog } from './useAuditLog';
 import type { Project } from '@/lib/mock-data';
 import { toast } from 'sonner';
 
 // Map DB row to Project interface
-function rowToProject(row: any): Project & { userId: string; archived: boolean } {
+function rowToProject(row: any): Project & { userId: string; archived: boolean; organizationId?: string } {
   return {
     id: row.id,
     convention: row.convention,
@@ -31,12 +32,14 @@ function rowToProject(row: any): Project & { userId: string; archived: boolean }
     createdAt: new Date(row.created_at).getTime(),
     userId: row.user_id,
     archived: row.archived ?? false,
+    organizationId: row.organization_id,
   };
 }
 
-function projectToRow(p: Omit<Project, 'id' | 'createdAt'>, userId: string) {
+function projectToRow(p: Omit<Project, 'id' | 'createdAt'>, userId: string, organizationId?: string | null) {
   return {
     user_id: userId,
+    organization_id: organizationId || null,
     convention: p.convention,
     org: p.org,
     org_type: p.orgType,
@@ -59,16 +62,18 @@ function projectToRow(p: Omit<Project, 'id' | 'createdAt'>, userId: string) {
 
 export function useProjects() {
   const { user } = useAuth();
+  const { activeOrgId } = useOrganization();
   const { log: auditLog } = useAuditLog();
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ['projects'],
+    queryKey: ['projects', activeOrgId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .order('created_at', { ascending: false });
+      let q = supabase.from('projects').select('*').order('created_at', { ascending: false });
+      if (activeOrgId) {
+        q = q.eq('organization_id', activeOrgId);
+      }
+      const { data, error } = await q;
       if (error) throw error;
       return (data || []).map(rowToProject);
     },
@@ -80,7 +85,7 @@ export function useProjects() {
       if (!user) throw new Error('Non authentifié');
       const { data, error } = await supabase
         .from('projects')
-        .insert(projectToRow(project, user.id))
+        .insert(projectToRow(project, user.id, activeOrgId))
         .select()
         .single();
       if (error) throw error;
