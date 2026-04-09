@@ -1,8 +1,10 @@
 import { useAppStore } from '@/lib/store';
 import { useProjects } from '@/hooks/useProjects';
 import { useAuth } from '@/hooks/useAuth';
-import { ChevronRight, LayoutDashboard, BookOpen, Users, Search, BarChart3, UserCircle, History } from 'lucide-react';
+import { useOrganization } from '@/hooks/useOrganization';
+import { ChevronRight, LayoutDashboard, BookOpen, Users, Search, BarChart3, UserCircle, History, Building2 } from 'lucide-react';
 import { getReportCount } from '@/lib/mock-data';
+import OrgSwitcher from '@/components/OrgSwitcher';
 import logo from '@/assets/logo-growhub.png';
 
 function buildSectionTabs(periodicite: string) {
@@ -47,17 +49,19 @@ export default function Sidebar() {
   const { currentPage, currentProjectId, currentTab, openProjectIds, setPage, openProjectTab, toggleSidebarProject, sidebarSearch, setSidebarSearch } = useAppStore();
   const { projects } = useProjects();
   const { signOut } = useAuth();
+  const { activeOrg } = useOrganization();
 
   return (
     <aside className="fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col overflow-y-auto bg-sidebar border-r border-sidebar-border/5 print:hidden">
-      {/* Brand */}
+      {/* Brand + Org switcher */}
       <div className="border-b border-sidebar-border/10 p-5 pb-4">
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-3 mb-2">
           <div className="rounded-md bg-card/90 p-1.5 px-2">
             <img src={logo} alt="Grow Hub" className="h-5 w-auto" />
           </div>
         </div>
-        <p className="text-[10.5px] tracking-wide text-sidebar-foreground/30 uppercase">Grants Tracking System</p>
+        <OrgSwitcher />
+        <p className="text-[10.5px] tracking-wide text-sidebar-foreground/30 uppercase mt-1">Grants Tracking System</p>
         
         {/* Search */}
         <div className="mt-3 relative">
@@ -80,7 +84,7 @@ export default function Sidebar() {
         <NavItem icon={<BookOpen className="w-4 h-4" />} label="Guide d'utilisation" active={currentPage === 'tutoriel'} onClick={() => setPage('tutoriel')} />
         <NavItem icon={<Users className="w-4 h-4" />} label="Gestion utilisateurs" active={currentPage === 'admin'} onClick={() => setPage('admin')} />
         <NavItem icon={<History className="w-4 h-4" />} label="Historique" active={currentPage === 'audit'} onClick={() => setPage('audit')} />
-        <NavItem icon={<UserCircle className="w-4 h-4" />} label="Mon profil" active={currentPage === 'profile'} onClick={() => setPage('profile')} />
+        <NavItem icon={<Building2 className="w-4 h-4" />} label="Organisation" active={currentPage === 'organization'} onClick={() => setPage('organization')} />
       </div>
 
       {/* Projects */}
