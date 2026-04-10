@@ -11,53 +11,95 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Verify caller is admin
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Non autorisé");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Verify caller with anon client
     const anonClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!, {
       global: { headers: { Authorization: authHeader } },
     });
     const { data: { user: caller } } = await anonClient.auth.getUser();
     if (!caller) throw new Error("Non autorisé");
 
-    // Check admin role
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
+
+    const { email, first_name, last_name, role, password, organization_id, org_role } = await req.json();
+    if (!email) throw new Error("Email requis");
+
+    // Authorization: must be global admin OR org admin/owner
+    let authorized = false;
+
+    // Check global admin
     const { data: roleData } = await adminClient.from("user_roles").select("role").eq("user_id", caller.id).single();
-    if (roleData?.role !== "admin") throw new Error("Accès réservé aux administrateurs");
+    if (roleData?.role === "admin") authorized = true;
 
-    const { email, first_name, last_name, role, password, organization_id } = await req.json();
-    if (!email || !password) throw new Error("Email et mot de passe requis");
-
-    // Create user with admin API
-    const { data: newUser, error: createErr } = await adminClient.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { first_name: first_name || "", last_name: last_name || "" },
-    });
-
-    if (createErr) throw createErr;
-
-    // Update role if not default
-    if (role && role !== "beneficiaire" && newUser.user) {
-      await adminClient.from("user_roles").update({ role }).eq("user_id", newUser.user.id);
+    // Check org admin/owner
+    if (!authorized && organization_id) {
+      const { data: orgMember } = await adminClient
+        .from("organization_members")
+        .select("role")
+        .eq("user_id", caller.id)
+        .eq("organization_id", organization_id)
+        .single();
+      if (orgMember?.role === "owner" || orgMember?.role === "admin") {
+        authorized = true;
+      }
     }
 
-    // Add to organization if specified
-    if (organization_id && newUser.user) {
+    if (!authorized) throw new Error("Accès non autorisé");
+
+    // Check if user already exists by email
+    const { data: { users: existingUsers } } = await adminClient.auth.admin.listUsers();
+    const existingUser = existingUsers?.find((u: any) => u.email === email);
+
+    let targetUserId: string;
+
+    if (existingUser) {
+      targetUserId = existingUser.id;
+
+      // Check if already a member of this org
+      if (organization_id) {
+        const { data: existing } = await adminClient
+          .from("organization_members")
+          .select("id")
+          .eq("user_id", targetUserId)
+          .eq("organization_id", organization_id)
+          .single();
+        if (existing) {
+          throw new Error("Cet utilisateur est déjà membre de cette organisation");
+        }
+      }
+    } else {
+      // Create new user
+      const tempPassword = password || Math.random().toString(36).slice(-12) + "A1!";
+      const { data: newUser, error: createErr } = await adminClient.auth.admin.createUser({
+        email,
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: { first_name: first_name || "", last_name: last_name || "" },
+      });
+      if (createErr) throw createErr;
+      targetUserId = newUser.user!.id;
+
+      // Set app role if specified
+      if (role && role !== "beneficiaire") {
+        await adminClient.from("user_roles").update({ role }).eq("user_id", targetUserId);
+      }
+    }
+
+    // Add to organization
+    if (organization_id) {
+      const memberRole = org_role || "member";
       await adminClient.from("organization_members").insert({
         organization_id,
-        user_id: newUser.user.id,
-        role: "member",
+        user_id: targetUserId,
+        role: memberRole,
       });
     }
 
-    return new Response(JSON.stringify({ success: true, user_id: newUser.user?.id }), {
+    return new Response(JSON.stringify({ success: true, user_id: targetUserId, existing: !!existingUser }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {

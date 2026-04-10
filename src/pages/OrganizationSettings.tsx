@@ -29,13 +29,16 @@ export default function OrganizationSettings() {
       // Find user by email through profiles - we need to use the invite system
       const { data: { session } } = await supabase.auth.getSession();
       const res = await supabase.functions.invoke('invite-user', {
-        body: { email: addEmail, password: Math.random().toString(36).slice(-10), first_name: '', last_name: '', role: 'beneficiaire', organization_id: activeOrg?.id },
+        body: { email: addEmail, organization_id: activeOrg?.id, org_role: addRole },
         headers: { Authorization: `Bearer ${session?.access_token}` },
       });
       if (res.error || res.data?.error) {
         throw new Error(res.data?.error || res.error?.message || 'Erreur');
       }
-      toast.success('Membre invité avec succès');
+      const isExisting = res.data?.existing;
+      toast.success(isExisting ? 'Utilisateur existant ajouté à l\'organisation' : 'Nouveau membre invité avec succès');
+      // Refresh members list
+      window.location.reload();
       setShowAddMember(false);
       setAddEmail('');
     } catch (err: any) {
