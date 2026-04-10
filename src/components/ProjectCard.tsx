@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { Project, calcBudgetTotal, calcDepensesTotal, fmt, getReportCount } from '@/lib/utils-project';
+import type { Project } from '@/lib/types';
+import { calcBudgetTotal, calcDepensesTotal, fmt, getReportCount } from '@/lib/utils-project';
 import { useAppStore } from '@/lib/store';
 import { useProjects } from '@/hooks/useProjects';
 import { Archive, ArchiveRestore } from 'lucide-react';
