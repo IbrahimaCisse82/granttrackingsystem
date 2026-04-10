@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useAuth } from '@/hooks/useAuth';
-import { Building2, Users, Crown, Shield, User, Trash2, Plus } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Building2, Users, Crown, Shield, User, Trash2, Plus, Mail } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
