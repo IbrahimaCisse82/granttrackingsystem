@@ -1,4 +1,5 @@
-import { Project, BudgetLine, lineTotal, fmt, fmtFCFA, EUR_TO_FCFA } from '@/lib/mock-data';
+import type { Project, BudgetLine } from '@/lib/types';
+import { lineTotal, fmt, fmtFCFA, EUR_TO_FCFA } from '@/lib/utils-project';
 import { useCallback } from 'react';
 import { Trash2 } from 'lucide-react';
 

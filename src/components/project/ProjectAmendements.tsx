@@ -1,4 +1,5 @@
-import { Project, Amendement, BudgetLine, fmt } from '@/lib/mock-data';
+import type { Project, Amendement, BudgetLine } from '@/lib/types';
+import { fmt } from '@/lib/utils-project';
 import { useCallback, useState } from 'react';
 import { Plus, FileText, Check, X, Send, Lock } from 'lucide-react';
 import {

@@ -1,4 +1,4 @@
-import { Project } from '@/lib/mock-data';
+import type { Project } from '@/lib/types';
 import { Info } from 'lucide-react';
 import { useCallback } from 'react';
 

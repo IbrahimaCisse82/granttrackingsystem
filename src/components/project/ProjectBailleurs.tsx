@@ -8,8 +8,8 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Building2, Check, X, Edit2, Mail, Phone, Globe, Landmark } from 'lucide-react';
 import { toast } from 'sonner';
-import { fmt } from '@/lib/mock-data';
-import type { Project } from '@/lib/mock-data';
+import { fmt } from '@/lib/utils-project';
+import type { Project } from '@/lib/types';
 
 export interface Bailleur {
   id: string;

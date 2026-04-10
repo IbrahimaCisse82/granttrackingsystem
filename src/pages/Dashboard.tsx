@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useProjects } from '@/hooks/useProjects';
-import { calcBudgetTotal, calcDepensesTotal, fmt, lineTotal } from '@/lib/mock-data';
+import { calcBudgetTotal, calcDepensesTotal, fmt, lineTotal } from '@/lib/utils-project';
 import MetricCard from '@/components/MetricCard';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend } from 'recharts';
 import { Loader2, Filter } from 'lucide-react';
