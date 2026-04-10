@@ -15,6 +15,7 @@ const ROLE_LABELS: Record<string, { label: string; icon: React.ReactNode; color:
 export default function OrganizationSettings() {
   const { activeOrg, members, membersLoading, orgRole, removeMember, updateMemberRole, organizations, setActiveOrg } = useOrganization();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [showAddMember, setShowAddMember] = useState(false);
   const [addEmail, setAddEmail] = useState('');
   const [addRole, setAddRole] = useState('member');
