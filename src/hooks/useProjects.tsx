@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useOrganization } from './useOrganization';
 import { useAuditLog } from './useAuditLog';
-import type { Project } from '@/lib/mock-data';
+import type { Project } from '@/lib/types';
 import { toast } from 'sonner';
 
 // Map DB row to Project interface

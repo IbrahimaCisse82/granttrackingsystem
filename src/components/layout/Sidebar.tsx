@@ -1,9 +1,10 @@
 import { useAppStore } from '@/lib/store';
 import { useProjects } from '@/hooks/useProjects';
 import { useAuth } from '@/hooks/useAuth';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import { ChevronRight, LayoutDashboard, BookOpen, Users, Search, BarChart3, UserCircle, History, Building2 } from 'lucide-react';
-import { getReportCount } from '@/lib/mock-data';
+import { getReportCount } from '@/lib/utils-project';
 import OrgSwitcher from '@/components/OrgSwitcher';
 import logo from '@/assets/logo-growhub.png';
 
@@ -46,10 +47,15 @@ function buildSectionTabs(periodicite: string) {
 }
 
 export default function Sidebar() {
-  const { currentPage, currentProjectId, currentTab, openProjectIds, setPage, openProjectTab, toggleSidebarProject, sidebarSearch, setSidebarSearch } = useAppStore();
+  const { currentProjectId, currentTab, openProjectIds, openProjectTab, toggleSidebarProject, sidebarSearch, setSidebarSearch } = useAppStore();
   const { projects } = useProjects();
   const { signOut } = useAuth();
-  
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const currentPath = location.pathname;
+
+  const navTo = (path: string) => navigate(path);
 
   return (
     <aside className="fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col overflow-y-auto bg-sidebar border-r border-sidebar-border/5 print:hidden">
@@ -79,13 +85,13 @@ export default function Sidebar() {
       {/* Navigation */}
       <div className="p-2.5 pt-3">
         <p className="px-2 pb-1.5 text-[9.5px] font-semibold uppercase tracking-[1.2px] text-sidebar-foreground/25">Navigation</p>
-        <NavItem icon={<LayoutDashboard className="w-4 h-4" />} label="Portefeuille" active={currentPage === 'portfolio'} onClick={() => setPage('portfolio')} />
-        <NavItem icon={<BarChart3 className="w-4 h-4" />} label="Dashboard" active={currentPage === 'dashboard'} onClick={() => setPage('dashboard')} />
-        <NavItem icon={<BookOpen className="w-4 h-4" />} label="Guide d'utilisation" active={currentPage === 'tutoriel'} onClick={() => setPage('tutoriel')} />
-        <NavItem icon={<Users className="w-4 h-4" />} label="Gestion utilisateurs" active={currentPage === 'admin'} onClick={() => setPage('admin')} />
-        <NavItem icon={<History className="w-4 h-4" />} label="Historique" active={currentPage === 'audit'} onClick={() => setPage('audit')} />
-        <NavItem icon={<Building2 className="w-4 h-4" />} label="Organisation" active={currentPage === 'organization'} onClick={() => setPage('organization')} />
-        <NavItem icon={<UserCircle className="w-4 h-4" />} label="Mon profil" active={currentPage === 'profile'} onClick={() => setPage('profile')} />
+        <NavItem icon={<LayoutDashboard className="w-4 h-4" />} label="Portefeuille" active={currentPath === '/'} onClick={() => navTo('/')} />
+        <NavItem icon={<BarChart3 className="w-4 h-4" />} label="Dashboard" active={currentPath === '/dashboard'} onClick={() => navTo('/dashboard')} />
+        <NavItem icon={<BookOpen className="w-4 h-4" />} label="Guide d'utilisation" active={currentPath === '/guide'} onClick={() => navTo('/guide')} />
+        <NavItem icon={<Users className="w-4 h-4" />} label="Gestion utilisateurs" active={currentPath === '/admin'} onClick={() => navTo('/admin')} />
+        <NavItem icon={<History className="w-4 h-4" />} label="Historique" active={currentPath === '/audit'} onClick={() => navTo('/audit')} />
+        <NavItem icon={<Building2 className="w-4 h-4" />} label="Organisation" active={currentPath === '/organization'} onClick={() => navTo('/organization')} />
+        <NavItem icon={<UserCircle className="w-4 h-4" />} label="Mon profil" active={currentPath === '/profile'} onClick={() => navTo('/profile')} />
       </div>
 
       {/* Projects */}
@@ -96,10 +102,14 @@ export default function Sidebar() {
         {projects.filter(p => !sidebarSearch || p.org.toLowerCase().includes(sidebarSearch.toLowerCase())).map(proj => {
           const isOpen = openProjectIds.includes(proj.id);
           const tabs = buildSectionTabs(proj.periodicite);
+          const isProjectActive = currentPath === `/projects/${proj.id}`;
           return (
             <div key={proj.id} className="border-t border-sidebar-foreground/5 mt-1 pt-1">
               <button
-                onClick={() => toggleSidebarProject(proj.id)}
+                onClick={() => {
+                  toggleSidebarProject(proj.id);
+                  navigate(`/projects/${proj.id}`);
+                }}
                 className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 hover:bg-sidebar-foreground/5 transition-colors"
               >
                 <span className="font-mono text-[10px] rounded px-1.5 py-0.5" style={{ background: proj.color.stripe + '22', color: proj.color.stripe }}>
@@ -113,9 +123,12 @@ export default function Sidebar() {
                   {tabs.map(tab => (
                     <button
                       key={tab.id}
-                      onClick={() => openProjectTab(proj.id, tab.id)}
+                      onClick={() => {
+                        openProjectTab(proj.id, tab.id);
+                        navigate(`/projects/${proj.id}?tab=${tab.id}`);
+                      }}
                       className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs transition-colors ${
-                        currentProjectId === proj.id && currentTab === tab.id
+                        isProjectActive && currentTab === tab.id
                           ? 'bg-primary/20 text-sidebar-foreground/90'
                           : 'text-sidebar-foreground/40 hover:text-sidebar-foreground/70 hover:bg-sidebar-foreground/5'
                       }`}

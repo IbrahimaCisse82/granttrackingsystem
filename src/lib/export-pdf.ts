@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import type { Project } from '@/lib/mock-data';
-import { lineTotal, fmt, fmtFCFA, EUR_TO_FCFA, getReportCount } from '@/lib/mock-data';
+import type { Project } from '@/lib/types';
+import { lineTotal, fmt, fmtFCFA, EUR_TO_FCFA, getReportCount } from '@/lib/utils-project';
 
 function addHeader(doc: jsPDF, project: Project, title: string) {
   const pageW = doc.internal.pageSize.getWidth();

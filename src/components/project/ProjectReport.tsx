@@ -1,4 +1,5 @@
-import { Project, Report, lineTotal, fmt, calcDepensesTotal, createEmptyReport } from '@/lib/mock-data';
+import type { Project, Report } from '@/lib/types';
+import { lineTotal, fmt, calcDepensesTotal, createEmptyReport } from '@/lib/utils-project';
 import { useState, useCallback } from 'react';
 import { useNotifications } from '@/hooks/useNotifications';
 import ReportComments from './ReportComments';

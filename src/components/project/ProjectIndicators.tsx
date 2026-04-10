@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Target, TrendingUp, Activity, BarChart3, Edit2, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
-import type { Project } from '@/lib/mock-data';
+import type { Project } from '@/lib/types';
 
 export interface Indicator {
   id: string;

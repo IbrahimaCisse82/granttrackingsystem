@@ -1,6 +1,6 @@
 import { useRef, useCallback } from 'react';
 import { useProjects } from './useProjects';
-import type { Project } from '@/lib/mock-data';
+import type { Project } from '@/lib/types';
 import { toast } from 'sonner';
 
 /**

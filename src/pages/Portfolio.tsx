@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { calcBudgetTotal, calcDepensesTotal, fmt, getReportCount } from '@/lib/mock-data';
+import { calcBudgetTotal, calcDepensesTotal, fmt, getReportCount } from '@/lib/utils-project';
 import { useProjects } from '@/hooks/useProjects';
 import MetricCard from '@/components/MetricCard';
 import ProjectCard from '@/components/ProjectCard';

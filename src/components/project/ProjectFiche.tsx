@@ -1,4 +1,5 @@
-import { Project, FicheVersement, fmt } from '@/lib/mock-data';
+import type { Project, FicheVersement } from '@/lib/types';
+import { fmt } from '@/lib/utils-project';
 import { useCallback } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 

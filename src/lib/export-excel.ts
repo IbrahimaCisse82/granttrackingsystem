@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx';
-import type { Project } from '@/lib/mock-data';
-import { lineTotal, EUR_TO_FCFA } from '@/lib/mock-data';
+import type { Project } from '@/lib/types';
+import { lineTotal, EUR_TO_FCFA } from '@/lib/utils-project';
 
 export function exportBudgetExcel(project: Project) {
   const wb = XLSX.utils.book_new();

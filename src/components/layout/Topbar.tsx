@@ -3,12 +3,13 @@ import { useProjects } from '@/hooks/useProjects';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useDarkMode } from '@/hooks/useDarkMode';
-import { Save, Download, Bell, User, LogOut, FileDown, FileSpreadsheet, Upload, Sun, Moon, Check } from 'lucide-react';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { Save, Download, Bell, User, LogOut, FileDown, FileSpreadsheet, Upload, Sun, Moon } from 'lucide-react';
 import { toast } from 'sonner';
 import { exportBudgetPDF, exportReportPDF, exportTransactionsPDF } from '@/lib/export-pdf';
 import { exportBudgetExcel, exportFullProjectExcel } from '@/lib/export-excel';
 import { useState, useRef, useEffect } from 'react';
-import type { Project } from '@/lib/mock-data';
+import type { Project } from '@/lib/types';
 
 function getSectionLabel(tab: string): string {
   const LABELS: Record<string, string> = {
@@ -26,19 +27,26 @@ function getSectionLabel(tab: string): string {
 }
 
 export default function Topbar() {
-  const { currentPage, currentProjectId, currentTab, setPage, triggerForceSave } = useAppStore();
+  const { currentTab, triggerForceSave } = useAppStore();
   const { projects, addProject } = useProjects();
   const { role, signOut } = useAuth();
   const { notifications, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
   const { darkMode, toggle: toggleDarkMode } = useDarkMode();
-  const project = projects.find(p => p.id === currentProjectId);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const params = useParams();
+
+  const projectId = params.projectId;
+  const isProjectPage = location.pathname.startsWith('/projects/');
+  const isPortfolioPage = location.pathname === '/';
+  const project = projects.find(p => p.id === projectId);
+
   const [showNotifs, setShowNotifs] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
   const exportRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdowns on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) setShowNotifs(false);
@@ -47,7 +55,6 @@ export default function Topbar() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
-
 
   const handleSave = () => {
     triggerForceSave();
@@ -122,28 +129,27 @@ export default function Topbar() {
 
       <div className="flex items-center gap-3">
         <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <button onClick={() => setPage('portfolio')} className="hover:text-foreground transition-colors">Grow Hub GTS</button>
-          {currentPage === 'project' && project && (
+          <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors">Grow Hub GTS</button>
+          {isProjectPage && project && (
             <>
               <span className="text-dim">›</span>
-              <button onClick={() => setPage('portfolio')} className="hover:text-foreground transition-colors">{project.org}</button>
+              <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors">{project.org}</button>
               <span className="text-dim">›</span>
               <span className="font-medium text-foreground">{getSectionLabel(currentTab)}</span>
             </>
           )}
-          {currentPage === 'tutoriel' && (<><span className="text-dim">›</span><span className="font-medium text-foreground">Guide d'utilisation</span></>)}
-          {currentPage === 'admin' && (<><span className="text-dim">›</span><span className="font-medium text-foreground">Gestion utilisateurs</span></>)}
+          {location.pathname === '/guide' && (<><span className="text-dim">›</span><span className="font-medium text-foreground">Guide d'utilisation</span></>)}
+          {location.pathname === '/admin' && (<><span className="text-dim">›</span><span className="font-medium text-foreground">Gestion utilisateurs</span></>)}
         </nav>
       </div>
 
       <div className="flex items-center gap-2">
-        {currentPage === 'project' && project && (
+        {isProjectPage && project && (
           <>
             <button onClick={handleSave} className="inline-flex items-center gap-1.5 rounded-md border border-rule bg-card px-3 py-1.5 text-xs font-medium text-steel transition-colors hover:bg-paper hover:border-dim">
               <Save className="w-3.5 h-3.5" /> Sauvegarder
             </button>
 
-            {/* Export dropdown */}
             <div className="relative" ref={exportRef}>
               <button onClick={() => setShowExport(!showExport)} className="inline-flex items-center gap-1.5 rounded-md border border-rule bg-card px-3 py-1.5 text-xs font-medium text-steel transition-colors hover:bg-paper hover:border-dim">
                 <Download className="w-3.5 h-3.5" /> Exporter ▾
@@ -169,19 +175,16 @@ export default function Topbar() {
           </>
         )}
 
-        {/* Import on portfolio */}
-        {currentPage === 'portfolio' && (
+        {isPortfolioPage && (
           <button onClick={() => fileInputRef.current?.click()} className="inline-flex items-center gap-1.5 rounded-md border border-rule bg-card px-3 py-1.5 text-xs font-medium text-steel transition-colors hover:bg-paper hover:border-dim">
             <Upload className="w-3.5 h-3.5" /> Importer JSON
           </button>
         )}
 
-        {/* Dark mode */}
         <button onClick={toggleDarkMode} className="rounded-md border border-rule bg-card p-1.5 text-steel hover:bg-paper transition-colors" title="Basculer thème">
           {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
 
-        {/* Notifications */}
         <div className="relative" ref={notifRef}>
           <button onClick={() => setShowNotifs(!showNotifs)} className="relative rounded-md border border-rule bg-card p-1.5 text-steel hover:bg-paper">
             <Bell className="w-4 h-4" />
@@ -223,7 +226,6 @@ export default function Topbar() {
           )}
         </div>
 
-        {/* User */}
         <div className="flex items-center gap-2 rounded-md border border-rule bg-paper px-2.5 py-1">
           <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
             <User className="w-3.5 h-3.5 text-primary-foreground" />
