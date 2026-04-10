@@ -40,7 +40,7 @@ export default function OrganizationSettings() {
       const isExisting = res.data?.existing;
       toast.success(isExisting ? 'Utilisateur existant ajouté à l\'organisation' : 'Nouveau membre invité avec succès');
       // Refresh members list
-      window.location.reload();
+      queryClient.invalidateQueries({ queryKey: ['org-members', activeOrg?.id] });
       setShowAddMember(false);
       setAddEmail('');
     } catch (err: any) {
