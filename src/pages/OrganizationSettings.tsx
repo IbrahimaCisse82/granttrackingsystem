@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useAuth } from '@/hooks/useAuth';
-import { Building2, Users, Crown, Shield, User, Trash2, Plus } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Building2, Users, Crown, Shield, User, Trash2, Plus, Mail } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -14,6 +15,7 @@ const ROLE_LABELS: Record<string, { label: string; icon: React.ReactNode; color:
 export default function OrganizationSettings() {
   const { activeOrg, members, membersLoading, orgRole, removeMember, updateMemberRole, organizations, setActiveOrg } = useOrganization();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [showAddMember, setShowAddMember] = useState(false);
   const [addEmail, setAddEmail] = useState('');
   const [addRole, setAddRole] = useState('member');
@@ -29,13 +31,16 @@ export default function OrganizationSettings() {
       // Find user by email through profiles - we need to use the invite system
       const { data: { session } } = await supabase.auth.getSession();
       const res = await supabase.functions.invoke('invite-user', {
-        body: { email: addEmail, password: Math.random().toString(36).slice(-10), first_name: '', last_name: '', role: 'beneficiaire', organization_id: activeOrg?.id },
+        body: { email: addEmail, organization_id: activeOrg?.id, org_role: addRole },
         headers: { Authorization: `Bearer ${session?.access_token}` },
       });
       if (res.error || res.data?.error) {
         throw new Error(res.data?.error || res.error?.message || 'Erreur');
       }
-      toast.success('Membre invité avec succès');
+      const isExisting = res.data?.existing;
+      toast.success(isExisting ? 'Utilisateur existant ajouté à l\'organisation' : 'Nouveau membre invité avec succès');
+      // Refresh members list
+      queryClient.invalidateQueries({ queryKey: ['org-members', activeOrg?.id] });
       setShowAddMember(false);
       setAddEmail('');
     } catch (err: any) {
