@@ -1,7 +1,8 @@
-import { useAppStore } from '@/lib/store';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useProjects } from '@/hooks/useProjects';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { useReadOnly } from '@/hooks/useReadOnly';
+import { useAppStore } from '@/lib/store';
 import ProjectInfos from '@/components/project/ProjectInfos';
 import ProjectBudget from '@/components/project/ProjectBudget';
 import ProjectFiche from '@/components/project/ProjectFiche';
@@ -11,26 +12,35 @@ import ProjectAmendements from '@/components/project/ProjectAmendements';
 import ProjectIndicators from '@/components/project/ProjectIndicators';
 import ProjectBailleurs from '@/components/project/ProjectBailleurs';
 import SaveIndicator from '@/components/SaveIndicator';
-import { useState, useCallback, useEffect, useMemo } from 'react';
-import { getReportCount } from '@/lib/mock-data';
-import type { Project } from '@/lib/mock-data';
+import { useState, useCallback, useEffect } from 'react';
+import { getReportCount } from '@/lib/utils-project';
+import type { Project } from '@/lib/types';
 
 export default function ProjectView() {
-  const { currentProjectId, currentTab, forceSaveCounter } = useAppStore();
+  const { projectId } = useParams<{ projectId: string }>();
+  const [searchParams] = useSearchParams();
+  const { currentTab, forceSaveCounter, openProject } = useAppStore();
   const { projects, updateProject } = useProjects();
-  const project = projects.find(p => p.id === currentProjectId);
+  const project = projects.find(p => p.id === projectId);
   const [saving, setSaving] = useState(false);
-  const autoSave = useAutoSave(currentProjectId || '');
+  const autoSave = useAutoSave(projectId || '');
   const readOnly = useReadOnly((project as any)?.userId);
+
+  // Sync store with URL params
+  useEffect(() => {
+    if (projectId) {
+      const tab = searchParams.get('tab') || 'infos';
+      openProject(projectId, tab);
+    }
+  }, [projectId, searchParams]);
 
   // Force save from Topbar
   useEffect(() => {
-    if (forceSaveCounter > 0 && currentProjectId) {
-      // trigger immediate flush by saving empty partial
+    if (forceSaveCounter > 0 && projectId) {
       setSaving(true);
       setTimeout(() => setSaving(false), 1200);
     }
-  }, [forceSaveCounter, currentProjectId]);
+  }, [forceSaveCounter, projectId]);
 
   const save = useCallback((partial: Partial<Project>) => {
     if (readOnly) return;
@@ -45,7 +55,6 @@ export default function ProjectView() {
 
   const reportCount = getReportCount(project.periodicite);
 
-  // Build dynamic tab map
   const tabMap: Record<string, React.ReactNode> = {
     infos: <ProjectInfos project={project} onSave={save} readOnly={readOnly} />,
     budget: <ProjectBudget project={project} onSave={save} readOnly={readOnly} />,

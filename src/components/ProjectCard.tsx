@@ -1,4 +1,5 @@
-import { Project, calcBudgetTotal, calcDepensesTotal, fmt, getReportCount } from '@/lib/mock-data';
+import { useNavigate } from 'react-router-dom';
+import { Project, calcBudgetTotal, calcDepensesTotal, fmt, getReportCount } from '@/lib/utils-project';
 import { useAppStore } from '@/lib/store';
 import { useProjects } from '@/hooks/useProjects';
 import { Archive, ArchiveRestore } from 'lucide-react';
@@ -17,21 +18,25 @@ const RISK_STYLES: Record<string, string> = {
 export default function ProjectCard({ project }: { project: Project }) {
   const { openProject } = useAppStore();
   const { deleteProject, archiveProject } = useProjects();
+  const navigate = useNavigate();
   const isArchived = (project as any).archived ?? false;
   const budget = calcBudgetTotal(project);
   const depenses = calcDepensesTotal(project);
   const pct = budget > 0 ? Math.min(100, Math.round(depenses / budget * 100)) : 0;
   const rapSoumis = project.reports.filter(r => r.status !== 'vide').length;
 
+  const handleOpen = () => {
+    openProject(project.id);
+    navigate(`/projects/${project.id}`);
+  };
+
   return (
     <div
       className="group relative cursor-pointer overflow-hidden rounded-[10px] border border-rule bg-card transition-all duration-200 hover:shadow-gts-md hover:-translate-y-0.5 hover:border-primary"
-      onDoubleClick={() => openProject(project.id)}
+      onDoubleClick={handleOpen}
     >
-      {/* Color stripe */}
       <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: project.color.stripe }} />
 
-      {/* Header */}
       <div className="flex items-start justify-between gap-3 border-b border-rule p-4">
         <div className="min-w-0 flex-1">
           <p className="text-[13.5px] font-semibold text-foreground leading-tight">{project.org}</p>
@@ -42,7 +47,6 @@ export default function ProjectCard({ project }: { project: Project }) {
         </span>
       </div>
 
-      {/* Body */}
       <div className="p-4 space-y-0">
         <Row label="Budget total" value={`${fmt(budget)} €`} />
         <Row label="Dépenses engagées" value={`${fmt(depenses)} €`} />
@@ -57,7 +61,6 @@ export default function ProjectCard({ project }: { project: Project }) {
         <Row label="Rapports" value={`${rapSoumis} / ${getReportCount(project.periodicite)} soumis`} />
       </div>
 
-      {/* Footer */}
       <div className="flex items-center gap-1.5 border-t border-rule bg-paper p-3 px-4">
         <div className="flex-1">
           <div className="flex justify-between text-[10.5px] text-dim mb-1">
@@ -70,7 +73,7 @@ export default function ProjectCard({ project }: { project: Project }) {
         </div>
         <div className="flex shrink-0 gap-1 ml-3">
           <button
-            onClick={(e) => { e.stopPropagation(); openProject(project.id); }}
+            onClick={(e) => { e.stopPropagation(); handleOpen(); }}
             className="rounded border border-rule bg-card px-2.5 py-1 text-[11px] font-medium text-steel transition-colors hover:bg-paper hover:border-dim"
           >
             Ouvrir
