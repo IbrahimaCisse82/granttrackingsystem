@@ -150,20 +150,19 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
   // Create organization
   const createMutation = useMutation({
     mutationFn: async ({ name, slug, description }: { name: string; slug: string; description?: string }) => {
-      const { data, error } = await supabase
-        .from('organizations')
-        .insert({ name, slug, description: description || '' })
-        .select()
-        .single();
+      const { data: orgId, error } = await supabase
+        .rpc('create_organization', { _name: name, _slug: slug, _description: description || '' });
       if (error) throw error;
 
-      // Add creator as owner
-      const { error: mErr } = await supabase
-        .from('organization_members')
-        .insert({ organization_id: data.id, user_id: user!.id, role: 'owner' });
-      if (mErr) throw mErr;
+      // Fetch the created org
+      const { data: org, error: fetchErr } = await supabase
+        .from('organizations')
+        .select('*')
+        .eq('id', orgId)
+        .single();
+      if (fetchErr) throw fetchErr;
 
-      return data as Organization;
+      return org as Organization;
     },
     onSuccess: (org) => {
       queryClient.invalidateQueries({ queryKey: ['organizations'] });
