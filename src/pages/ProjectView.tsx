@@ -3,6 +3,7 @@ import { useProjects } from '@/hooks/useProjects';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { useReadOnly } from '@/hooks/useReadOnly';
 import { useAppStore } from '@/lib/store';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import ProjectInfos from '@/components/project/ProjectInfos';
 import ProjectBudget from '@/components/project/ProjectBudget';
 import ProjectFiche from '@/components/project/ProjectFiche';
@@ -12,15 +13,16 @@ import ProjectAmendements from '@/components/project/ProjectAmendements';
 import ProjectIndicators from '@/components/project/ProjectIndicators';
 import ProjectBailleurs from '@/components/project/ProjectBailleurs';
 import SaveIndicator from '@/components/SaveIndicator';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { getReportCount } from '@/lib/utils-project';
 import type { Project } from '@/lib/types';
+import { Loader2 } from 'lucide-react';
 
 export default function ProjectView() {
   const { projectId } = useParams<{ projectId: string }>();
   const [searchParams] = useSearchParams();
   const { currentTab, forceSaveCounter, openProject } = useAppStore();
-  const { projects, updateProject } = useProjects();
+  const { projects, isLoading } = useProjects();
   const project = projects.find(p => p.id === projectId);
   const [saving, setSaving] = useState(false);
   const autoSave = useAutoSave(projectId || '');
@@ -32,7 +34,7 @@ export default function ProjectView() {
       const tab = searchParams.get('tab') || 'infos';
       openProject(projectId, tab);
     }
-  }, [projectId, searchParams]);
+  }, [projectId, searchParams, openProject]);
 
   // Force save from Topbar
   useEffect(() => {
@@ -49,24 +51,35 @@ export default function ProjectView() {
     setTimeout(() => setSaving(false), 1200);
   }, [autoSave, readOnly]);
 
-  if (!project) {
-    return <p className="p-8 text-muted-foreground">Projet introuvable.</p>;
+  const reportCount = useMemo(() => project ? getReportCount(project.periodicite) : 0, [project?.periodicite]);
+
+  const tabContent = useMemo(() => {
+    if (!project) return null;
+    const map: Record<string, React.ReactNode> = {
+      infos: <ProjectInfos project={project} onSave={save} readOnly={readOnly} />,
+      budget: <ProjectBudget project={project} onSave={save} readOnly={readOnly} />,
+      fiche: <ProjectFiche project={project} onSave={save} readOnly={readOnly} />,
+      indicateurs: <ProjectIndicators project={project} onSave={save} readOnly={readOnly} />,
+      bailleurs: <ProjectBailleurs project={project} onSave={save} readOnly={readOnly} />,
+      amendements: <ProjectAmendements project={project} onSave={save} readOnly={readOnly} />,
+    };
+    for (let i = 1; i <= reportCount; i++) {
+      map[`rapport-${i}`] = <ProjectReport project={project} reportIndex={i - 1} onSave={save} readOnly={readOnly} />;
+      map[`trans-${i}`] = <ProjectTransactions project={project} reportIndex={i - 1} onSave={save} readOnly={readOnly} />;
+    }
+    return map[currentTab] || <p className="p-8 text-muted-foreground italic">Section à venir.</p>;
+  }, [project, currentTab, reportCount, save, readOnly]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
   }
 
-  const reportCount = getReportCount(project.periodicite);
-
-  const tabMap: Record<string, React.ReactNode> = {
-    infos: <ProjectInfos project={project} onSave={save} readOnly={readOnly} />,
-    budget: <ProjectBudget project={project} onSave={save} readOnly={readOnly} />,
-    fiche: <ProjectFiche project={project} onSave={save} readOnly={readOnly} />,
-    indicateurs: <ProjectIndicators project={project} onSave={save} readOnly={readOnly} />,
-    bailleurs: <ProjectBailleurs project={project} onSave={save} readOnly={readOnly} />,
-    amendements: <ProjectAmendements project={project} onSave={save} readOnly={readOnly} />,
-  };
-
-  for (let i = 1; i <= reportCount; i++) {
-    tabMap[`rapport-${i}`] = <ProjectReport project={project} reportIndex={i - 1} onSave={save} readOnly={readOnly} />;
-    tabMap[`trans-${i}`] = <ProjectTransactions project={project} reportIndex={i - 1} onSave={save} readOnly={readOnly} />;
+  if (!project) {
+    return <p className="p-8 text-muted-foreground">Projet introuvable.</p>;
   }
 
   return (
@@ -79,7 +92,9 @@ export default function ProjectView() {
         )}
         <SaveIndicator saving={saving} />
       </div>
-      {tabMap[currentTab] || <p className="p-8 text-muted-foreground italic">Section à venir.</p>}
+      <ErrorBoundary>
+        {tabContent}
+      </ErrorBoundary>
     </div>
   );
 }

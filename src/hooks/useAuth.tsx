@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
 
@@ -23,39 +23,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<string | null>(null);
+  const initializedRef = useRef(false);
+
+  const fetchRole = useCallback(async (userId: string) => {
+    const { data } = await supabase.rpc('get_user_role', { _user_id: userId });
+    setRole(data ?? null);
+  }, []);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        setTimeout(() => fetchRole(session.user.id), 0);
+    // Set up auth listener FIRST (Supabase best practice)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
+      if (newSession?.user) {
+        // Defer to avoid Supabase deadlock
+        setTimeout(() => fetchRole(newSession.user.id), 0);
       } else {
         setRole(null);
       }
       setLoading(false);
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchRole(session.user.id);
-      }
-      setLoading(false);
-    });
+    // THEN check initial session (only once)
+    if (!initializedRef.current) {
+      initializedRef.current = true;
+      supabase.auth.getSession().then(({ data: { session: s } }) => {
+        setSession(s);
+        setUser(s?.user ?? null);
+        if (s?.user) fetchRole(s.user.id);
+        setLoading(false);
+      });
+    }
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [fetchRole]);
 
-  const fetchRole = async (userId: string) => {
-    const { data } = await supabase.rpc('get_user_role', { _user_id: userId });
-    setRole(data ?? null);
-  };
-
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
+    setRole(null);
     await supabase.auth.signOut();
-  };
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, session, loading, role, signOut }}>

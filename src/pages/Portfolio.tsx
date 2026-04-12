@@ -16,10 +16,13 @@ export default function Portfolio() {
   const [showArchived, setShowArchived] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Unique countries
   const countries = useMemo(() => [...new Set(projects.map(p => p.pays).filter(Boolean))].sort(), [projects]);
 
-  // Filtered projects
+  const { activeProjects, archivedProjects } = useMemo(() => ({
+    activeProjects: projects.filter(p => !(p as any).archived),
+    archivedProjects: projects.filter(p => (p as any).archived),
+  }), [projects]);
+
   const filtered = useMemo(() => {
     return projects.filter(p => {
       const isArchived = (p as any).archived ?? false;
@@ -33,6 +36,13 @@ export default function Portfolio() {
     });
   }, [projects, search, riskFilter, paysFilter, showArchived]);
 
+  const metrics = useMemo(() => {
+    const totalBudget = activeProjects.reduce((s, p) => s + calcBudgetTotal(p), 0);
+    const totalDepenses = activeProjects.reduce((s, p) => s + calcDepensesTotal(p), 0);
+    const totalRapports = activeProjects.reduce((s, p) => s + p.reports.filter(r => r.status === 'soumis' || r.status === 'valide').length, 0);
+    return { totalBudget, totalDepenses, totalRapports };
+  }, [activeProjects]);
+
   const hasFilters = !!riskFilter || !!paysFilter;
 
   if (isLoading) {
@@ -43,35 +53,29 @@ export default function Portfolio() {
     );
   }
 
-  const activeProjects = projects.filter(p => !(p as any).archived);
-  const archivedProjects = projects.filter(p => (p as any).archived);
-  const totalBudget = activeProjects.reduce((s, p) => s + calcBudgetTotal(p), 0);
-  const totalDepenses = activeProjects.reduce((s, p) => s + calcDepensesTotal(p), 0);
-  const totalRapports = activeProjects.reduce((s, p) => s + p.reports.filter(r => r.status === 'soumis' || r.status === 'valide').length, 0);
-
   return (
     <div>
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-start justify-between mb-6 gap-3">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-foreground">Portefeuille global</h1>
-          <p className="text-xs text-muted-foreground mt-1">Vue d'ensemble de tous les projets de subvention Grow Hub SARL</p>
+          <p className="text-xs text-muted-foreground mt-1">Vue d'ensemble de tous les projets de subvention</p>
         </div>
         <CreateProjectDialog />
       </div>
 
       {/* Metrics */}
-      <div className="grid grid-cols-4 gap-3.5 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
         <MetricCard label="Projets actifs" value={String(activeProjects.length)} note="en cours" accentColor="blue" />
-        <MetricCard label="Budget total" value={`${fmt(totalBudget)} €`} note="consolidé" accentColor="teal" />
-        <MetricCard label="Dépenses totales" value={`${fmt(totalDepenses)} €`} note="engagées" accentColor="amber" />
-        <MetricCard label="Rapports soumis" value={String(totalRapports)} note="sur tous les projets" accentColor="emerald" />
+        <MetricCard label="Budget total" value={`${fmt(metrics.totalBudget)} €`} note="consolidé" accentColor="teal" />
+        <MetricCard label="Dépenses totales" value={`${fmt(metrics.totalDepenses)} €`} note="engagées" accentColor="amber" />
+        <MetricCard label="Rapports soumis" value={String(metrics.totalRapports)} note="sur tous les projets" accentColor="emerald" />
       </div>
 
       {/* Search & Filters */}
       {projects.length > 0 && (
         <div className="mb-4 space-y-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
@@ -79,43 +83,46 @@ export default function Portfolio() {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Rechercher par organisation, convention ou titre…"
+                aria-label="Rechercher un projet"
                 className="w-full rounded-lg border border-rule bg-card py-2 pl-9 pr-3 text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-colors"
               />
               {search && (
-                <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-dim hover:text-foreground">
+                <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-dim hover:text-foreground" aria-label="Effacer la recherche">
                   <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
-            <button onClick={() => setShowArchived(!showArchived)}
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
-                showArchived ? 'border-amber bg-amber-light text-amber' : 'border-rule bg-card text-steel hover:bg-paper'
-              }`}>
-              <Archive className="w-3.5 h-3.5" />
-              Archivés ({archivedProjects.length})
-            </button>
-            <button onClick={() => setShowFilters(!showFilters)}
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
-                hasFilters ? 'border-primary bg-enabel-light text-primary' : 'border-rule bg-card text-steel hover:bg-paper'
-              }`}>
-              <Filter className="w-3.5 h-3.5" />
-              Filtres {hasFilters && `(${[riskFilter, paysFilter].filter(Boolean).length})`}
-            </button>
+            <div className="flex gap-2">
+              <button onClick={() => setShowArchived(!showArchived)}
+                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                  showArchived ? 'border-amber bg-amber-light text-amber' : 'border-rule bg-card text-steel hover:bg-paper'
+                }`}>
+                <Archive className="w-3.5 h-3.5" />
+                Archivés ({archivedProjects.length})
+              </button>
+              <button onClick={() => setShowFilters(!showFilters)}
+                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                  hasFilters ? 'border-primary bg-enabel-light text-primary' : 'border-rule bg-card text-steel hover:bg-paper'
+                }`}>
+                <Filter className="w-3.5 h-3.5" />
+                Filtres {hasFilters && `(${[riskFilter, paysFilter].filter(Boolean).length})`}
+              </button>
+            </div>
           </div>
 
           {showFilters && (
-            <div className="flex items-center gap-3 rounded-lg border border-rule bg-card p-3">
+            <div className="flex flex-wrap items-center gap-3 rounded-lg border border-rule bg-card p-3">
               <div className="flex items-center gap-2">
-                <label className="text-[11px] font-medium text-steel whitespace-nowrap">Risque :</label>
-                <select value={riskFilter} onChange={e => setRiskFilter(e.target.value)}
+                <label htmlFor="risk-filter" className="text-[11px] font-medium text-steel whitespace-nowrap">Risque :</label>
+                <select id="risk-filter" value={riskFilter} onChange={e => setRiskFilter(e.target.value)}
                   className="rounded-md border border-input bg-background px-2 py-1 text-xs outline-none focus:border-primary">
                   <option value="">Tous</option>
                   {RISK_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
               </div>
               <div className="flex items-center gap-2">
-                <label className="text-[11px] font-medium text-steel whitespace-nowrap">Pays :</label>
-                <select value={paysFilter} onChange={e => setPaysFilter(e.target.value)}
+                <label htmlFor="country-filter" className="text-[11px] font-medium text-steel whitespace-nowrap">Pays :</label>
+                <select id="country-filter" value={paysFilter} onChange={e => setPaysFilter(e.target.value)}
                   className="rounded-md border border-input bg-background px-2 py-1 text-xs outline-none focus:border-primary">
                   <option value="">Tous</option>
                   {countries.map(c => <option key={c} value={c}>{c}</option>)}

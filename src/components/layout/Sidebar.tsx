@@ -1,3 +1,4 @@
+import { useMemo, useCallback } from 'react';
 import { useAppStore } from '@/lib/store';
 import { useProjects } from '@/hooks/useProjects';
 import { useAuth } from '@/hooks/useAuth';
@@ -46,7 +47,11 @@ function buildSectionTabs(periodicite: string) {
   return base;
 }
 
-export default function Sidebar() {
+interface SidebarProps {
+  onNavigate?: () => void;
+}
+
+export default function Sidebar({ onNavigate }: SidebarProps) {
   const { currentProjectId, currentTab, openProjectIds, openProjectTab, toggleSidebarProject, sidebarSearch, setSidebarSearch } = useAppStore();
   const { projects } = useProjects();
   const { signOut } = useAuth();
@@ -55,10 +60,21 @@ export default function Sidebar() {
 
   const currentPath = location.pathname;
 
-  const navTo = (path: string) => navigate(path);
+  const navTo = useCallback((path: string) => {
+    navigate(path);
+    onNavigate?.();
+  }, [navigate, onNavigate]);
+
+  const filteredProjects = useMemo(() => {
+    if (!sidebarSearch) return projects.filter(p => !(p as any).archived);
+    const q = sidebarSearch.toLowerCase();
+    return projects.filter(p => !(p as any).archived && p.org.toLowerCase().includes(q));
+  }, [projects, sidebarSearch]);
+
+  const activeCount = useMemo(() => projects.filter(p => !(p as any).archived).length, [projects]);
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col overflow-y-auto bg-sidebar border-r border-sidebar-border/5 print:hidden">
+    <aside className="flex w-[260px] h-full flex-col overflow-y-auto bg-sidebar border-r border-sidebar-border/5 print:hidden">
       {/* Brand + Org switcher */}
       <div className="border-b border-sidebar-border/10 p-5 pb-4">
         <div className="flex items-center gap-3 mb-2">
@@ -77,13 +93,14 @@ export default function Sidebar() {
             value={sidebarSearch}
             onChange={(e) => setSidebarSearch(e.target.value)}
             placeholder="Rechercher…"
+            aria-label="Rechercher un projet"
             className="w-full rounded-md border border-sidebar-foreground/10 bg-sidebar-foreground/5 py-1.5 pl-8 pr-3 text-xs text-sidebar-foreground/70 placeholder:text-sidebar-foreground/25 outline-none focus:border-primary/60 focus:bg-sidebar-foreground/8"
           />
         </div>
       </div>
 
       {/* Navigation */}
-      <div className="p-2.5 pt-3">
+      <nav className="p-2.5 pt-3" aria-label="Navigation principale">
         <p className="px-2 pb-1.5 text-[9.5px] font-semibold uppercase tracking-[1.2px] text-sidebar-foreground/25">Navigation</p>
         <NavItem icon={<LayoutDashboard className="w-4 h-4" />} label="Portefeuille" active={currentPath === '/'} onClick={() => navTo('/')} />
         <NavItem icon={<BarChart3 className="w-4 h-4" />} label="Dashboard" active={currentPath === '/dashboard'} onClick={() => navTo('/dashboard')} />
@@ -92,23 +109,23 @@ export default function Sidebar() {
         <NavItem icon={<History className="w-4 h-4" />} label="Historique" active={currentPath === '/audit'} onClick={() => navTo('/audit')} />
         <NavItem icon={<Building2 className="w-4 h-4" />} label="Organisation" active={currentPath === '/organization'} onClick={() => navTo('/organization')} />
         <NavItem icon={<UserCircle className="w-4 h-4" />} label="Mon profil" active={currentPath === '/profile'} onClick={() => navTo('/profile')} />
-      </div>
+      </nav>
 
       {/* Projects */}
       <div className="p-2.5 pt-1">
         <p className="px-2 pb-1.5 text-[9.5px] font-semibold uppercase tracking-[1.2px] text-sidebar-foreground/25">
-          Projets · <span className="font-mono">{projects.length}</span> actif(s)
+          Projets · <span className="font-mono">{activeCount}</span> actif(s)
         </p>
-        {projects.filter(p => !sidebarSearch || p.org.toLowerCase().includes(sidebarSearch.toLowerCase())).map(proj => {
+        {filteredProjects.map(proj => {
           const isOpen = openProjectIds.includes(proj.id);
-          const tabs = buildSectionTabs(proj.periodicite);
+          const tabs = isOpen ? buildSectionTabs(proj.periodicite) : [];
           const isProjectActive = currentPath === `/projects/${proj.id}`;
           return (
             <div key={proj.id} className="border-t border-sidebar-foreground/5 mt-1 pt-1">
               <button
                 onClick={() => {
                   toggleSidebarProject(proj.id);
-                  navigate(`/projects/${proj.id}`);
+                  navTo(`/projects/${proj.id}`);
                 }}
                 className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 hover:bg-sidebar-foreground/5 transition-colors"
               >
@@ -125,7 +142,7 @@ export default function Sidebar() {
                       key={tab.id}
                       onClick={() => {
                         openProjectTab(proj.id, tab.id);
-                        navigate(`/projects/${proj.id}?tab=${tab.id}`);
+                        navTo(`/projects/${proj.id}?tab=${tab.id}`);
                       }}
                       className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs transition-colors ${
                         isProjectActive && currentTab === tab.id
@@ -151,7 +168,7 @@ export default function Sidebar() {
         </button>
         <p className="mt-3 text-[10.5px] leading-relaxed text-sidebar-foreground/20">
           Grow Hub SARL · GH-GTS v3.0<br />
-          © 2024 — Tous droits réservés
+          © {new Date().getFullYear()} — Tous droits réservés
         </p>
       </div>
     </aside>
@@ -162,6 +179,7 @@ function NavItem({ icon, label, active, onClick }: { icon: React.ReactNode; labe
   return (
     <button
       onClick={onClick}
+      aria-current={active ? 'page' : undefined}
       className={`relative flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-[13px] transition-all ${
         active
           ? 'bg-primary/30 font-medium text-sidebar-foreground'

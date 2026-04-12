@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useCallback } from 'react';
 import type { Project } from '@/lib/types';
 import { calcBudgetTotal, calcDepensesTotal, fmt, getReportCount } from '@/lib/utils-project';
 import { useAppStore } from '@/lib/store';
@@ -26,15 +27,17 @@ export default function ProjectCard({ project }: { project: Project }) {
   const pct = budget > 0 ? Math.min(100, Math.round(depenses / budget * 100)) : 0;
   const rapSoumis = project.reports.filter(r => r.status !== 'vide').length;
 
-  const handleOpen = () => {
+  const handleOpen = useCallback(() => {
     openProject(project.id);
     navigate(`/projects/${project.id}`);
-  };
+  }, [openProject, project.id, navigate]);
 
   return (
     <div
       className="group relative cursor-pointer overflow-hidden rounded-[10px] border border-rule bg-card transition-all duration-200 hover:shadow-gts-md hover:-translate-y-0.5 hover:border-primary"
-      onDoubleClick={handleOpen}
+      onClick={handleOpen}
+      role="article"
+      aria-label={`Projet ${project.org}`}
     >
       <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: project.color.stripe }} />
 
@@ -62,23 +65,17 @@ export default function ProjectCard({ project }: { project: Project }) {
         <Row label="Rapports" value={`${rapSoumis} / ${getReportCount(project.periodicite)} soumis`} />
       </div>
 
-      <div className="flex items-center gap-1.5 border-t border-rule bg-paper p-3 px-4">
+      <div className="flex items-center gap-1.5 border-t border-rule bg-paper p-3 px-4" onClick={e => e.stopPropagation()}>
         <div className="flex-1">
           <div className="flex justify-between text-[10.5px] text-dim mb-1">
             <span>Consommation budget</span>
             <span>{pct}%</span>
           </div>
-          <div className="h-[5px] overflow-hidden rounded-full bg-rule">
+          <div className="h-[5px] overflow-hidden rounded-full bg-rule" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
             <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: project.color.stripe }} />
           </div>
         </div>
         <div className="flex shrink-0 gap-1 ml-3">
-          <button
-            onClick={(e) => { e.stopPropagation(); handleOpen(); }}
-            className="rounded border border-rule bg-card px-2.5 py-1 text-[11px] font-medium text-steel transition-colors hover:bg-paper hover:border-dim"
-          >
-            Ouvrir
-          </button>
           <button
             onClick={(e) => { e.stopPropagation(); archiveProject(project.id, !isArchived); }}
             title={isArchived ? 'Désarchiver' : 'Archiver'}
