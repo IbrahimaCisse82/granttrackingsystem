@@ -10,12 +10,12 @@ export function useAuditLog() {
   const log = useCallback(async (action: AuditAction, projectId?: string, details?: Record<string, unknown>) => {
     if (!user) return;
     try {
-      await supabase.from('audit_logs').insert({
+      await supabase.from('audit_logs').insert([{
         user_id: user.id,
         project_id: projectId || null,
         action,
-        details: details || {},
-      });
+        details: (details || {}) as any,
+      }]);
     } catch (e) {
       console.error('Audit log error:', e);
     }

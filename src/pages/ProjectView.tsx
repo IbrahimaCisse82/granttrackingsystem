@@ -51,7 +51,8 @@ export default function ProjectView() {
     setTimeout(() => setSaving(false), 1200);
   }, [autoSave, readOnly]);
 
-  const reportCount = useMemo(() => project ? getReportCount(project.periodicite) : 0, [project?.periodicite]);
+  const periodicite = project?.periodicite;
+  const reportCount = useMemo(() => periodicite ? getReportCount(periodicite) : 0, [periodicite]);
 
   const tabContent = useMemo(() => {
     if (!project) return null;

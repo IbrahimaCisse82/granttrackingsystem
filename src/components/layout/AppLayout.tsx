@@ -1,6 +1,5 @@
 import { Outlet } from 'react-router-dom';
 import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 

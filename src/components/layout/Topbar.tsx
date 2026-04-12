@@ -89,7 +89,7 @@ export default function Topbar({ onMenuToggle, showMenuButton }: TopbarProps) {
     reader.onload = async (ev) => {
       try {
         const data = JSON.parse(ev.target?.result as string);
-        const { id, createdAt, userId, ...rest } = data;
+        const { id: _id, createdAt: _ca, userId: _uid, ...rest } = data;
         await addProject(rest as Omit<Project, 'id' | 'createdAt'>);
         toast.success('Projet importé avec succès');
       } catch {
