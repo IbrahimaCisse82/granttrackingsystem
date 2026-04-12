@@ -28,7 +28,7 @@ export function useDarkMode() {
   const setDarkMode = useCallback((value: boolean) => {
     setDarkModeState(value);
     if (user) {
-      supabase.from('profiles').update({ dark_mode: value } as any).eq('user_id', user.id).then();
+      supabase.from('profiles').update({ dark_mode: value }).eq('user_id', user.id).then();
     }
   }, [user]);
 

@@ -4,11 +4,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useDarkMode } from '@/hooks/useDarkMode';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import { Save, Download, Bell, User, LogOut, FileDown, FileSpreadsheet, Upload, Sun, Moon } from 'lucide-react';
+import { Save, Download, Bell, User, LogOut, FileDown, FileSpreadsheet, Upload, Sun, Moon, Menu } from 'lucide-react';
 import { toast } from 'sonner';
 import { exportBudgetPDF, exportReportPDF, exportTransactionsPDF } from '@/lib/export-pdf';
 import { exportBudgetExcel, exportFullProjectExcel } from '@/lib/export-excel';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import type { Project } from '@/lib/types';
 
 function getSectionLabel(tab: string): string {
@@ -17,6 +17,8 @@ function getSectionLabel(tab: string): string {
     budget: 'Budget (Annexe 1b)',
     fiche: 'Fiche récapitulative',
     amendements: 'Amendements',
+    indicateurs: 'Suivi programmatique',
+    bailleurs: 'Bailleurs / Financements',
   };
   if (LABELS[tab]) return LABELS[tab];
   const rapportMatch = tab.match(/^rapport-(\d+)$/);
@@ -26,7 +28,12 @@ function getSectionLabel(tab: string): string {
   return tab;
 }
 
-export default function Topbar() {
+interface TopbarProps {
+  onMenuToggle?: () => void;
+  showMenuButton?: boolean;
+}
+
+export default function Topbar({ onMenuToggle, showMenuButton }: TopbarProps) {
   const { currentTab, triggerForceSave } = useAppStore();
   const { projects, addProject } = useProjects();
   const { role, signOut } = useAuth();
@@ -56,12 +63,12 @@ export default function Topbar() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     triggerForceSave();
     toast.success('Sauvegarde lancée');
-  };
+  }, [triggerForceSave]);
 
-  const handleExportJSON = () => {
+  const handleExportJSON = useCallback(() => {
     if (!project) return;
     const json = JSON.stringify(project, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
@@ -73,16 +80,16 @@ export default function Topbar() {
     URL.revokeObjectURL(url);
     toast.success('Export JSON téléchargé');
     setShowExport(false);
-  };
+  }, [project]);
 
-  const handleImportJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportJSON = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = async (ev) => {
       try {
         const data = JSON.parse(ev.target?.result as string);
-        const { id, createdAt, userId, ...rest } = data;
+        const { id: _id, createdAt: _ca, userId: _uid, ...rest } = data;
         await addProject(rest as Omit<Project, 'id' | 'createdAt'>);
         toast.success('Projet importé avec succès');
       } catch {
@@ -91,9 +98,9 @@ export default function Topbar() {
     };
     reader.readAsText(file);
     if (fileInputRef.current) fileInputRef.current.value = '';
-  };
+  }, [addProject]);
 
-  const handleExportPDF = () => {
+  const handleExportPDF = useCallback(() => {
     if (!project) return;
     if (currentTab === 'budget') {
       exportBudgetPDF(project);
@@ -108,9 +115,9 @@ export default function Topbar() {
     }
     toast.success('PDF exporté');
     setShowExport(false);
-  };
+  }, [project, currentTab]);
 
-  const handleExportExcel = () => {
+  const handleExportExcel = useCallback(() => {
     if (!project) return;
     if (currentTab === 'budget') {
       exportBudgetExcel(project);
@@ -119,40 +126,53 @@ export default function Topbar() {
     }
     toast.success('Excel exporté');
     setShowExport(false);
-  };
+  }, [project, currentTab]);
 
   const unread = unreadCount();
 
   return (
-    <header className="sticky top-0 z-40 flex h-[52px] items-center justify-between border-b border-rule bg-card px-7 shadow-[0_1px_0_hsl(var(--rule))] print:hidden">
+    <header className="sticky top-0 z-40 flex h-[52px] items-center justify-between border-b border-rule bg-card px-4 sm:px-7 shadow-[0_1px_0_hsl(var(--rule))] print:hidden">
       <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImportJSON} />
 
       <div className="flex items-center gap-3">
-        <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors">Grow Hub GTS</button>
+        {showMenuButton && (
+          <button
+            onClick={onMenuToggle}
+            className="lg:hidden rounded-md p-1.5 text-steel hover:bg-muted transition-colors"
+            aria-label="Menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
+        <nav className="flex items-center gap-1.5 text-xs text-muted-foreground" aria-label="Fil d'Ariane">
+          <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors hidden sm:inline">Grow Hub GTS</button>
           {isProjectPage && project && (
             <>
+              <span className="text-dim hidden sm:inline">›</span>
+              <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors truncate max-w-[120px] sm:max-w-none">{project.org}</button>
               <span className="text-dim">›</span>
-              <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors">{project.org}</button>
-              <span className="text-dim">›</span>
-              <span className="font-medium text-foreground">{getSectionLabel(currentTab)}</span>
+              <span className="font-medium text-foreground truncate max-w-[100px] sm:max-w-none">{getSectionLabel(currentTab)}</span>
             </>
           )}
           {location.pathname === '/guide' && (<><span className="text-dim">›</span><span className="font-medium text-foreground">Guide d'utilisation</span></>)}
           {location.pathname === '/admin' && (<><span className="text-dim">›</span><span className="font-medium text-foreground">Gestion utilisateurs</span></>)}
+          {location.pathname === '/dashboard' && (<><span className="text-dim">›</span><span className="font-medium text-foreground">Tableau de bord</span></>)}
+          {location.pathname === '/organization' && (<><span className="text-dim">›</span><span className="font-medium text-foreground">Organisation</span></>)}
+          {location.pathname === '/audit' && (<><span className="text-dim">›</span><span className="font-medium text-foreground">Historique</span></>)}
+          {location.pathname === '/profile' && (<><span className="text-dim">›</span><span className="font-medium text-foreground">Mon profil</span></>)}
         </nav>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2">
         {isProjectPage && project && (
           <>
-            <button onClick={handleSave} className="inline-flex items-center gap-1.5 rounded-md border border-rule bg-card px-3 py-1.5 text-xs font-medium text-steel transition-colors hover:bg-paper hover:border-dim">
-              <Save className="w-3.5 h-3.5" /> Sauvegarder
+            <button onClick={handleSave} className="inline-flex items-center gap-1.5 rounded-md border border-rule bg-card px-2 sm:px-3 py-1.5 text-xs font-medium text-steel transition-colors hover:bg-paper hover:border-dim">
+              <Save className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Sauvegarder</span>
             </button>
 
             <div className="relative" ref={exportRef}>
-              <button onClick={() => setShowExport(!showExport)} className="inline-flex items-center gap-1.5 rounded-md border border-rule bg-card px-3 py-1.5 text-xs font-medium text-steel transition-colors hover:bg-paper hover:border-dim">
-                <Download className="w-3.5 h-3.5" /> Exporter ▾
+              <button onClick={() => setShowExport(!showExport)} className="inline-flex items-center gap-1.5 rounded-md border border-rule bg-card px-2 sm:px-3 py-1.5 text-xs font-medium text-steel transition-colors hover:bg-paper hover:border-dim">
+                <Download className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Exporter ▾</span>
               </button>
               {showExport && (
                 <div className="absolute right-0 top-full mt-1 w-52 rounded-lg border border-rule bg-card shadow-md z-50">
@@ -176,17 +196,17 @@ export default function Topbar() {
         )}
 
         {isPortfolioPage && (
-          <button onClick={() => fileInputRef.current?.click()} className="inline-flex items-center gap-1.5 rounded-md border border-rule bg-card px-3 py-1.5 text-xs font-medium text-steel transition-colors hover:bg-paper hover:border-dim">
+          <button onClick={() => fileInputRef.current?.click()} className="hidden sm:inline-flex items-center gap-1.5 rounded-md border border-rule bg-card px-3 py-1.5 text-xs font-medium text-steel transition-colors hover:bg-paper hover:border-dim">
             <Upload className="w-3.5 h-3.5" /> Importer JSON
           </button>
         )}
 
-        <button onClick={toggleDarkMode} className="rounded-md border border-rule bg-card p-1.5 text-steel hover:bg-paper transition-colors" title="Basculer thème">
+        <button onClick={toggleDarkMode} className="rounded-md border border-rule bg-card p-1.5 text-steel hover:bg-paper transition-colors" title="Basculer thème" aria-label="Basculer mode sombre">
           {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
 
         <div className="relative" ref={notifRef}>
-          <button onClick={() => setShowNotifs(!showNotifs)} className="relative rounded-md border border-rule bg-card p-1.5 text-steel hover:bg-paper">
+          <button onClick={() => setShowNotifs(!showNotifs)} className="relative rounded-md border border-rule bg-card p-1.5 text-steel hover:bg-paper" aria-label={`Notifications${unread > 0 ? ` (${unread} non lues)` : ''}`}>
             <Bell className="w-4 h-4" />
             {unread > 0 && (
               <span className="absolute -right-0.5 -top-0.5 min-w-[14px] h-3.5 rounded-full bg-rose text-[9px] font-bold text-primary-foreground flex items-center justify-center px-0.5">
@@ -226,12 +246,12 @@ export default function Topbar() {
           )}
         </div>
 
-        <div className="flex items-center gap-2 rounded-md border border-rule bg-paper px-2.5 py-1">
+        <div className="hidden sm:flex items-center gap-2 rounded-md border border-rule bg-paper px-2.5 py-1">
           <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
             <User className="w-3.5 h-3.5 text-primary-foreground" />
           </div>
           <span className="text-xs font-medium text-ink-3">{role ?? '…'}</span>
-          <button onClick={signOut} className="ml-1 p-1 rounded hover:bg-muted transition-colors" title="Déconnexion">
+          <button onClick={signOut} className="ml-1 p-1 rounded hover:bg-muted transition-colors" title="Déconnexion" aria-label="Déconnexion">
             <LogOut className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
         </div>

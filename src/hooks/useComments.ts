@@ -22,27 +22,26 @@ export function useComments(projectId: string, reportIndex: number) {
     queryKey,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('comments' as any)
+        .from('comments')
         .select('*')
         .eq('project_id', projectId)
         .eq('report_index', reportIndex)
         .order('created_at', { ascending: true });
       if (error) throw error;
 
-      // Fetch user names
-      const userIds = [...new Set((data || []).map((c: any) => c.user_id))];
+      const userIds = [...new Set((data || []).map(c => c.user_id))];
       const profiles: Record<string, string> = {};
       if (userIds.length > 0) {
         const { data: pData } = await supabase
           .from('profiles')
           .select('user_id, first_name, last_name')
           .in('user_id', userIds);
-        (pData || []).forEach((p: any) => {
+        (pData || []).forEach(p => {
           profiles[p.user_id] = `${p.first_name} ${p.last_name}`.trim() || 'Utilisateur';
         });
       }
 
-      return (data || []).map((c: any): Comment => ({
+      return (data || []).map((c): Comment => ({
         id: c.id,
         userId: c.user_id,
         projectId: c.project_id,
@@ -58,7 +57,7 @@ export function useComments(projectId: string, reportIndex: number) {
   const addMutation = useMutation({
     mutationFn: async (content: string) => {
       if (!user) throw new Error('Non authentifié');
-      const { error } = await supabase.from('comments' as any).insert({
+      const { error } = await supabase.from('comments').insert({
         user_id: user.id,
         project_id: projectId,
         report_index: reportIndex,
@@ -75,7 +74,7 @@ export function useComments(projectId: string, reportIndex: number) {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('comments' as any).delete().eq('id', id);
+      const { error } = await supabase.from('comments').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {

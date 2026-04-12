@@ -7,15 +7,15 @@ type AuditAction = 'create' | 'update' | 'delete' | 'archive' | 'unarchive' | 's
 export function useAuditLog() {
   const { user } = useAuth();
 
-  const log = useCallback(async (action: AuditAction, projectId?: string, details?: Record<string, any>) => {
+  const log = useCallback(async (action: AuditAction, projectId?: string, details?: Record<string, unknown>) => {
     if (!user) return;
     try {
-      await supabase.from('audit_logs' as any).insert({
+      await supabase.from('audit_logs').insert([{
         user_id: user.id,
         project_id: projectId || null,
         action,
-        details: details || {},
-      });
+        details: (details || {}) as any,
+      }]);
     } catch (e) {
       console.error('Audit log error:', e);
     }

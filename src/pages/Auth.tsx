@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import logo from '@/assets/logo-growhub.png';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -14,7 +14,7 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+    if (error) toast.error(error.message);
     setLoading(false);
   };
 
@@ -25,9 +25,9 @@ export default function Auth() {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     if (error) {
-      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+      toast.error(error.message);
     } else {
-      toast({ title: 'Email envoyé', description: 'Consultez votre boîte mail pour réinitialiser votre mot de passe.' });
+      toast.success('Consultez votre boîte mail pour réinitialiser votre mot de passe.');
     }
     setLoading(false);
   };
@@ -41,7 +41,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-[hsl(var(--enabel-light))]">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-[hsl(var(--enabel-light))] px-4">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-[hsl(var(--enabel)/0.06)] blur-3xl" />
         <div className="absolute -bottom-48 -left-48 w-[500px] h-[500px] rounded-full bg-[hsl(var(--teal)/0.05)] blur-3xl" />
@@ -51,7 +51,7 @@ export default function Auth() {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="relative w-full max-w-md mx-4"
+        className="relative w-full max-w-md"
       >
         <div className="bg-card rounded-2xl border border-border p-8 sm:p-10 shadow-[var(--shadow-md)]">
           {/* Logo */}
@@ -92,14 +92,14 @@ export default function Auth() {
                 className="space-y-4"
               >
                 <div>
-                  <label className="block text-xs font-medium text-foreground mb-1.5">Email</label>
-                  <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                    placeholder="votre@email.com" className={inputClass} />
+                  <label htmlFor="login-email" className="block text-xs font-medium text-foreground mb-1.5">Email</label>
+                  <input id="login-email" type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                    placeholder="votre@email.com" className={inputClass} autoComplete="email" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-foreground mb-1.5">Mot de passe</label>
-                  <input type="password" required value={password} onChange={e => setPassword(e.target.value)}
-                    placeholder="••••••••" className={inputClass} />
+                  <label htmlFor="login-password" className="block text-xs font-medium text-foreground mb-1.5">Mot de passe</label>
+                  <input id="login-password" type="password" required value={password} onChange={e => setPassword(e.target.value)}
+                    placeholder="••••••••" className={inputClass} autoComplete="current-password" />
                 </div>
                 <button type="submit" disabled={loading}
                   className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:bg-[hsl(var(--enabel-dark))] transition-all duration-200 disabled:opacity-50 shadow-sm hover:shadow-md">
@@ -127,9 +127,9 @@ export default function Auth() {
                 className="space-y-4"
               >
                 <div>
-                  <label className="block text-xs font-medium text-foreground mb-1.5">Email</label>
-                  <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                    placeholder="votre@email.com" className={inputClass} />
+                  <label htmlFor="forgot-email" className="block text-xs font-medium text-foreground mb-1.5">Email</label>
+                  <input id="forgot-email" type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                    placeholder="votre@email.com" className={inputClass} autoComplete="email" />
                 </div>
                 <button type="submit" disabled={loading}
                   className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:bg-[hsl(var(--enabel-dark))] transition-all duration-200 disabled:opacity-50 shadow-sm hover:shadow-md">
@@ -144,7 +144,7 @@ export default function Auth() {
         </div>
 
         <p className="text-center text-[10px] text-muted-foreground mt-5 opacity-60">
-          Grow Hub SARL · GH-GTS v3.0 · © 2024
+          Grow Hub SARL · GH-GTS v3.0 · © {new Date().getFullYear()}
         </p>
       </motion.div>
     </div>
