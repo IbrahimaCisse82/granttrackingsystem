@@ -1,10 +1,12 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useOrganization } from './useOrganization';
 import { useAuditLog } from './useAuditLog';
 import type { Project } from '@/lib/types';
 import { toast } from 'sonner';
+
+const PAGE_SIZE = 12;
 
 // Map DB row to Project interface
 function rowToProject(row: any): Project & { userId: string; archived: boolean; organizationId?: string } {
@@ -60,23 +62,64 @@ function projectToRow(p: Omit<Project, 'id' | 'createdAt'>, userId: string, orga
   };
 }
 
-export function useProjects() {
+export interface ProjectFilters {
+  search?: string;
+  risque?: string;
+  pays?: string;
+  archived?: boolean;
+  page?: number;
+  pageSize?: number;
+}
+
+export function useProjects(filters?: ProjectFilters) {
   const { user } = useAuth();
   const { activeOrgId } = useOrganization();
   const { log: auditLog } = useAuditLog();
   const queryClient = useQueryClient();
 
+  const page = filters?.page ?? 0;
+  const pageSize = filters?.pageSize ?? PAGE_SIZE;
+
   const query = useQuery({
-    queryKey: ['projects', activeOrgId],
+    queryKey: ['projects', activeOrgId, filters],
     queryFn: async () => {
-      let q = supabase.from('projects').select('*').order('created_at', { ascending: false });
-      if (activeOrgId) {
-        q = q.eq('organization_id', activeOrgId);
+      // Count query
+      let countQuery = supabase.from('projects').select('*', { count: 'exact', head: true });
+      if (activeOrgId) countQuery = countQuery.eq('organization_id', activeOrgId);
+      if (filters?.archived !== undefined) countQuery = countQuery.eq('archived', filters.archived);
+      if (filters?.risque) countQuery = countQuery.eq('risque', filters.risque);
+      if (filters?.pays) countQuery = countQuery.eq('pays', filters.pays);
+      if (filters?.search) {
+        countQuery = countQuery.or(`org.ilike.%${filters.search}%,convention.ilike.%${filters.search}%,title.ilike.%${filters.search}%`);
       }
-      const { data, error } = await q;
-      if (error) throw error;
-      return (data || []).map(rowToProject);
+
+      // Data query
+      let q = supabase.from('projects').select('*').order('created_at', { ascending: false });
+      if (activeOrgId) q = q.eq('organization_id', activeOrgId);
+      if (filters?.archived !== undefined) q = q.eq('archived', filters.archived);
+      if (filters?.risque) q = q.eq('risque', filters.risque);
+      if (filters?.pays) q = q.eq('pays', filters.pays);
+      if (filters?.search) {
+        q = q.or(`org.ilike.%${filters.search}%,convention.ilike.%${filters.search}%,title.ilike.%${filters.search}%`);
+      }
+
+      const from = page * pageSize;
+      const to = from + pageSize - 1;
+      q = q.range(from, to);
+
+      const [countResult, dataResult] = await Promise.all([countQuery, q]);
+      if (countResult.error) throw countResult.error;
+      if (dataResult.error) throw dataResult.error;
+
+      return {
+        projects: (dataResult.data || []).map(rowToProject),
+        totalCount: countResult.count ?? 0,
+        page,
+        pageSize,
+        totalPages: Math.ceil((countResult.count ?? 0) / pageSize),
+      };
     },
+    placeholderData: keepPreviousData,
     enabled: !!user,
   });
 
@@ -157,13 +200,19 @@ export function useProjects() {
     onError: (e) => toast.error('Erreur: ' + e.message),
   });
 
+  const result = query.data ?? { projects: [], totalCount: 0, page: 0, pageSize, totalPages: 0 };
+
   return {
-    projects: query.data || [],
+    projects: result.projects,
+    totalCount: result.totalCount,
+    totalPages: result.totalPages,
+    currentPage: result.page,
     isLoading: query.isLoading,
+    isFetching: query.isFetching,
     addProject: addMutation.mutateAsync,
     updateProject: (id: string, updates: Partial<Project>) => updateMutation.mutateAsync({ id, updates }),
     updateProjectFn: (id: string, updater: (p: Project) => Project) => {
-      const project = query.data?.find(p => p.id === id);
+      const project = result.projects.find(p => p.id === id);
       if (!project) return;
       const updated = updater(project);
       return updateMutation.mutateAsync({ id, updates: updated });
