@@ -8,7 +8,7 @@ import { Loader2, Filter } from 'lucide-react';
 const CHART_COLORS = ['hsl(204,100%,30%)', 'hsl(172,86%,32%)', 'hsl(28,91%,37%)', 'hsl(263,83%,42%)', 'hsl(343,86%,35%)', 'hsl(164,93%,20%)'];
 
 export default function Dashboard() {
-  const { projects: allProjects, isLoading } = useProjects();
+  const { projects: allProjects, isLoading } = useProjects({ archived: false, pageSize: 500 });
   const [paysFilter, setPaysFilter] = useState('');
   const [periodeFilter, setPeriodeFilter] = useState('');
 
