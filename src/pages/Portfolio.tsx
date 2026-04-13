@@ -190,7 +190,7 @@ export default function Portfolio() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-6 pt-4 border-t border-rule">
           <p className="text-[11px] text-muted-foreground">
-            {currentPage * filters.pageSize! + 1}–{Math.min((currentPage + 1) * filters.pageSize!, totalCount)} sur {totalCount} projets
+            {currentPage * 12 + 1}–{Math.min((currentPage + 1) * 12, totalCount)} sur {totalCount} projets
           </p>
           <div className="flex items-center gap-1">
             <button
