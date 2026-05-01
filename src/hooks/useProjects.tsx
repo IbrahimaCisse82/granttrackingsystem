@@ -62,6 +62,7 @@ function projectToRow(p: Omit<Project, 'id' | 'createdAt'>, userId: string, orga
   };
 }
 
+export type ProjectSortKey = 'created_at' | 'org' | 'debut' | 'fin' | 'pays';
 export interface ProjectFilters {
   search?: string;
   risque?: string;
@@ -69,6 +70,8 @@ export interface ProjectFilters {
   archived?: boolean;
   page?: number;
   pageSize?: number;
+  sortBy?: ProjectSortKey;
+  sortDir?: 'asc' | 'desc';
 }
 
 export function useProjects(filters?: ProjectFilters) {
@@ -94,7 +97,9 @@ export function useProjects(filters?: ProjectFilters) {
       }
 
       // Data query
-      let q = supabase.from('projects').select('*').order('created_at', { ascending: false });
+      const sortBy = filters?.sortBy ?? 'created_at';
+      const sortDir = filters?.sortDir ?? 'desc';
+      let q = supabase.from('projects').select('*').order(sortBy, { ascending: sortDir === 'asc', nullsFirst: false });
       if (activeOrgId) q = q.eq('organization_id', activeOrgId);
       if (filters?.archived !== undefined) q = q.eq('archived', filters.archived);
       if (filters?.risque) q = q.eq('risque', filters.risque);

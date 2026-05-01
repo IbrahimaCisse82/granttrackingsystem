@@ -335,6 +335,10 @@ export type Database = {
         Args: { _description?: string; _name: string; _slug: string }
         Returns: string
       }
+      get_dashboard_metrics: {
+        Args: { _org_id?: string; _pays?: string; _periodicite?: string }
+        Returns: Json
+      }
       get_user_org_ids: { Args: { _user_id: string }; Returns: string[] }
       get_user_role: {
         Args: { _user_id: string }
