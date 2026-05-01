@@ -4,9 +4,17 @@ import { useProjects } from '@/hooks/useProjects';
 import MetricCard from '@/components/MetricCard';
 import ProjectCard from '@/components/ProjectCard';
 import CreateProjectDialog from '@/components/CreateProjectDialog';
-import { Plus, FolderOpen, Loader2, Search, Filter, X, Archive, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, FolderOpen, Loader2, Search, Filter, X, Archive, ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react';
+import type { ProjectSortKey } from '@/hooks/useProjects';
 
 const RISK_OPTIONS = ['Faible risque', 'Risque modéré', 'Risque important', 'Risque élevé'];
+const SORT_OPTIONS: { value: ProjectSortKey; label: string }[] = [
+  { value: 'created_at', label: 'Date de création' },
+  { value: 'org', label: 'Organisation' },
+  { value: 'debut', label: 'Date de début' },
+  { value: 'fin', label: 'Date de fin' },
+  { value: 'pays', label: 'Pays' },
+];
 
 export default function Portfolio() {
   const [search, setSearch] = useState('');
@@ -16,6 +24,8 @@ export default function Portfolio() {
   const [showArchived, setShowArchived] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(0);
+  const [sortBy, setSortBy] = useState<ProjectSortKey>('created_at');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   // Debounce search
   const debounceTimer = useState<ReturnType<typeof setTimeout> | null>(null);
@@ -34,7 +44,9 @@ export default function Portfolio() {
     pays: paysFilter || undefined,
     archived: showArchived,
     page,
-  }), [debouncedSearch, riskFilter, paysFilter, showArchived, page]);
+    sortBy,
+    sortDir,
+  }), [debouncedSearch, riskFilter, paysFilter, showArchived, page, sortBy, sortDir]);
 
   const { projects, totalCount, totalPages, currentPage, isLoading, isFetching } = useProjects(filters);
 
