@@ -118,7 +118,29 @@ export default function Portfolio() {
               </button>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <div className="inline-flex items-center gap-1 rounded-lg border border-rule bg-card px-2 py-1 text-xs">
+              <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground" />
+              <label htmlFor="sort-by" className="sr-only">Trier par</label>
+              <select
+                id="sort-by"
+                value={sortBy}
+                onChange={e => { setSortBy(e.target.value as ProjectSortKey); setPage(0); }}
+                className="bg-transparent text-xs outline-none cursor-pointer"
+                aria-label="Critère de tri"
+              >
+                {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+              <button
+                type="button"
+                onClick={() => { setSortDir(d => d === 'asc' ? 'desc' : 'asc'); setPage(0); }}
+                className="text-xs text-steel hover:text-primary px-1"
+                aria-label={`Inverser le tri (actuellement ${sortDir === 'asc' ? 'croissant' : 'décroissant'})`}
+                title={sortDir === 'asc' ? 'Croissant' : 'Décroissant'}
+              >
+                {sortDir === 'asc' ? '↑' : '↓'}
+              </button>
+            </div>
             <button onClick={() => { setShowArchived(!showArchived); setPage(0); }}
               className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
                 showArchived ? 'border-amber bg-amber-light text-amber' : 'border-rule bg-card text-steel hover:bg-paper'
