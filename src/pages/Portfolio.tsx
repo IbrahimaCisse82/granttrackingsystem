@@ -76,6 +76,64 @@ export default function Portfolio() {
     setPage(0);
   }, []);
 
+  const { activeOrgId } = useOrganization();
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportPDF = useCallback(async () => {
+    setIsExporting(true);
+    try {
+      let q = supabase
+        .from('projects')
+        .select('*')
+        .order(sortBy, { ascending: sortDir === 'asc', nullsFirst: false });
+      if (activeOrgId) q = q.eq('organization_id', activeOrgId);
+      q = q.eq('archived', showArchived);
+      if (riskFilter) q = q.eq('risque', riskFilter);
+      if (paysFilter) q = q.eq('pays', paysFilter);
+      if (debouncedSearch) {
+        q = q.or(`org.ilike.%${debouncedSearch}%,convention.ilike.%${debouncedSearch}%,title.ilike.%${debouncedSearch}%`);
+      }
+      const { data, error } = await q.limit(2000);
+      if (error) throw error;
+
+      const rows = (data || []).map((r: any) => {
+        const proj: any = {
+          budgetLines: r.budget_lines || [],
+          reports: r.reports || [],
+          taux: Number(r.taux) || 1,
+        };
+        const budget = calcBudgetTotal(proj);
+        const depenses = calcDepensesTotal(proj);
+        return {
+          convention: r.convention || '',
+          org: r.org || '',
+          title: r.title || '',
+          pays: r.pays || '',
+          risque: r.risque || '',
+          debut: r.debut || '',
+          fin: r.fin || '',
+          budget,
+          depenses,
+          taux: budget > 0 ? Math.round((depenses / budget) * 100) : 0,
+        };
+      });
+
+      exportPortfolioPDF(rows, {
+        search: debouncedSearch,
+        risque: riskFilter,
+        pays: paysFilter,
+        archived: showArchived,
+        sortBy,
+        sortDir,
+      });
+      toast.success(`${rows.length} projet(s) exporté(s)`);
+    } catch (e: any) {
+      toast.error('Erreur export: ' + e.message);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [activeOrgId, sortBy, sortDir, showArchived, riskFilter, paysFilter, debouncedSearch]);
+
   if (isLoading && !isFetching) {
     return (
       <div className="flex items-center justify-center py-20">
