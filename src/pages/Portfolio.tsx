@@ -150,7 +150,19 @@ export default function Portfolio() {
           <h1 className="text-xl font-bold tracking-tight text-foreground">Portefeuille global</h1>
           <p className="text-xs text-muted-foreground mt-1">Vue d'ensemble de tous les projets de subvention</p>
         </div>
-        <CreateProjectDialog />
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleExportPDF}
+            disabled={isExporting || totalCount === 0}
+            className="inline-flex items-center gap-1.5 rounded-md border border-rule bg-card px-3 py-2 text-xs font-medium text-steel hover:bg-paper transition-colors disabled:opacity-50"
+            aria-label="Exporter le portefeuille en PDF"
+          >
+            {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
+            Exporter PDF
+          </button>
+          <CreateProjectDialog />
+        </div>
       </div>
 
       {/* Metrics */}
