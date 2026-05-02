@@ -13,6 +13,7 @@ const CHART_COLORS = ['hsl(204,100%,30%)', 'hsl(172,86%,32%)', 'hsl(28,91%,37%)'
 export default function Dashboard() {
   const [paysFilter, setPaysFilter] = useState('');
   const [periodeFilter, setPeriodeFilter] = useState('');
+  const { activeOrg } = useOrganization();
 
   const { data: metrics, isLoading } = useDashboardMetrics({
     pays: paysFilter,
@@ -34,9 +35,9 @@ export default function Dashboard() {
         </div>
         <button
           type="button"
-          onClick={() => {
+          onClick={async () => {
             try {
-              exportDashboardPDF(metrics, { pays: paysFilter, periodicite: periodeFilter });
+              await exportDashboardPDF(metrics, { pays: paysFilter, periodicite: periodeFilter }, activeOrg?.name);
               toast.success('Export PDF généré');
             } catch (e: any) {
               toast.error('Erreur export: ' + e.message);

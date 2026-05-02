@@ -118,14 +118,14 @@ export default function Portfolio() {
         };
       });
 
-      exportPortfolioPDF(rows, {
+      await exportPortfolioPDF(rows, {
         search: debouncedSearch,
         risque: riskFilter,
         pays: paysFilter,
         archived: showArchived,
         sortBy,
         sortDir,
-      });
+      }, activeOrg?.name);
       toast.success(`${rows.length} projet(s) exporté(s)`);
     } catch (e: any) {
       toast.error('Erreur export: ' + e.message);
