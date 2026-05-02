@@ -1,10 +1,14 @@
 import { useState, useMemo, useCallback } from 'react';
 import { calcBudgetTotal, calcDepensesTotal, fmt } from '@/lib/utils-project';
 import { useProjects } from '@/hooks/useProjects';
+import { useOrganization } from '@/hooks/useOrganization';
+import { supabase } from '@/integrations/supabase/client';
+import { exportPortfolioPDF } from '@/lib/export-dashboard-pdf';
 import MetricCard from '@/components/MetricCard';
 import ProjectCard from '@/components/ProjectCard';
 import CreateProjectDialog from '@/components/CreateProjectDialog';
-import { Plus, FolderOpen, Loader2, Search, Filter, X, Archive, ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react';
+import { Plus, FolderOpen, Loader2, Search, Filter, X, Archive, ChevronLeft, ChevronRight, ArrowUpDown, FileDown } from 'lucide-react';
+import { toast } from 'sonner';
 import type { ProjectSortKey } from '@/hooks/useProjects';
 
 const RISK_OPTIONS = ['Faible risque', 'Risque modéré', 'Risque important', 'Risque élevé'];
@@ -72,6 +76,64 @@ export default function Portfolio() {
     setPage(0);
   }, []);
 
+  const { activeOrgId } = useOrganization();
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportPDF = useCallback(async () => {
+    setIsExporting(true);
+    try {
+      let q = supabase
+        .from('projects')
+        .select('*')
+        .order(sortBy, { ascending: sortDir === 'asc', nullsFirst: false });
+      if (activeOrgId) q = q.eq('organization_id', activeOrgId);
+      q = q.eq('archived', showArchived);
+      if (riskFilter) q = q.eq('risque', riskFilter);
+      if (paysFilter) q = q.eq('pays', paysFilter);
+      if (debouncedSearch) {
+        q = q.or(`org.ilike.%${debouncedSearch}%,convention.ilike.%${debouncedSearch}%,title.ilike.%${debouncedSearch}%`);
+      }
+      const { data, error } = await q.limit(2000);
+      if (error) throw error;
+
+      const rows = (data || []).map((r: any) => {
+        const proj: any = {
+          budgetLines: r.budget_lines || [],
+          reports: r.reports || [],
+          taux: Number(r.taux) || 1,
+        };
+        const budget = calcBudgetTotal(proj);
+        const depenses = calcDepensesTotal(proj);
+        return {
+          convention: r.convention || '',
+          org: r.org || '',
+          title: r.title || '',
+          pays: r.pays || '',
+          risque: r.risque || '',
+          debut: r.debut || '',
+          fin: r.fin || '',
+          budget,
+          depenses,
+          taux: budget > 0 ? Math.round((depenses / budget) * 100) : 0,
+        };
+      });
+
+      exportPortfolioPDF(rows, {
+        search: debouncedSearch,
+        risque: riskFilter,
+        pays: paysFilter,
+        archived: showArchived,
+        sortBy,
+        sortDir,
+      });
+      toast.success(`${rows.length} projet(s) exporté(s)`);
+    } catch (e: any) {
+      toast.error('Erreur export: ' + e.message);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [activeOrgId, sortBy, sortDir, showArchived, riskFilter, paysFilter, debouncedSearch]);
+
   if (isLoading && !isFetching) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -88,7 +150,19 @@ export default function Portfolio() {
           <h1 className="text-xl font-bold tracking-tight text-foreground">Portefeuille global</h1>
           <p className="text-xs text-muted-foreground mt-1">Vue d'ensemble de tous les projets de subvention</p>
         </div>
-        <CreateProjectDialog />
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleExportPDF}
+            disabled={isExporting || totalCount === 0}
+            className="inline-flex items-center gap-1.5 rounded-md border border-rule bg-card px-3 py-2 text-xs font-medium text-steel hover:bg-paper transition-colors disabled:opacity-50"
+            aria-label="Exporter le portefeuille en PDF"
+          >
+            {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
+            Exporter PDF
+          </button>
+          <CreateProjectDialog />
+        </div>
       </div>
 
       {/* Metrics */}
