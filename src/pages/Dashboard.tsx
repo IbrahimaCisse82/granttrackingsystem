@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
+import { useOrganization } from '@/hooks/useOrganization';
 import { fmt } from '@/lib/utils-project';
 import MetricCard from '@/components/MetricCard';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend } from 'recharts';
