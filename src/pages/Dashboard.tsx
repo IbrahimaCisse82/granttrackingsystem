@@ -3,7 +3,9 @@ import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
 import { fmt } from '@/lib/utils-project';
 import MetricCard from '@/components/MetricCard';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend } from 'recharts';
-import { Loader2, Filter } from 'lucide-react';
+import { Loader2, Filter, FileDown } from 'lucide-react';
+import { exportDashboardPDF } from '@/lib/export-dashboard-pdf';
+import { toast } from 'sonner';
 
 const CHART_COLORS = ['hsl(204,100%,30%)', 'hsl(172,86%,32%)', 'hsl(28,91%,37%)', 'hsl(263,83%,42%)', 'hsl(343,86%,35%)', 'hsl(164,93%,20%)'];
 
@@ -24,9 +26,27 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-xl font-bold tracking-tight text-foreground">Tableau de bord</h1>
-        <p className="text-xs text-muted-foreground mt-1">Vue analytique consolidée de tous les projets</p>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">Tableau de bord</h1>
+          <p className="text-xs text-muted-foreground mt-1">Vue analytique consolidée de tous les projets</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            try {
+              exportDashboardPDF(metrics, { pays: paysFilter, periodicite: periodeFilter });
+              toast.success('Export PDF généré');
+            } catch (e: any) {
+              toast.error('Erreur export: ' + e.message);
+            }
+          }}
+          className="inline-flex items-center gap-1.5 rounded-md border border-rule bg-card px-3 py-2 text-xs font-medium text-steel hover:bg-paper transition-colors"
+          aria-label="Exporter le tableau de bord en PDF"
+        >
+          <FileDown className="w-3.5 h-3.5" />
+          Exporter PDF
+        </button>
       </div>
       {/* Filters */}
       <div className="flex items-center gap-3 mb-4 rounded-lg border border-rule bg-card p-3">
