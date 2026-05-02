@@ -76,7 +76,7 @@ export default function Portfolio() {
     setPage(0);
   }, []);
 
-  const { activeOrgId } = useOrganization();
+  const { activeOrgId, activeOrg } = useOrganization();
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExportPDF = useCallback(async () => {
@@ -118,21 +118,21 @@ export default function Portfolio() {
         };
       });
 
-      exportPortfolioPDF(rows, {
+      await exportPortfolioPDF(rows, {
         search: debouncedSearch,
         risque: riskFilter,
         pays: paysFilter,
         archived: showArchived,
         sortBy,
         sortDir,
-      });
+      }, activeOrg?.name);
       toast.success(`${rows.length} projet(s) exporté(s)`);
     } catch (e: any) {
       toast.error('Erreur export: ' + e.message);
     } finally {
       setIsExporting(false);
     }
-  }, [activeOrgId, sortBy, sortDir, showArchived, riskFilter, paysFilter, debouncedSearch]);
+  }, [activeOrgId, activeOrg, sortBy, sortDir, showArchived, riskFilter, paysFilter, debouncedSearch]);
 
   if (isLoading && !isFetching) {
     return (

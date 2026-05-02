@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
+import { useOrganization } from '@/hooks/useOrganization';
 import { fmt } from '@/lib/utils-project';
 import MetricCard from '@/components/MetricCard';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend } from 'recharts';
@@ -12,6 +13,7 @@ const CHART_COLORS = ['hsl(204,100%,30%)', 'hsl(172,86%,32%)', 'hsl(28,91%,37%)'
 export default function Dashboard() {
   const [paysFilter, setPaysFilter] = useState('');
   const [periodeFilter, setPeriodeFilter] = useState('');
+  const { activeOrg } = useOrganization();
 
   const { data: metrics, isLoading } = useDashboardMetrics({
     pays: paysFilter,
@@ -33,9 +35,9 @@ export default function Dashboard() {
         </div>
         <button
           type="button"
-          onClick={() => {
+          onClick={async () => {
             try {
-              exportDashboardPDF(metrics, { pays: paysFilter, periodicite: periodeFilter });
+              await exportDashboardPDF(metrics, { pays: paysFilter, periodicite: periodeFilter }, activeOrg?.name);
               toast.success('Export PDF généré');
             } catch (e: any) {
               toast.error('Erreur export: ' + e.message);
