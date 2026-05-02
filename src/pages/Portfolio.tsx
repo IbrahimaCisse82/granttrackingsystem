@@ -1,10 +1,14 @@
 import { useState, useMemo, useCallback } from 'react';
 import { calcBudgetTotal, calcDepensesTotal, fmt } from '@/lib/utils-project';
 import { useProjects } from '@/hooks/useProjects';
+import { useOrganization } from '@/hooks/useOrganization';
+import { supabase } from '@/integrations/supabase/client';
+import { exportPortfolioPDF } from '@/lib/export-dashboard-pdf';
 import MetricCard from '@/components/MetricCard';
 import ProjectCard from '@/components/ProjectCard';
 import CreateProjectDialog from '@/components/CreateProjectDialog';
-import { Plus, FolderOpen, Loader2, Search, Filter, X, Archive, ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react';
+import { Plus, FolderOpen, Loader2, Search, Filter, X, Archive, ChevronLeft, ChevronRight, ArrowUpDown, FileDown } from 'lucide-react';
+import { toast } from 'sonner';
 import type { ProjectSortKey } from '@/hooks/useProjects';
 
 const RISK_OPTIONS = ['Faible risque', 'Risque modéré', 'Risque important', 'Risque élevé'];
