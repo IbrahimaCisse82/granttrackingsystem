@@ -76,7 +76,7 @@ export default function Portfolio() {
     setPage(0);
   }, []);
 
-  const { activeOrgId } = useOrganization();
+  const { activeOrgId, activeOrg } = useOrganization();
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExportPDF = useCallback(async () => {
@@ -132,7 +132,7 @@ export default function Portfolio() {
     } finally {
       setIsExporting(false);
     }
-  }, [activeOrgId, sortBy, sortDir, showArchived, riskFilter, paysFilter, debouncedSearch]);
+  }, [activeOrgId, activeOrg, sortBy, sortDir, showArchived, riskFilter, paysFilter, debouncedSearch]);
 
   if (isLoading && !isFetching) {
     return (
