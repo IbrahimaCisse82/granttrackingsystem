@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { drawBrandHeader, drawBrandFooter, preloadPdfLogo } from './pdf-branding';
+import { drawBrandHeader, drawFooters, preloadPdfLogo } from './pdf-branding';
 import { fmt } from './utils-project';
 import type { PaymentVoucher } from '@/hooks/usePaymentVouchers';
 import type { Project } from './types';
