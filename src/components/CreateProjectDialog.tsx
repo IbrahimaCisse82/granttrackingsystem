@@ -28,6 +28,7 @@ const initialForm = {
   title: '',
   pays: '',
   devise: 'FCFA',
+  currency: 'XOF',
   taux: 655.957,
   risque: '',
   debut: '',
