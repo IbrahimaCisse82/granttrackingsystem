@@ -2,6 +2,7 @@ import type { Project, FicheVersement } from '@/lib/types';
 import { fmt } from '@/lib/utils-project';
 import { useCallback } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
+import PaymentVouchersPanel from './PaymentVouchersPanel';
 
 interface Props {
   project: Project;
@@ -124,6 +125,10 @@ export default function ProjectFiche({ project, onSave, readOnly }: Props) {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="mt-8">
+        <PaymentVouchersPanel project={project} />
       </div>
     </div>
   );
