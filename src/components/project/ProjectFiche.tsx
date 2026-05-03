@@ -2,6 +2,7 @@ import type { Project, FicheVersement } from '@/lib/types';
 import { fmt } from '@/lib/utils-project';
 import { useCallback } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
+import PaymentVouchersPanel from './PaymentVouchersPanel';
 
 interface Props {
   project: Project;
