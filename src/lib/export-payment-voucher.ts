@@ -36,6 +36,6 @@ export async function exportPaymentVoucherPDF(v: PaymentVoucher, project: Projec
     columnStyles: { 0: { cellWidth: 55, fontStyle: 'bold' } },
   });
 
-  drawBrandFooter(doc);
+  drawFooters(doc);
   doc.save(`fiche-versement-${v.voucher_number}.pdf`);
 }
