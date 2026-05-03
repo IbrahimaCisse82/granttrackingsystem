@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      approval_workflows: {
+        Row: {
+          actor_id: string
+          created_at: string
+          deadline: string | null
+          entity_id: string
+          entity_type: string
+          from_status: string | null
+          id: string
+          organization_id: string
+          project_id: string | null
+          reason: string | null
+          to_status: string
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          deadline?: string | null
+          entity_id: string
+          entity_type: string
+          from_status?: string | null
+          id?: string
+          organization_id: string
+          project_id?: string | null
+          reason?: string | null
+          to_status: string
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          deadline?: string | null
+          entity_id?: string
+          entity_type?: string
+          from_status?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string | null
+          reason?: string | null
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_workflows_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approval_workflows_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -70,6 +127,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      exchange_rates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          from_currency: string
+          id: string
+          organization_id: string
+          rate: number
+          rate_date: string
+          source: string
+          to_currency: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          from_currency: string
+          id?: string
+          organization_id: string
+          rate: number
+          rate_date?: string
+          source?: string
+          to_currency: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          from_currency?: string
+          id?: string
+          organization_id?: string
+          rate?: number
+          rate_date?: string
+          source?: string
+          to_currency?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exchange_rates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -166,6 +267,166 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_vouchers: {
+        Row: {
+          amount_eur: number | null
+          amount_local: number
+          bank_reference: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          donor_reference: string | null
+          exchange_rate: number | null
+          id: string
+          notes: string | null
+          organization_id: string
+          payment_date: string
+          project_id: string
+          report_id: string | null
+          status: string
+          updated_at: string
+          voucher_number: string
+        }
+        Insert: {
+          amount_eur?: number | null
+          amount_local: number
+          bank_reference?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          donor_reference?: string | null
+          exchange_rate?: number | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          payment_date: string
+          project_id: string
+          report_id?: string | null
+          status?: string
+          updated_at?: string
+          voucher_number: string
+        }
+        Update: {
+          amount_eur?: number | null
+          amount_local?: number
+          bank_reference?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          donor_reference?: string | null
+          exchange_rate?: number | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          payment_date?: string
+          project_id?: string
+          report_id?: string | null
+          status?: string
+          updated_at?: string
+          voucher_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_vouchers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_vouchers_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_vouchers_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "periodic_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      periodic_reports: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          deadline_approval: string | null
+          depenses: Json
+          explanation: Json
+          id: string
+          organization_id: string
+          period_end: string | null
+          period_start: string | null
+          previsions: Json
+          project_id: string
+          rejection_reason: string | null
+          report_index: number
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          deadline_approval?: string | null
+          depenses?: Json
+          explanation?: Json
+          id?: string
+          organization_id: string
+          period_end?: string | null
+          period_start?: string | null
+          previsions?: Json
+          project_id: string
+          rejection_reason?: string | null
+          report_index: number
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          deadline_approval?: string | null
+          depenses?: Json
+          explanation?: Json
+          id?: string
+          organization_id?: string
+          period_end?: string | null
+          period_start?: string | null
+          previsions?: Json
+          project_id?: string
+          rejection_reason?: string | null
+          report_index?: number
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "periodic_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "periodic_reports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           active_organization_id: string | null
@@ -225,6 +486,7 @@ export type Database = {
           color: Json
           convention: string
           created_at: string
+          currency: string
           debut: string
           devise: string
           fiches: Json
@@ -252,6 +514,7 @@ export type Database = {
           color?: Json
           convention?: string
           created_at?: string
+          currency?: string
           debut?: string
           devise?: string
           fiches?: Json
@@ -279,6 +542,7 @@ export type Database = {
           color?: Json
           convention?: string
           created_at?: string
+          currency?: string
           debut?: string
           devise?: string
           fiches?: Json
@@ -352,6 +616,10 @@ export type Database = {
         Returns: boolean
       }
       is_org_admin: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_org_manager_or_admin: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
