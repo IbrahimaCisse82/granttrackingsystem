@@ -211,6 +211,8 @@ export default function OrganizationSettings() {
           </table>
         )}
       </div>
+
+      <ExchangeRatesPanel />
     </div>
   );
 }
