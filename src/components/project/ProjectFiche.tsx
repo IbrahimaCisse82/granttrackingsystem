@@ -126,6 +126,10 @@ export default function ProjectFiche({ project, onSave, readOnly }: Props) {
           </table>
         </div>
       </div>
+
+      <div className="mt-8">
+        <PaymentVouchersPanel project={project} />
+      </div>
     </div>
   );
 }
