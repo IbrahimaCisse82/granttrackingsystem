@@ -4,7 +4,7 @@ import { useProjects } from '@/hooks/useProjects';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-import { ChevronRight, LayoutDashboard, BookOpen, Users, Search, BarChart3, UserCircle, History, Building2 } from 'lucide-react';
+import { ChevronRight, LayoutDashboard, BookOpen, Users, Search, BarChart3, UserCircle, History, Building2, ClipboardList, Database } from 'lucide-react';
 import { getReportCount } from '@/lib/utils-project';
 import OrgSwitcher from '@/components/OrgSwitcher';
 import logo from '@/assets/logo-growhub.png';
@@ -54,7 +54,7 @@ interface SidebarProps {
 export default function Sidebar({ onNavigate }: SidebarProps) {
   const { currentTab, openProjectIds, openProjectTab, toggleSidebarProject, sidebarSearch, setSidebarSearch } = useAppStore();
   const { projects } = useProjects();
-  const { signOut } = useAuth();
+  const { signOut, role } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -108,6 +108,10 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
         <NavItem icon={<Users className="w-4 h-4" />} label="Gestion utilisateurs" active={currentPath === '/admin'} onClick={() => navTo('/admin')} />
         <NavItem icon={<History className="w-4 h-4" />} label="Historique" active={currentPath === '/audit'} onClick={() => navTo('/audit')} />
         <NavItem icon={<Building2 className="w-4 h-4" />} label="Organisation" active={currentPath === '/organization'} onClick={() => navTo('/organization')} />
+        <NavItem icon={<ClipboardList className="w-4 h-4" />} label="Rapports terrain" active={currentPath === '/field-reports'} onClick={() => navTo('/field-reports')} />
+        {role === 'admin' && (
+          <NavItem icon={<Database className="w-4 h-4" />} label="Schéma BDD" active={currentPath === '/admin/schema'} onClick={() => navTo('/admin/schema')} />
+        )}
         <NavItem icon={<UserCircle className="w-4 h-4" />} label="Mon profil" active={currentPath === '/profile'} onClick={() => navTo('/profile')} />
       </nav>
 

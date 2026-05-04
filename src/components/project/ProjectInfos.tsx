@@ -1,6 +1,7 @@
 import type { Project } from '@/lib/types';
 import { Info } from 'lucide-react';
 import { useCallback } from 'react';
+import ProjectBeneficiariesPanel from './ProjectBeneficiariesPanel';
 
 function calcDuree(debut: string, fin: string): string {
   if (!debut || !fin) return '—';
@@ -105,6 +106,8 @@ export default function ProjectInfos({ project, onSave, readOnly }: Props) {
           </div>
         </div>
       </Card>
+
+      <ProjectBeneficiariesPanel project={project} />
     </div>
   );
 }
