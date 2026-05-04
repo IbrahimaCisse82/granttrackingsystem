@@ -172,6 +172,63 @@ export type Database = {
           },
         ]
       }
+      field_reports: {
+        Row: {
+          attachments: Json
+          beneficiary_id: string
+          created_at: string
+          id: string
+          indicators: Json
+          narrative: string
+          organization_id: string
+          period_end: string
+          period_start: string
+          project_id: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          attachments?: Json
+          beneficiary_id: string
+          created_at?: string
+          id?: string
+          indicators?: Json
+          narrative?: string
+          organization_id: string
+          period_end: string
+          period_start: string
+          project_id: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attachments?: Json
+          beneficiary_id?: string
+          created_at?: string
+          id?: string
+          indicators?: Json
+          narrative?: string
+          organization_id?: string
+          period_end?: string
+          period_start?: string
+          project_id?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -477,6 +534,33 @@ export type Database = {
           },
         ]
       }
+      project_beneficiaries: {
+        Row: {
+          assigned_by: string | null
+          beneficiary_id: string
+          created_at: string
+          id: string
+          organization_id: string
+          project_id: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          beneficiary_id: string
+          created_at?: string
+          id?: string
+          organization_id: string
+          project_id: string
+        }
+        Update: {
+          assigned_by?: string | null
+          beneficiary_id?: string
+          created_at?: string
+          id?: string
+          organization_id?: string
+          project_id?: string
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           amendements: Json
@@ -625,6 +709,10 @@ export type Database = {
       }
       is_org_member: {
         Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_project_beneficiary: {
+        Args: { _project_id: string; _user_id: string }
         Returns: boolean
       }
     }
