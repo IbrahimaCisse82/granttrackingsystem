@@ -3,6 +3,7 @@ import { lineTotal, fmt, calcDepensesTotal, createEmptyReport } from '@/lib/util
 import { useState, useCallback } from 'react';
 import { useNotifications } from '@/hooks/useNotifications';
 import ReportComments from './ReportComments';
+import ReportApprovalPanel from './ReportApprovalPanel';
 
 const STATUS_STYLES: Record<string, [string, string]> = {
   vide: ['bg-muted text-steel', 'Vide'],
