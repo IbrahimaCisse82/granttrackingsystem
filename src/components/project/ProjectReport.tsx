@@ -118,6 +118,8 @@ export default function ProjectReport({ project, reportIndex, onSave, readOnly }
         )}
       </div>
 
+      <ReportApprovalPanel project={project} reportIndex={reportIndex} />
+
       {/* Period info */}
       <div className="mb-4 overflow-hidden rounded-[10px] border border-rule bg-card p-4">
         <div className="grid grid-cols-3 gap-4">
