@@ -3,6 +3,7 @@ import { lineTotal, fmt, calcDepensesTotal, createEmptyReport } from '@/lib/util
 import { useState, useCallback } from 'react';
 import { useNotifications } from '@/hooks/useNotifications';
 import ReportComments from './ReportComments';
+import ReportApprovalPanel from './ReportApprovalPanel';
 
 const STATUS_STYLES: Record<string, [string, string]> = {
   vide: ['bg-muted text-steel', 'Vide'],
@@ -116,6 +117,8 @@ export default function ProjectReport({ project, reportIndex, onSave, readOnly }
           </div>
         )}
       </div>
+
+      <ReportApprovalPanel project={project} reportIndex={reportIndex} />
 
       {/* Period info */}
       <div className="mb-4 overflow-hidden rounded-[10px] border border-rule bg-card p-4">
