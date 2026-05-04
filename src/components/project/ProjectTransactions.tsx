@@ -61,8 +61,35 @@ export default function ProjectTransactions({ project, reportIndex, onSave, read
 
   const removeTx = useCallback((index: number) => {
     if (readOnly) return;
+    const tx = transactions[index];
+    const reportStatus = report?.status;
+    // Hard delete only allowed if report is still a local draft
+    if (reportStatus && reportStatus !== 'vide' && reportStatus !== 'en_cours') {
+      const ok = window.confirm(
+        `Suppression interdite : ce rapport est "${reportStatus}". Voulez-vous générer une contre-passe (transaction d'annulation) ?`
+      );
+      if (!ok) {
+        toast.error('Suppression bloquée — utilisez la contre-passe pour préserver la traçabilité.');
+        return;
+      }
+      const reversal: Transaction = {
+        id: crypto.randomUUID(),
+        code: tx.code,
+        date: new Date().toISOString().slice(0, 10),
+        voucher: `REV-${tx.voucher || tx.id.slice(0, 6)}`,
+        beneficiaire: tx.beneficiaire,
+        montantDevise: -tx.montantDevise,
+        tauxChange: tx.tauxChange,
+        montantEUR: -tx.montantEUR,
+        description: `Contre-passe : ${tx.description || tx.voucher || tx.id.slice(0, 6)}`,
+        attachments: [],
+      };
+      updateTransactions([...transactions, reversal]);
+      toast.success('Contre-passe enregistrée.');
+      return;
+    }
     updateTransactions(transactions.filter((_, i) => i !== index));
-  }, [transactions, updateTransactions, readOnly]);
+  }, [transactions, updateTransactions, readOnly, report]);
 
   const handleUploadClick = (txId: string) => {
     if (readOnly) return;
