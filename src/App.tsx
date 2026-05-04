@@ -19,6 +19,8 @@ const Profile = lazy(() => import("@/pages/Profile"));
 const Guide = lazy(() => import("@/pages/Guide"));
 const AuditPage = lazy(() => import("@/pages/AuditPage"));
 const OrganizationSettings = lazy(() => import("@/pages/OrganizationSettings"));
+const FieldReports = lazy(() => import("@/pages/FieldReports"));
+const AdminSchema = lazy(() => import("@/pages/AdminSchema"));
 const Auth = lazy(() => import("@/pages/Auth"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
@@ -64,6 +66,8 @@ const App = () => (
                       <Route path="/guide" element={<Guide />} />
                       <Route path="/audit" element={<AuditPage />} />
                       <Route path="/organization" element={<OrganizationSettings />} />
+                      <Route path="/field-reports" element={<FieldReports />} />
+                      <Route path="/admin/schema" element={<AdminSchema />} />
                     </Route>
                   </Route>
                   <Route path="*" element={<NotFound />} />

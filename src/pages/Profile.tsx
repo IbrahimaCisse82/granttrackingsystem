@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { User, Save, Loader2 } from 'lucide-react';
+import MfaSection from '@/components/MfaSection';
 
 interface ProfileData {
   first_name: string;
@@ -76,6 +77,8 @@ export default function Profile() {
           </button>
         </div>
       </div>
+
+      <MfaSection />
     </div>
   );
 }
