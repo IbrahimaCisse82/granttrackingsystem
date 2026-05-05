@@ -229,6 +229,30 @@ export type Database = {
         }
         Relationships: []
       }
+      glossary: {
+        Row: {
+          created_at: string
+          definition: string
+          id: string
+          module: string | null
+          term: string
+        }
+        Insert: {
+          created_at?: string
+          definition: string
+          id?: string
+          module?: string | null
+          term: string
+        }
+        Update: {
+          created_at?: string
+          definition?: string
+          id?: string
+          module?: string | null
+          term?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
