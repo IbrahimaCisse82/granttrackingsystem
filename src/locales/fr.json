@@ -1,0 +1,50 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "loading": "Chargement…",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "export": "Exporter",
+    "actions": "Actions",
+    "yes": "Oui",
+    "no": "Non",
+    "close": "Fermer",
+    "confirm": "Confirmer",
+    "error": "Erreur",
+    "success": "Succès",
+    "warning": "Attention",
+    "noData": "Aucune donnée"
+  },
+  "export": {
+    "menu": "Exporter",
+    "pdf": "PDF (aperçu)",
+    "excel": "Excel",
+    "json": "JSON (admin)",
+    "preview": "Aperçu avant téléchargement",
+    "download": "Télécharger",
+    "filtersApplied": "Les filtres actifs sont appliqués"
+  },
+  "help": {
+    "open": "Aide",
+    "title": "Aide contextuelle",
+    "noContent": "Aucune aide disponible pour cette page."
+  },
+  "glossary": {
+    "tooltip": "Voir la définition"
+  },
+  "nav": {
+    "portfolio": "Portefeuille",
+    "dashboard": "Tableau de bord",
+    "projects": "Projets",
+    "audit": "Audit",
+    "organization": "Organisation",
+    "profile": "Profil",
+    "guide": "Guide",
+    "fieldReports": "Rapports terrain",
+    "schema": "Schéma BDD"
+  }
+}
