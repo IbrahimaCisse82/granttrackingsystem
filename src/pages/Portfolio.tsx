@@ -10,6 +10,9 @@ import CreateProjectDialog from '@/components/CreateProjectDialog';
 import { Plus, FolderOpen, Loader2, Search, Filter, X, Archive, ChevronLeft, ChevronRight, ArrowUpDown, FileDown } from 'lucide-react';
 import { toast } from 'sonner';
 import type { ProjectSortKey } from '@/hooks/useProjects';
+import { Skeleton } from '@/components/ui/skeleton';
+import { OnboardingTip } from '@/components/OnboardingTip';
+import { HelpButton } from '@/components/HelpButton';
 
 const RISK_OPTIONS = ['Faible risque', 'Risque modéré', 'Risque important', 'Risque élevé'];
 const SORT_OPTIONS: { value: ProjectSortKey; label: string }[] = [
@@ -136,14 +139,39 @@ export default function Portfolio() {
 
   if (isLoading && !isFetching) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-lg" />)}
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-40 rounded-lg" />)}
+        </div>
       </div>
     );
   }
 
   return (
     <div>
+      <OnboardingTip
+        moduleId="portfolio"
+        title="Bienvenue sur le portefeuille"
+        description="Retrouvez ici tous vos projets de subvention. Utilisez la recherche, les filtres et le tri pour naviguer, ou créez un nouveau projet via le bouton en haut à droite."
+      />
+      <HelpButton
+        title="Aide — Portefeuille"
+        content={
+          <>
+            <p>Le portefeuille liste tous les projets de votre organisation active.</p>
+            <ul>
+              <li><strong>Rechercher</strong> par organisation, convention ou titre.</li>
+              <li><strong>Filtrer</strong> par pays, niveau de risque ou archives.</li>
+              <li><strong>Exporter</strong> la liste filtrée en PDF.</li>
+              <li><strong>Créer un projet</strong> via le bouton « + Nouveau projet ».</li>
+            </ul>
+            <p>Cliquez sur une carte pour ouvrir le détail du projet.</p>
+          </>
+        }
+      />
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start justify-between mb-6 gap-3">
         <div>
