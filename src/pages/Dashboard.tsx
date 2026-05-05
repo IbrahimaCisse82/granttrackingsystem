@@ -31,6 +31,24 @@ export default function Dashboard() {
 
   return (
     <div>
+      <OnboardingTip
+        moduleId="dashboard"
+        title="Votre tableau de bord analytique"
+        description="Visualisez la consommation budgétaire, la répartition par bailleur et le risque global. Affinez les chiffres avec les filtres pays et périodicité."
+      />
+      <HelpButton
+        title="Aide — Tableau de bord"
+        content={
+          <>
+            <p>Indicateurs consolidés sur l'ensemble des projets non-archivés.</p>
+            <ul>
+              <li><strong>Filtres</strong> par pays et périodicité — l'export PDF respecte ces filtres.</li>
+              <li><strong>Taux de consommation</strong> = dépenses / budget initial.</li>
+              <li>Les données sont mises en cache 5 minutes pour des performances optimales.</li>
+            </ul>
+          </>
+        }
+      />
       <div className="mb-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-foreground">Tableau de bord</h1>
