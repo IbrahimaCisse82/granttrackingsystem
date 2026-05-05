@@ -7,6 +7,9 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pi
 import { Loader2, Filter, FileDown } from 'lucide-react';
 import { exportDashboardPDF } from '@/lib/export-dashboard-pdf';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
+import { OnboardingTip } from '@/components/OnboardingTip';
+import { HelpButton } from '@/components/HelpButton';
 
 const CHART_COLORS = ['hsl(204,100%,30%)', 'hsl(172,86%,32%)', 'hsl(28,91%,37%)', 'hsl(263,83%,42%)', 'hsl(343,86%,35%)', 'hsl(164,93%,20%)'];
 
