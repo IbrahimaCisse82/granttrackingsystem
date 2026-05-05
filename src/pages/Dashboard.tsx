@@ -7,6 +7,9 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pi
 import { Loader2, Filter, FileDown } from 'lucide-react';
 import { exportDashboardPDF } from '@/lib/export-dashboard-pdf';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
+import { OnboardingTip } from '@/components/OnboardingTip';
+import { HelpButton } from '@/components/HelpButton';
 
 const CHART_COLORS = ['hsl(204,100%,30%)', 'hsl(172,86%,32%)', 'hsl(28,91%,37%)', 'hsl(263,83%,42%)', 'hsl(343,86%,35%)', 'hsl(164,93%,20%)'];
 
@@ -28,6 +31,24 @@ export default function Dashboard() {
 
   return (
     <div>
+      <OnboardingTip
+        moduleId="dashboard"
+        title="Votre tableau de bord analytique"
+        description="Visualisez la consommation budgétaire, la répartition par bailleur et le risque global. Affinez les chiffres avec les filtres pays et périodicité."
+      />
+      <HelpButton
+        title="Aide — Tableau de bord"
+        content={
+          <>
+            <p>Indicateurs consolidés sur l'ensemble des projets non-archivés.</p>
+            <ul>
+              <li><strong>Filtres</strong> par pays et périodicité — l'export PDF respecte ces filtres.</li>
+              <li><strong>Taux de consommation</strong> = dépenses / budget initial.</li>
+              <li>Les données sont mises en cache 5 minutes pour des performances optimales.</li>
+            </ul>
+          </>
+        }
+      />
       <div className="mb-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-foreground">Tableau de bord</h1>
