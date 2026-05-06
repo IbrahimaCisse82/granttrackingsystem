@@ -1,80 +1,97 @@
-import { BookOpen, LayoutDashboard, FileText, DollarSign, ClipboardList, Users, Shield, ArrowRight } from 'lucide-react';
+import { useState } from 'react';
+import { BookOpen, LayoutDashboard, FileText, DollarSign, ClipboardList, Users, Shield, Receipt, Eye, Briefcase, ArrowRight } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-const sections = [
-  {
-    icon: <LayoutDashboard className="w-5 h-5" />,
-    title: 'Portefeuille & Dashboard',
-    content: 'La page Portefeuille affiche tous vos projets sous forme de cartes avec les métriques clés (budget, dépenses, risque). Le Dashboard fournit une vue analytique avec graphiques de répartition budgétaire, évolution des dépenses et distribution des risques.',
-  },
-  {
-    icon: <FileText className="w-5 h-5" />,
-    title: 'Créer un projet',
-    content: 'Cliquez sur "Nouveau projet" pour créer une convention. Renseignez le numéro de convention, l\'organisation bénéficiaire, le titre, le pays, la devise et les dates. Chaque projet est automatiquement structuré avec les onglets : Infos, Budget, Fiches, Rapports et Transactions.',
-  },
-  {
-    icon: <DollarSign className="w-5 h-5" />,
-    title: 'Budget (Annexe 1b)',
-    content: 'L\'onglet Budget permet de saisir les lignes budgétaires en deux sections : A (Coûts opérationnels) et B (Frais de gestion). Les montants sont saisis en FCFA et automatiquement convertis en EUR au taux de 655,957. Vous pouvez ajouter, modifier ou supprimer des lignes.',
-  },
-  {
-    icon: <ClipboardList className="w-5 h-5" />,
-    title: 'Rapports financiers',
-    content: 'Chaque rapport contient trois sous-sections : Dépenses engagées (réel de la période), Dépenses prévues (prévisions pour les périodes suivantes) et Réconciliation (comparaison budget vs dépenses avec avances et soldes). Les rapports passent par un workflow : Vide → En cours → Soumis → Validé.',
-  },
-  {
-    icon: <FileText className="w-5 h-5" />,
-    title: 'Transactions',
-    content: 'Chaque rapport est lié à une liste de transactions détaillées avec : code budgétaire, date, N° voucher, bénéficiaire, montant en devise locale, taux de change et montant EUR (calculé automatiquement). La variance entre le total des transactions et le rapport est affichée.',
-  },
-  {
-    icon: <Shield className="w-5 h-5" />,
-    title: 'Amendements budgétaires',
-    content: 'Les amendements (addenda) permettent de modifier le budget initial. Créez un amendement, ajoutez des lignes delta par code budgétaire, puis soumettez-le pour approbation. Statuts : Brouillon → Soumis → Approuvé/Rejeté.',
-  },
-  {
-    icon: <Users className="w-5 h-5" />,
-    title: 'Gestion des utilisateurs',
-    content: 'Les administrateurs peuvent créer des comptes, attribuer des rôles (Admin, Manager, Lecteur, Bénéficiaire) et gérer les accès. Chaque rôle a des permissions spécifiques : les bénéficiaires gèrent leurs projets, les managers supervisent, les admins ont un accès complet.',
-  },
+interface Section { icon: JSX.Element; title: string; content: string; }
+
+const COMMON: Section[] = [
+  { icon: <LayoutDashboard className="w-5 h-5" />, title: 'Portefeuille & Dashboard',
+    content: 'Le Portefeuille liste tous vos projets accessibles avec budget, dépenses et risque. Le Dashboard agrège les indicateurs (répartition budgétaire A/B, évolution des dépenses, distribution des risques, top bailleurs).' },
+  { icon: <BookOpen className="w-5 h-5" />, title: 'Notifications & aide contextuelle',
+    content: 'Les notifications en haut à droite signalent les soumissions, approbations et échéances. Le bouton « ? » flottant ouvre un panneau d\'aide adapté à la page courante.' },
 ];
 
+const ADMIN: Section[] = [
+  { icon: <Users className="w-5 h-5" />, title: 'Gestion des utilisateurs',
+    content: 'Depuis /admin, créez des comptes par invitation, attribuez les rôles (Admin, Manager, Lecteur, Bénéficiaire) et révoquez les accès. Les bénéficiaires doivent ensuite être assignés à un projet via l\'onglet Bénéficiaires du projet.' },
+  { icon: <DollarSign className="w-5 h-5" />, title: 'Devises & taux de change',
+    content: 'Dans Paramètres organisation → Devises, ajoutez les paires utilisées (EUR, USD, GBP…). Le taux FCFA→EUR de 655,957 reste actif par défaut. Chaque transaction peut utiliser son propre taux du jour.' },
+  { icon: <Shield className="w-5 h-5" />, title: 'Workflow d\'approbation',
+    content: 'Les rapports périodiques et amendements suivent un workflow Brouillon → Soumis → Approuvé/Rejeté. Seuls les admin et owner peuvent approuver. Une notification est envoyée à chaque transition et un rappel automatique est déclenché 48h avant la deadline.' },
+  { icon: <Receipt className="w-5 h-5" />, title: 'Audit trail',
+    content: 'Toutes les opérations sensibles (transactions, vouchers, rapports, amendements) sont tracées dans /audit avec utilisateur, action et horodatage. Les transactions ne se suppriment pas — utilisez la contre-passe.' },
+];
+
+const MANAGER: Section[] = [
+  { icon: <FileText className="w-5 h-5" />, title: 'Créer & piloter un projet',
+    content: 'Créez la convention (numéro, organisation, titre, pays, devise, dates). Saisissez le budget en deux sections A (opérationnel) et B (gestion). Ajoutez les bailleurs et leurs contributions.' },
+  { icon: <ClipboardList className="w-5 h-5" />, title: 'Rapports périodiques',
+    content: 'Renseignez Dépenses engagées, Prévisions et Réconciliation. Soumettez le rapport pour validation. Vous ne pouvez pas auto-approuver.' },
+  { icon: <Receipt className="w-5 h-5" />, title: 'Fiches de versement',
+    content: 'Liez à un rapport validé une fiche : numéro, montant local, devise, taux, date de paiement, références. Exportez en PDF pour le bailleur. Marquez-la « reçue » à réception effective.' },
+  { icon: <DollarSign className="w-5 h-5" />, title: 'Transactions & contre-passes',
+    content: 'Saisissez code budgétaire, voucher, bénéficiaire, montant, taux et justificatif. Pour corriger une transaction validée, utilisez la contre-passe (motif obligatoire) — la suppression est interdite.' },
+];
+
+const BENEFICIAIRE: Section[] = [
+  { icon: <Briefcase className="w-5 h-5" />, title: 'Vos projets assignés',
+    content: 'Le Portefeuille n\'affiche que les projets où vous êtes assigné·e comme bénéficiaire. Vous voyez les informations descriptives mais pas les détails budgétaires ni les transactions financières.' },
+  { icon: <FileText className="w-5 h-5" />, title: 'Rapports de terrain',
+    content: 'Depuis /field-reports, créez un rapport narratif avec indicateurs et pièces jointes pour la période. Statuts : Brouillon → Soumis → Revu. Vous ne voyez que vos propres soumissions.' },
+];
+
+const LECTEUR: Section[] = [
+  { icon: <Eye className="w-5 h-5" />, title: 'Mode lecture seule',
+    content: 'Vous pouvez consulter et exporter (PDF/Excel) toutes les données de l\'organisation, mais aucune création ni modification n\'est possible. Les boutons d\'édition sont masqués.' },
+];
+
+function List({ items }: { items: Section[] }) {
+  return (
+    <div className="space-y-3">
+      {items.map((s, i) => (
+        <div key={i} className="flex items-start gap-3 rounded-[10px] border bg-card p-4">
+          <div className="text-primary shrink-0">{s.icon}</div>
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-1">{s.title}</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">{s.content}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function Guide() {
+  const [tab, setTab] = useState('admin');
   return (
     <div className="max-w-3xl">
       <div className="mb-6">
         <h1 className="text-xl font-bold tracking-tight text-foreground">Guide d'utilisation</h1>
-        <p className="text-xs text-muted-foreground mt-1">GH-GTS · Grants Tracking System — Documentation fonctionnelle</p>
+        <p className="text-xs text-muted-foreground mt-1">GH-GTS · Documentation par rôle</p>
       </div>
 
-      <div className="flex items-start gap-2.5 rounded-[10px] border border-primary/30 bg-enabel-light p-4 text-xs text-enabel-dark mb-6">
-        <BookOpen className="w-5 h-5 mt-0.5 shrink-0" />
+      <div className="flex items-start gap-2.5 rounded-[10px] border border-primary/30 bg-primary/5 p-4 text-xs text-foreground mb-6">
+        <BookOpen className="w-5 h-5 mt-0.5 shrink-0 text-primary" />
         <div>
-          <p className="font-semibold mb-1">Bienvenue sur GH-GTS</p>
-          <p>Ce système permet le suivi financier complet des projets de subvention : budget, rapports, transactions, amendements et réconciliation. Toutes les modifications sont sauvegardées automatiquement.</p>
+          Sélectionnez votre rôle ci-dessous. Les sections « Commun » s'appliquent à tous.
+          <span className="inline-flex items-center gap-1 ml-1 text-primary">En savoir plus <ArrowRight className="w-3 h-3" /></span>
         </div>
       </div>
 
-      <div className="space-y-3">
-        {sections.map((s, i) => (
-          <div key={i} className="rounded-[10px] border border-rule bg-card overflow-hidden">
-            <div className="flex items-start gap-3 p-4">
-              <div className="rounded-lg bg-enabel-light p-2 text-primary shrink-0 mt-0.5">{s.icon}</div>
-              <div>
-                <h3 className="text-[13px] font-semibold text-foreground mb-1">{s.title}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">{s.content}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-6 rounded-[10px] bg-ink text-sidebar-foreground p-4">
-        <p className="text-xs font-semibold mb-1">Raccourcis clavier</p>
-        <div className="grid grid-cols-2 gap-2 text-[11px] text-sidebar-foreground/70">
-          <div className="flex items-center gap-2"><kbd className="rounded bg-sidebar-foreground/10 px-1.5 py-0.5 font-mono text-[10px]">Double-clic</kbd> Ouvrir un projet</div>
-          <div className="flex items-center gap-2"><kbd className="rounded bg-sidebar-foreground/10 px-1.5 py-0.5 font-mono text-[10px]">Recherche</kbd> Filtrer la sidebar</div>
-        </div>
-      </div>
+      <Tabs value={tab} onValueChange={setTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="admin">Admin</TabsTrigger>
+          <TabsTrigger value="manager">Manager</TabsTrigger>
+          <TabsTrigger value="beneficiaire">Bénéficiaire</TabsTrigger>
+          <TabsTrigger value="lecteur">Lecteur</TabsTrigger>
+          <TabsTrigger value="commun">Commun</TabsTrigger>
+        </TabsList>
+        <TabsContent value="admin"><List items={ADMIN} /></TabsContent>
+        <TabsContent value="manager"><List items={MANAGER} /></TabsContent>
+        <TabsContent value="beneficiaire"><List items={BENEFICIAIRE} /></TabsContent>
+        <TabsContent value="lecteur"><List items={LECTEUR} /></TabsContent>
+        <TabsContent value="commun"><List items={COMMON} /></TabsContent>
+      </Tabs>
     </div>
   );
 }
