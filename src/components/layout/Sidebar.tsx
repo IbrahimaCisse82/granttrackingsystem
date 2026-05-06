@@ -109,6 +109,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
         <NavItem icon={<History className="w-4 h-4" />} label="Historique" active={currentPath === '/audit'} onClick={() => navTo('/audit')} />
         <NavItem icon={<Building2 className="w-4 h-4" />} label="Organisation" active={currentPath === '/organization'} onClick={() => navTo('/organization')} />
         <NavItem icon={<ClipboardList className="w-4 h-4" />} label="Rapports terrain" active={currentPath === '/field-reports'} onClick={() => navTo('/field-reports')} />
+        <NavItem icon={<FileSpreadsheet className="w-4 h-4" />} label="Reporting bailleur" active={currentPath === '/donor-reports'} onClick={() => navTo('/donor-reports')} />
         {role === 'admin' && (
           <NavItem icon={<Database className="w-4 h-4" />} label="Schéma BDD" active={currentPath === '/admin/schema'} onClick={() => navTo('/admin/schema')} />
         )}
