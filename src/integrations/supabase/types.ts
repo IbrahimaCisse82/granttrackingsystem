@@ -128,6 +128,92 @@ export type Database = {
         }
         Relationships: []
       }
+      donor_report_runs: {
+        Row: {
+          generated_at: string
+          generated_by: string | null
+          id: string
+          organization_id: string
+          payload: Json
+          period_end: string
+          period_start: string
+          project_id: string
+          status: string
+          template_id: string
+        }
+        Insert: {
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          organization_id: string
+          payload?: Json
+          period_end: string
+          period_start: string
+          project_id: string
+          status?: string
+          template_id: string
+        }
+        Update: {
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          organization_id?: string
+          payload?: Json
+          period_end?: string
+          period_start?: string
+          project_id?: string
+          status?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donor_report_runs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "donor_report_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      donor_report_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          currency: string
+          donor_name: string
+          id: string
+          name: string
+          organization_id: string
+          periodicity: string
+          sections: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          donor_name: string
+          id?: string
+          name: string
+          organization_id: string
+          periodicity?: string
+          sections?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          donor_name?: string
+          id?: string
+          name?: string
+          organization_id?: string
+          periodicity?: string
+          sections?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       exchange_rates: {
         Row: {
           created_at: string
