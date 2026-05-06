@@ -739,6 +739,7 @@ export type Database = {
         Args: { _project_id: string; _user_id: string }
         Returns: boolean
       }
+      send_report_deadline_reminders: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "manager" | "lecteur" | "beneficiaire"
