@@ -70,6 +70,7 @@ const App = () => (
                       <Route path="/organization" element={<OrganizationSettings />} />
                       <Route path="/field-reports" element={<FieldReports />} />
                       <Route path="/admin/schema" element={<AdminSchema />} />
+                      <Route path="/donor-reports" element={<DonorReports />} />
                     </Route>
                   </Route>
                   <Route path="*" element={<NotFound />} />
