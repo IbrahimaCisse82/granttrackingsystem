@@ -21,6 +21,7 @@ const AuditPage = lazy(() => import("@/pages/AuditPage"));
 const OrganizationSettings = lazy(() => import("@/pages/OrganizationSettings"));
 const FieldReports = lazy(() => import("@/pages/FieldReports"));
 const AdminSchema = lazy(() => import("@/pages/AdminSchema"));
+const DonorReports = lazy(() => import("@/pages/DonorReports"));
 const Auth = lazy(() => import("@/pages/Auth"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
