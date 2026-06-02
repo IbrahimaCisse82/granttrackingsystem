@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 const PAGE_SIZE = 12;
 
 // Map DB row to Project interface
-function rowToProject(row: any): Project & { userId: string; archived: boolean; organizationId?: string } {
+function rowToProject(row: any): Project & { userId: string; archived: boolean; organizationId?: string; version: number } {
   return {
     id: row.id,
     convention: row.convention,
@@ -35,6 +35,7 @@ function rowToProject(row: any): Project & { userId: string; archived: boolean; 
     userId: row.user_id,
     archived: row.archived ?? false,
     organizationId: row.organization_id,
+    version: row.version ?? 1,
   };
 }
 
@@ -170,11 +171,17 @@ export function useProjects(filters?: ProjectFilters) {
       if ((updates as any).indicators !== undefined) row.indicators = (updates as any).indicators as any;
       if ((updates as any).bailleurs !== undefined) row.bailleurs = (updates as any).bailleurs as any;
 
-      const { error } = await supabase
-        .from('projects')
-        .update(row)
-        .eq('id', id);
+      // Optimistic locking: get current version from cache, send .eq('version', v)
+      const current = (result.projects as any[]).find(p => p.id === id);
+      const expectedVersion: number | undefined = current?.version;
+
+      let q = supabase.from('projects').update(row).eq('id', id);
+      if (typeof expectedVersion === 'number') q = q.eq('version', expectedVersion);
+      const { data, error } = await q.select('id, version').maybeSingle();
       if (error) throw error;
+      if (!data && typeof expectedVersion === 'number') {
+        throw new Error('Conflit de version : ce projet a été modifié par un autre utilisateur. Rechargez la page.');
+      }
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
     onError: (e) => toast.error('Erreur: ' + e.message),
