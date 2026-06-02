@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 const PAGE_SIZE = 12;
 
 // Map DB row to Project interface
-function rowToProject(row: any): Project & { userId: string; archived: boolean; organizationId?: string } {
+function rowToProject(row: any): Project & { userId: string; archived: boolean; organizationId?: string; version: number } {
   return {
     id: row.id,
     convention: row.convention,
@@ -35,6 +35,7 @@ function rowToProject(row: any): Project & { userId: string; archived: boolean; 
     userId: row.user_id,
     archived: row.archived ?? false,
     organizationId: row.organization_id,
+    version: row.version ?? 1,
   };
 }
 
