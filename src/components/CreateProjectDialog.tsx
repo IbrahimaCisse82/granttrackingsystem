@@ -6,8 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProjects } from '@/hooks/useProjects';
 import { Plus } from 'lucide-react';
+import { toast } from 'sonner';
 import type { Project } from '@/lib/types';
 import { createEmptyReport, getReportCount } from '@/lib/utils-project';
+import { projectCreateSchema, formatZodError } from '@/lib/schemas';
 
 const COLORS = [
   { stripe: '#005B99', badge: 'b-blue' },
@@ -45,15 +47,29 @@ export default function CreateProjectDialog({ trigger }: { trigger?: React.React
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.convention.trim() || !form.org.trim() || !form.title.trim()) return;
+    const parsed = projectCreateSchema.safeParse(form);
+    if (!parsed.success) {
+      toast.error(formatZodError(parsed.error));
+      return;
+    }
+    const data = parsed.data;
 
     const colorIndex = Math.floor(Math.random() * COLORS.length);
-    const reportCount = getReportCount(form.periodicite);
+    const reportCount = getReportCount(data.periodicite || '');
     const reports = Array.from({ length: reportCount }, () => createEmptyReport());
 
     const project: Omit<Project, 'id' | 'createdAt'> = {
-      ...form,
-      taux: Number(form.taux),
+      convention: data.convention,
+      org: data.org,
+      title: data.title,
+      devise: data.devise,
+      orgType: data.orgType ?? '',
+      pays: data.pays ?? '',
+      risque: data.risque ?? '',
+      debut: data.debut ?? '',
+      fin: data.fin ?? '',
+      periodicite: data.periodicite ?? '',
+      taux: Number(data.taux),
       color: COLORS[colorIndex],
       budgetLines: [],
       reports,
