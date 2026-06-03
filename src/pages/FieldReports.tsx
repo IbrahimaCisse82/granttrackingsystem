@@ -61,14 +61,20 @@ export default function FieldReports() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !activeOrg || !form.project_id) return;
+    if (!user || !activeOrg) return;
+    const parsed = fieldReportSchema.safeParse(form);
+    if (!parsed.success) {
+      toast.error(formatZodError(parsed.error));
+      return;
+    }
+    const d = parsed.data;
     create.mutate({
-      project_id: form.project_id,
+      project_id: d.project_id,
       organization_id: activeOrg.id,
       beneficiary_id: user.id,
-      period_start: form.period_start,
-      period_end: form.period_end,
-      narrative: form.narrative,
+      period_start: d.period_start,
+      period_end: d.period_end,
+      narrative: d.narrative,
       indicators: [],
       attachments: [],
       status: 'draft',
