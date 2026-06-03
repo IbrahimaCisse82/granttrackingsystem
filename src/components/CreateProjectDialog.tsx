@@ -63,7 +63,6 @@ export default function CreateProjectDialog({ trigger }: { trigger?: React.React
       org: data.org,
       title: data.title,
       devise: data.devise,
-      currency: data.currency,
       orgType: data.orgType ?? '',
       pays: data.pays ?? '',
       risque: data.risque ?? '',
