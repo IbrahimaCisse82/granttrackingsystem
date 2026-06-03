@@ -6,8 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProjects } from '@/hooks/useProjects';
 import { Plus } from 'lucide-react';
+import { toast } from 'sonner';
 import type { Project } from '@/lib/types';
 import { createEmptyReport, getReportCount } from '@/lib/utils-project';
+import { projectCreateSchema, formatZodError } from '@/lib/schemas';
 
 const COLORS = [
   { stripe: '#005B99', badge: 'b-blue' },
