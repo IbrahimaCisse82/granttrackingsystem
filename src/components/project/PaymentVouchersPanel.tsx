@@ -52,23 +52,27 @@ export default function PaymentVouchersPanel({ project }: Props) {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!activeOrg || !form.voucher_number.trim() || !form.amount_local) return;
-    const amount = Number(form.amount_local);
-    const rate = Number(form.exchange_rate) || 1;
+    if (!activeOrg) return;
+    const parsed = paymentVoucherSchema.safeParse(form);
+    if (!parsed.success) {
+      toast.error(formatZodError(parsed.error));
+      return;
+    }
+    const d = parsed.data;
     add.mutate({
       project_id: project.id,
       organization_id: activeOrg.id,
       report_id: null,
-      voucher_number: form.voucher_number.trim(),
-      amount_local: amount,
-      amount_eur: rate > 0 ? Math.round((amount / rate) * 100) / 100 : amount,
-      currency: form.currency,
-      exchange_rate: rate,
-      payment_date: form.payment_date,
-      donor_reference: form.donor_reference || null,
-      bank_reference: form.bank_reference || null,
+      voucher_number: d.voucher_number,
+      amount_local: d.amount_local,
+      amount_eur: d.exchange_rate > 0 ? Math.round((d.amount_local / d.exchange_rate) * 100) / 100 : d.amount_local,
+      currency: d.currency,
+      exchange_rate: d.exchange_rate,
+      payment_date: d.payment_date,
+      donor_reference: d.donor_reference || null,
+      bank_reference: d.bank_reference || null,
       status: 'pending',
-      notes: form.notes || null,
+      notes: d.notes || null,
     }, {
       onSuccess: () => { reset(); setOpen(false); },
     });
