@@ -59,7 +59,11 @@ export default function CreateProjectDialog({ trigger }: { trigger?: React.React
     const reports = Array.from({ length: reportCount }, () => createEmptyReport());
 
     const project: Omit<Project, 'id' | 'createdAt'> = {
-      ...data,
+      convention: data.convention,
+      org: data.org,
+      title: data.title,
+      devise: data.devise,
+      currency: data.currency,
       orgType: data.orgType ?? '',
       pays: data.pays ?? '',
       risque: data.risque ?? '',
