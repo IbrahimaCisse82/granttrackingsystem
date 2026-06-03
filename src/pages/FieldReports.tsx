@@ -12,6 +12,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ClipboardList, Send, CheckCircle2, Clock, FileEdit } from 'lucide-react';
+import { toast } from 'sonner';
+import { fieldReportSchema, formatZodError } from '@/lib/schemas';
 
 const STATUS: Record<string, { label: string; cls: string; icon: React.ReactNode }> = {
   draft: { label: 'Brouillon', cls: 'bg-muted text-muted-foreground', icon: <FileEdit className="w-3 h-3" /> },
