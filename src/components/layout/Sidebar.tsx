@@ -113,6 +113,9 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
         {role === 'admin' && (
           <NavItem icon={<Database className="w-4 h-4" />} label="Schéma BDD" active={currentPath === '/admin/schema'} onClick={() => navTo('/admin/schema')} />
         )}
+        {role === 'admin' && (
+          <NavItem icon={<Bug className="w-4 h-4" />} label="Journal d'erreurs" active={currentPath === '/admin/errors'} onClick={() => navTo('/admin/errors')} />
+        )}
         <NavItem icon={<UserCircle className="w-4 h-4" />} label="Mon profil" active={currentPath === '/profile'} onClick={() => navTo('/profile')} />
       </nav>
 
