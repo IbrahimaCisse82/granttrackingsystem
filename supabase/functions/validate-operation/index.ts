@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { checkRateLimit, getIdentifier, rateLimitResponse } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -25,6 +26,12 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY')!,
       { global: { headers: { Authorization: auth } } }
     );
+
+    const { data: { user: caller } } = await supabase.auth.getUser();
+
+    // Rate limit: max 120 validation calls per minute per user/IP
+    const rl = await checkRateLimit(getIdentifier(req, caller?.id), 'validate-operation', 120, 60);
+    if (!rl.allowed) return rateLimitResponse(rl, corsHeaders);
 
     const body: ValidateBody = await req.json();
     if (!body.project_id || !body.action) return json({ error: 'Paramètres manquants', code: 'BAD_REQUEST' }, 400);

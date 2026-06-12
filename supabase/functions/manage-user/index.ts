@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.98.0";
+import { checkRateLimit, getIdentifier, rateLimitResponse } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,6 +24,10 @@ Deno.serve(async (req) => {
     });
     const { data: { user: caller } } = await anonClient.auth.getUser();
     if (!caller) throw new Error("Non autorisé");
+
+    // Rate limit: max 20 admin actions per minute per user
+    const rl = await checkRateLimit(getIdentifier(req, caller.id), "manage-user", 20, 60);
+    if (!rl.allowed) return rateLimitResponse(rl, corsHeaders);
 
     // Check admin role
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
