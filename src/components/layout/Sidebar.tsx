@@ -4,7 +4,7 @@ import { useProjects } from '@/hooks/useProjects';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-import { ChevronRight, LayoutDashboard, BookOpen, Users, Search, BarChart3, UserCircle, History, Building2, ClipboardList, Database, FileSpreadsheet } from 'lucide-react';
+import { ChevronRight, LayoutDashboard, BookOpen, Users, Search, BarChart3, UserCircle, History, Building2, ClipboardList, Database, FileSpreadsheet, Bug } from 'lucide-react';
 import { getReportCount } from '@/lib/utils-project';
 import OrgSwitcher from '@/components/OrgSwitcher';
 import logo from '@/assets/logo-growhub.png';
@@ -112,6 +112,9 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
         <NavItem icon={<FileSpreadsheet className="w-4 h-4" />} label="Reporting bailleur" active={currentPath === '/donor-reports'} onClick={() => navTo('/donor-reports')} />
         {role === 'admin' && (
           <NavItem icon={<Database className="w-4 h-4" />} label="Schéma BDD" active={currentPath === '/admin/schema'} onClick={() => navTo('/admin/schema')} />
+        )}
+        {role === 'admin' && (
+          <NavItem icon={<Bug className="w-4 h-4" />} label="Journal d'erreurs" active={currentPath === '/admin/errors'} onClick={() => navTo('/admin/errors')} />
         )}
         <NavItem icon={<UserCircle className="w-4 h-4" />} label="Mon profil" active={currentPath === '/profile'} onClick={() => navTo('/profile')} />
       </nav>
