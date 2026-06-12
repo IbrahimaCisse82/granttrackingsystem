@@ -98,6 +98,56 @@ export type Database = {
         }
         Relationships: []
       }
+      client_errors: {
+        Row: {
+          app_version: string | null
+          context: Json
+          created_at: string
+          id: string
+          message: string
+          organization_id: string | null
+          severity: string
+          stack: string | null
+          url: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          app_version?: string | null
+          context?: Json
+          created_at?: string
+          id?: string
+          message: string
+          organization_id?: string | null
+          severity?: string
+          stack?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          app_version?: string | null
+          context?: Json
+          created_at?: string
+          id?: string
+          message?: string
+          organization_id?: string | null
+          severity?: string
+          stack?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_errors_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           content: string
