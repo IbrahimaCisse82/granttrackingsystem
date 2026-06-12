@@ -72,7 +72,7 @@ export default function AdminErrors() {
             <RefreshCw className="w-4 h-4 mr-1.5" /> Actualiser
           </Button>
           <Button size="sm" variant="outline" onClick={() => purge.mutate()} disabled={purge.isPending}>
-            <Trash2 className="w-4 h-4 mr-1.5" /> Purger > 30j
+            <Trash2 className="w-4 h-4 mr-1.5" /> Purger &gt; 30j
           </Button>
         </div>
       </div>
