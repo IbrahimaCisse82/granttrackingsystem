@@ -4,7 +4,7 @@ import { useProjects } from '@/hooks/useProjects';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-import { ChevronRight, LayoutDashboard, BookOpen, Users, Search, BarChart3, UserCircle, History, Building2, ClipboardList, Database, FileSpreadsheet } from 'lucide-react';
+import { ChevronRight, LayoutDashboard, BookOpen, Users, Search, BarChart3, UserCircle, History, Building2, ClipboardList, Database, FileSpreadsheet, Bug } from 'lucide-react';
 import { getReportCount } from '@/lib/utils-project';
 import OrgSwitcher from '@/components/OrgSwitcher';
 import logo from '@/assets/logo-growhub.png';
