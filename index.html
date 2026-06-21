@@ -3,13 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Security headers (meta-equivalent; full set should also be served via HTTP headers at the edge) -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://*.lovable.app https://*.lovable.dev https://cdn.gpteng.co;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' data: https://fonts.gstatic.com;
+      img-src 'self' data: blob: https:;
+      connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.lovable.app https://*.lovable.dev https://api.openai.com https://ai.gateway.lovable.dev;
+      frame-ancestors 'self' https://*.lovable.app https://*.lovable.dev;
+      base-uri 'self';
+      form-action 'self';
+      object-src 'none';
+      upgrade-insecure-requests;
+    " />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=()" />
+
     <script>try{if(localStorage.getItem('gh-gts-dark-mode')==='true')document.documentElement.classList.add('dark')}catch(e){}</script>
     <title>GH-GTS — Grants Tracking System</title>
     <meta name="description" content="Grow Hub SARL — Système de suivi et gestion des subventions" />
     <meta name="author" content="Grow Hub SARL" />
+    <link rel="canonical" href="https://gh-gts.lovable.app/" />
     <meta property="og:title" content="GH-GTS — Grants Tracking System" />
     <meta property="og:description" content="Système de suivi et gestion des subventions" />
     <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
 
   <body>
