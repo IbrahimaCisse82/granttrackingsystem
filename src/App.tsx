@@ -22,6 +22,7 @@ const OrganizationSettings = lazy(() => import("@/pages/OrganizationSettings"));
 const FieldReports = lazy(() => import("@/pages/FieldReports"));
 const AdminSchema = lazy(() => import("@/pages/AdminSchema"));
 const AdminErrors = lazy(() => import("@/pages/AdminErrors"));
+const AdminHealth = lazy(() => import("@/pages/AdminHealth"));
 const DonorReports = lazy(() => import("@/pages/DonorReports"));
 const Auth = lazy(() => import("@/pages/Auth"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
@@ -72,6 +73,7 @@ const App = () => (
                       <Route path="/field-reports" element={<FieldReports />} />
                       <Route path="/admin/schema" element={<AdminSchema />} />
                       <Route path="/admin/errors" element={<AdminErrors />} />
+                      <Route path="/admin/health" element={<AdminHealth />} />
                       <Route path="/donor-reports" element={<DonorReports />} />
                     </Route>
                   </Route>
