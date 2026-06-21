@@ -917,6 +917,7 @@ export type Database = {
       send_report_deadline_reminders: { Args: never; Returns: undefined }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      storage_object_project_id: { Args: { _name: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "manager" | "lecteur" | "beneficiaire"
