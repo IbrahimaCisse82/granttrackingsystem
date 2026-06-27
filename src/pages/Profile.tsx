@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { User, Save, Loader2 } from 'lucide-react';
 import MfaSection from '@/components/MfaSection';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 interface ProfileData {
   first_name: string;
@@ -79,6 +80,7 @@ export default function Profile() {
       </div>
 
       <MfaSection />
+      <LanguageSwitcher />
     </div>
   );
 }
