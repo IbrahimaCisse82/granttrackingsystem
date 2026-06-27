@@ -1,0 +1,54 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "loading": "Loading…",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "actions": "Actions",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close",
+    "confirm": "Confirm",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "noData": "No data"
+  },
+  "export": {
+    "menu": "Export",
+    "pdf": "PDF (preview)",
+    "excel": "Excel",
+    "json": "JSON (admin)",
+    "preview": "Preview before download",
+    "download": "Download",
+    "filtersApplied": "Active filters are applied"
+  },
+  "help": {
+    "open": "Help",
+    "title": "Contextual help",
+    "noContent": "No help available for this page."
+  },
+  "glossary": {
+    "tooltip": "View definition"
+  },
+  "nav": {
+    "portfolio": "Portfolio",
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "audit": "Audit",
+    "organization": "Organization",
+    "profile": "Profile",
+    "guide": "Guide",
+    "fieldReports": "Field reports",
+    "schema": "DB schema"
+  },
+  "profile": {
+    "language": "Language",
+    "languageHint": "Interface language preference"
+  }
+}
