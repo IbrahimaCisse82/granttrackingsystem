@@ -19,6 +19,7 @@ export default function Dashboard() {
   const [paysFilter, setPaysFilter] = useState('');
   const [periodeFilter, setPeriodeFilter] = useState('');
   const { activeOrg } = useOrganization();
+  const { data: burnRate } = useBurnRate();
 
   const { data: metrics, isLoading } = useDashboardMetrics({
     pays: paysFilter,
