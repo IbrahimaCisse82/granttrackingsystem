@@ -99,11 +99,16 @@ export default function Dashboard() {
         <span className="ml-auto text-[11px] text-muted-foreground">{metrics.totalProjects} projet(s)</span>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5 mb-6">
         <MetricCard label="Projets actifs" value={String(metrics.totalProjects)} accentColor="blue" />
         <MetricCard label="Budget total" value={`${fmt(metrics.totalBudget)} €`} accentColor="teal" />
         <MetricCard label="Dépenses engagées" value={`${fmt(metrics.totalDepenses)} €`} note={`${tauxConsommation}% consommé`} accentColor="amber" />
         <MetricCard label="Rapports validés" value={String(metrics.totalRapports)} accentColor="emerald" />
+        <MetricCard label="Projets en alerte" value={String(burnRate?.alertCount ?? 0)} note="Écart burn/temps > 15%" accentColor="rose" />
+      </div>
+
+      <div className="mb-4">
+        <BurnRateTable />
       </div>
 
       {/* Charts row 1 */}
