@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
+import { useBurnRate } from '@/hooks/useBurnRate';
 import { useOrganization } from '@/hooks/useOrganization';
 import { fmt } from '@/lib/utils-project';
 import MetricCard from '@/components/MetricCard';
+import BurnRateTable from '@/components/BurnRateTable';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend } from 'recharts';
 import { Loader2, Filter, FileDown } from 'lucide-react';
 import { exportDashboardPDF } from '@/lib/export-dashboard-pdf';
