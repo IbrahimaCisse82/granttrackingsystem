@@ -721,6 +721,66 @@ export type Database = {
         }
         Relationships: []
       }
+      project_closure_checklists: {
+        Row: {
+          checked: boolean
+          checked_at: string | null
+          checked_by: string | null
+          created_at: string
+          id: string
+          item_key: string
+          item_label: string
+          item_order: number
+          notes: string | null
+          organization_id: string
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          checked?: boolean
+          checked_at?: string | null
+          checked_by?: string | null
+          created_at?: string
+          id?: string
+          item_key: string
+          item_label: string
+          item_order?: number
+          notes?: string | null
+          organization_id: string
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          checked?: boolean
+          checked_at?: string | null
+          checked_by?: string | null
+          created_at?: string
+          id?: string
+          item_key?: string
+          item_label?: string
+          item_order?: number
+          notes?: string | null
+          organization_id?: string
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_closure_checklists_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_closure_checklists_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           amendements: Json
@@ -914,6 +974,10 @@ export type Database = {
       is_project_beneficiary: {
         Args: { _project_id: string; _user_id: string }
         Returns: boolean
+      }
+      seed_closure_checklist: {
+        Args: { _project_id: string }
+        Returns: undefined
       }
       send_report_deadline_reminders: { Args: never; Returns: undefined }
       show_limit: { Args: never; Returns: number }
