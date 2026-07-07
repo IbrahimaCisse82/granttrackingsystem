@@ -781,6 +781,75 @@ export type Database = {
           },
         ]
       }
+      project_risks: {
+        Row: {
+          category: Database["public"]["Enums"]["risk_category"]
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          impact: number
+          likelihood: number
+          mitigation: string | null
+          organization_id: string
+          owner: string | null
+          project_id: string
+          review_date: string | null
+          score: number | null
+          status: Database["public"]["Enums"]["risk_status"]
+          updated_at: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["risk_category"]
+          created_at?: string
+          created_by?: string | null
+          description: string
+          id?: string
+          impact: number
+          likelihood: number
+          mitigation?: string | null
+          organization_id: string
+          owner?: string | null
+          project_id: string
+          review_date?: string | null
+          score?: number | null
+          status?: Database["public"]["Enums"]["risk_status"]
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["risk_category"]
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          impact?: number
+          likelihood?: number
+          mitigation?: string | null
+          organization_id?: string
+          owner?: string | null
+          project_id?: string
+          review_date?: string | null
+          score?: number | null
+          status?: Database["public"]["Enums"]["risk_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_risks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_risks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           amendements: Json
@@ -986,6 +1055,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "manager" | "lecteur" | "beneficiaire"
+      risk_category:
+        | "operational"
+        | "financial"
+        | "security"
+        | "reputation"
+        | "compliance"
+        | "other"
+      risk_status: "open" | "mitigated" | "closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1114,6 +1191,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "manager", "lecteur", "beneficiaire"],
+      risk_category: [
+        "operational",
+        "financial",
+        "security",
+        "reputation",
+        "compliance",
+        "other",
+      ],
+      risk_status: ["open", "mitigated", "closed"],
     },
   },
 } as const
