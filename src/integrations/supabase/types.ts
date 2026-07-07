@@ -882,6 +882,7 @@ export type Database = {
         Args: { _description?: string; _name: string; _slug: string }
         Returns: string
       }
+      get_burn_rate_analysis: { Args: { _org_id?: string }; Returns: Json }
       get_dashboard_metrics: {
         Args: { _org_id?: string; _pays?: string; _periodicite?: string }
         Returns: Json
