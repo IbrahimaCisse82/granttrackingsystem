@@ -12,6 +12,8 @@ import ProjectTransactions from '@/components/project/ProjectTransactions';
 import ProjectAmendements from '@/components/project/ProjectAmendements';
 import ProjectIndicators from '@/components/project/ProjectIndicators';
 import ProjectBailleurs from '@/components/project/ProjectBailleurs';
+import ProjectRiskRegister from '@/components/project/ProjectRiskRegister';
+import ProjectClosurePanel from '@/components/project/ProjectClosurePanel';
 import SaveIndicator from '@/components/SaveIndicator';
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { getReportCount } from '@/lib/utils-project';
@@ -62,7 +64,9 @@ export default function ProjectView() {
       fiche: <ProjectFiche project={project} onSave={save} readOnly={readOnly} />,
       indicateurs: <ProjectIndicators project={project} onSave={save} readOnly={readOnly} />,
       bailleurs: <ProjectBailleurs project={project} onSave={save} readOnly={readOnly} />,
+      risques: <ProjectRiskRegister project={project} readOnly={readOnly} />,
       amendements: <ProjectAmendements project={project} onSave={save} readOnly={readOnly} />,
+      cloture: <ProjectClosurePanel project={project} readOnly={readOnly} />,
     };
     for (let i = 1; i <= reportCount; i++) {
       map[`rapport-${i}`] = <ProjectReport project={project} reportIndex={i - 1} onSave={save} readOnly={readOnly} />;

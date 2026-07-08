@@ -721,6 +721,135 @@ export type Database = {
         }
         Relationships: []
       }
+      project_closure_checklists: {
+        Row: {
+          checked: boolean
+          checked_at: string | null
+          checked_by: string | null
+          created_at: string
+          id: string
+          item_key: string
+          item_label: string
+          item_order: number
+          notes: string | null
+          organization_id: string
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          checked?: boolean
+          checked_at?: string | null
+          checked_by?: string | null
+          created_at?: string
+          id?: string
+          item_key: string
+          item_label: string
+          item_order?: number
+          notes?: string | null
+          organization_id: string
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          checked?: boolean
+          checked_at?: string | null
+          checked_by?: string | null
+          created_at?: string
+          id?: string
+          item_key?: string
+          item_label?: string
+          item_order?: number
+          notes?: string | null
+          organization_id?: string
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_closure_checklists_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_closure_checklists_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_risks: {
+        Row: {
+          category: Database["public"]["Enums"]["risk_category"]
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          impact: number
+          likelihood: number
+          mitigation: string | null
+          organization_id: string
+          owner: string | null
+          project_id: string
+          review_date: string | null
+          score: number | null
+          status: Database["public"]["Enums"]["risk_status"]
+          updated_at: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["risk_category"]
+          created_at?: string
+          created_by?: string | null
+          description: string
+          id?: string
+          impact: number
+          likelihood: number
+          mitigation?: string | null
+          organization_id: string
+          owner?: string | null
+          project_id: string
+          review_date?: string | null
+          score?: number | null
+          status?: Database["public"]["Enums"]["risk_status"]
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["risk_category"]
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          impact?: number
+          likelihood?: number
+          mitigation?: string | null
+          organization_id?: string
+          owner?: string | null
+          project_id?: string
+          review_date?: string | null
+          score?: number | null
+          status?: Database["public"]["Enums"]["risk_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_risks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_risks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           amendements: Json
@@ -882,6 +1011,7 @@ export type Database = {
         Args: { _description?: string; _name: string; _slug: string }
         Returns: string
       }
+      get_burn_rate_analysis: { Args: { _org_id?: string }; Returns: Json }
       get_dashboard_metrics: {
         Args: { _org_id?: string; _pays?: string; _periodicite?: string }
         Returns: Json
@@ -914,6 +1044,10 @@ export type Database = {
         Args: { _project_id: string; _user_id: string }
         Returns: boolean
       }
+      seed_closure_checklist: {
+        Args: { _project_id: string }
+        Returns: undefined
+      }
       send_report_deadline_reminders: { Args: never; Returns: undefined }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
@@ -921,6 +1055,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "manager" | "lecteur" | "beneficiaire"
+      risk_category:
+        | "operational"
+        | "financial"
+        | "security"
+        | "reputation"
+        | "compliance"
+        | "other"
+      risk_status: "open" | "mitigated" | "closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1049,6 +1191,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "manager", "lecteur", "beneficiaire"],
+      risk_category: [
+        "operational",
+        "financial",
+        "security",
+        "reputation",
+        "compliance",
+        "other",
+      ],
+      risk_status: ["open", "mitigated", "closed"],
     },
   },
 } as const

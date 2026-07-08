@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
+import { useBurnRate } from '@/hooks/useBurnRate';
 import { useOrganization } from '@/hooks/useOrganization';
 import { fmt } from '@/lib/utils-project';
 import MetricCard from '@/components/MetricCard';
+import BurnRateTable from '@/components/BurnRateTable';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend } from 'recharts';
 import { Loader2, Filter, FileDown } from 'lucide-react';
 import { exportDashboardPDF } from '@/lib/export-dashboard-pdf';
@@ -17,6 +19,7 @@ export default function Dashboard() {
   const [paysFilter, setPaysFilter] = useState('');
   const [periodeFilter, setPeriodeFilter] = useState('');
   const { activeOrg } = useOrganization();
+  const { data: burnRate } = useBurnRate();
 
   const { data: metrics, isLoading } = useDashboardMetrics({
     pays: paysFilter,
@@ -96,11 +99,16 @@ export default function Dashboard() {
         <span className="ml-auto text-[11px] text-muted-foreground">{metrics.totalProjects} projet(s)</span>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5 mb-6">
         <MetricCard label="Projets actifs" value={String(metrics.totalProjects)} accentColor="blue" />
         <MetricCard label="Budget total" value={`${fmt(metrics.totalBudget)} €`} accentColor="teal" />
         <MetricCard label="Dépenses engagées" value={`${fmt(metrics.totalDepenses)} €`} note={`${tauxConsommation}% consommé`} accentColor="amber" />
         <MetricCard label="Rapports validés" value={String(metrics.totalRapports)} accentColor="emerald" />
+        <MetricCard label="Projets en alerte" value={String(burnRate?.alertCount ?? 0)} note="Écart burn/temps > 15%" accentColor="rose" />
+      </div>
+
+      <div className="mb-4">
+        <BurnRateTable />
       </div>
 
       {/* Charts row 1 */}

@@ -28,7 +28,9 @@ function buildSectionTabs(periodicite: string) {
     { id: 'fiche', label: 'Fiche récapitulative', color: '#0D9488' },
     { id: 'indicateurs', label: 'Suivi programmatique', color: '#059669' },
     { id: 'bailleurs', label: 'Bailleurs / Financements', color: '#6366F1' },
+    { id: 'risques', label: 'Registre des risques', color: '#DC2626' },
     { id: 'amendements', label: 'Amendements', color: '#7C3AED' },
+    { id: 'cloture', label: 'Clôture du projet', color: '#0EA5E9' },
   ];
 
   for (let i = 1; i <= count; i++) {
