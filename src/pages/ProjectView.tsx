@@ -12,6 +12,8 @@ import ProjectTransactions from '@/components/project/ProjectTransactions';
 import ProjectAmendements from '@/components/project/ProjectAmendements';
 import ProjectIndicators from '@/components/project/ProjectIndicators';
 import ProjectBailleurs from '@/components/project/ProjectBailleurs';
+import ProjectRiskRegister from '@/components/project/ProjectRiskRegister';
+import ProjectClosurePanel from '@/components/project/ProjectClosurePanel';
 import SaveIndicator from '@/components/SaveIndicator';
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { getReportCount } from '@/lib/utils-project';
