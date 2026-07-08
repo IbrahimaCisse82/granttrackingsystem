@@ -64,7 +64,9 @@ export default function ProjectView() {
       fiche: <ProjectFiche project={project} onSave={save} readOnly={readOnly} />,
       indicateurs: <ProjectIndicators project={project} onSave={save} readOnly={readOnly} />,
       bailleurs: <ProjectBailleurs project={project} onSave={save} readOnly={readOnly} />,
+      risques: <ProjectRiskRegister project={project} readOnly={readOnly} />,
       amendements: <ProjectAmendements project={project} onSave={save} readOnly={readOnly} />,
+      cloture: <ProjectClosurePanel project={project} readOnly={readOnly} />,
     };
     for (let i = 1; i <= reportCount; i++) {
       map[`rapport-${i}`] = <ProjectReport project={project} reportIndex={i - 1} onSave={save} readOnly={readOnly} />;
