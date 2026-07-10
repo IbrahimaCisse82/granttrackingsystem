@@ -178,6 +178,106 @@ export type Database = {
         }
         Relationships: []
       }
+      donor_document_checklist: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          doc_key: string
+          doc_label: string
+          donor_name: string
+          id: string
+          mandatory: boolean
+          notes: string | null
+          organization_id: string
+          phase: Database["public"]["Enums"]["donor_doc_phase"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          doc_key: string
+          doc_label: string
+          donor_name: string
+          id?: string
+          mandatory?: boolean
+          notes?: string | null
+          organization_id: string
+          phase?: Database["public"]["Enums"]["donor_doc_phase"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          doc_key?: string
+          doc_label?: string
+          donor_name?: string
+          id?: string
+          mandatory?: boolean
+          notes?: string | null
+          organization_id?: string
+          phase?: Database["public"]["Enums"]["donor_doc_phase"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donor_document_checklist_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      donor_eligibility_rules: {
+        Row: {
+          cap_amount: number | null
+          cap_pct: number | null
+          category: string
+          created_at: string
+          created_by: string | null
+          donor_name: string
+          id: string
+          notes: string | null
+          organization_id: string
+          rule_type: Database["public"]["Enums"]["donor_rule_type"]
+          updated_at: string
+        }
+        Insert: {
+          cap_amount?: number | null
+          cap_pct?: number | null
+          category: string
+          created_at?: string
+          created_by?: string | null
+          donor_name: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          rule_type?: Database["public"]["Enums"]["donor_rule_type"]
+          updated_at?: string
+        }
+        Update: {
+          cap_amount?: number | null
+          cap_pct?: number | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          donor_name?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          rule_type?: Database["public"]["Enums"]["donor_rule_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donor_eligibility_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       donor_report_runs: {
         Row: {
           generated_at: string
@@ -1055,6 +1155,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "manager" | "lecteur" | "beneficiaire"
+      donor_doc_phase: "contract" | "reporting" | "closure"
+      donor_rule_type: "allowed" | "forbidden" | "capped"
       risk_category:
         | "operational"
         | "financial"
@@ -1191,6 +1293,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "manager", "lecteur", "beneficiaire"],
+      donor_doc_phase: ["contract", "reporting", "closure"],
+      donor_rule_type: ["allowed", "forbidden", "capped"],
       risk_category: [
         "operational",
         "financial",
