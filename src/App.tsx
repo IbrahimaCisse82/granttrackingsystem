@@ -26,6 +26,7 @@ const AdminHealth = lazy(() => import("@/pages/AdminHealth"));
 const DonorReports = lazy(() => import("@/pages/DonorReports"));
 const Auth = lazy(() => import("@/pages/Auth"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
+const CalendarPage = lazy(() => import("@/pages/CalendarPage"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -75,6 +76,7 @@ const App = () => (
                       <Route path="/admin/errors" element={<AdminErrors />} />
                       <Route path="/admin/health" element={<AdminHealth />} />
                       <Route path="/donor-reports" element={<DonorReports />} />
+                      <Route path="/calendar" element={<CalendarPage />} />
                     </Route>
                   </Route>
                   <Route path="*" element={<NotFound />} />
