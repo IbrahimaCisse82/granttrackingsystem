@@ -4,7 +4,7 @@ import { useProjects } from '@/hooks/useProjects';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-import { ChevronRight, LayoutDashboard, BookOpen, Users, Search, BarChart3, UserCircle, History, Building2, ClipboardList, Database, FileSpreadsheet, Bug, Activity } from 'lucide-react';
+import { ChevronRight, LayoutDashboard, BookOpen, Users, Search, BarChart3, UserCircle, History, Building2, ClipboardList, Database, FileSpreadsheet, Bug, Activity, CalendarDays } from 'lucide-react';
 import { getReportCount } from '@/lib/utils-project';
 import OrgSwitcher from '@/components/OrgSwitcher';
 import logo from '@/assets/logo-growhub.png';
@@ -106,6 +106,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
         <p className="px-2 pb-1.5 text-[9.5px] font-semibold uppercase tracking-[1.2px] text-sidebar-foreground/25">Navigation</p>
         <NavItem icon={<LayoutDashboard className="w-4 h-4" />} label="Portefeuille" active={currentPath === '/'} onClick={() => navTo('/')} />
         <NavItem icon={<BarChart3 className="w-4 h-4" />} label="Dashboard" active={currentPath === '/dashboard'} onClick={() => navTo('/dashboard')} />
+        <NavItem icon={<CalendarDays className="w-4 h-4" />} label="Calendrier" active={currentPath === '/calendar'} onClick={() => navTo('/calendar')} />
         <NavItem icon={<BookOpen className="w-4 h-4" />} label="Guide d'utilisation" active={currentPath === '/guide'} onClick={() => navTo('/guide')} />
         <NavItem icon={<Users className="w-4 h-4" />} label="Gestion utilisateurs" active={currentPath === '/admin'} onClick={() => navTo('/admin')} />
         <NavItem icon={<History className="w-4 h-4" />} label="Historique" active={currentPath === '/audit'} onClick={() => navTo('/audit')} />

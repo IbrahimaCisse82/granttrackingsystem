@@ -6,6 +6,7 @@ import { Building2, Users, Crown, Shield, User, Trash2, Plus, Mail } from 'lucid
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import ExchangeRatesPanel from '@/components/ExchangeRatesPanel';
+import DonorEligibilityMatrix from '@/components/DonorEligibilityMatrix';
 
 const ROLE_LABELS: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
   owner: { label: 'Propriétaire', icon: <Crown className="w-3.5 h-3.5" />, color: 'hsl(var(--amber))' },
@@ -214,6 +215,7 @@ export default function OrganizationSettings() {
       </div>
 
       <ExchangeRatesPanel />
+      <DonorEligibilityMatrix />
     </div>
   );
 }
