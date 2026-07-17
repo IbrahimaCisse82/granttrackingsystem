@@ -45,10 +45,96 @@
     "profile": "Profile",
     "guide": "Guide",
     "fieldReports": "Field reports",
-    "schema": "DB schema"
+    "schema": "DB schema",
+    "calendar": "Calendar",
+    "donorReports": "Donor reporting"
   },
   "profile": {
     "language": "Language",
     "languageHint": "Interface language preference"
+  },
+  "burnRate": {
+    "title": "Budget burn rate",
+    "project": "Project",
+    "elapsed": "Time elapsed",
+    "burn": "Budget spent",
+    "variance": "Variance",
+    "forecastEnd": "Forecast end",
+    "status": "Status",
+    "onTrack": "On track",
+    "over": "Over-spending",
+    "under": "Under-spending",
+    "alertsKpi": "Projects at risk"
+  },
+  "closure": {
+    "title": "Project closure",
+    "progress": "Progress",
+    "item": "Item",
+    "checked": "Done",
+    "notes": "Notes",
+    "blocked": "Archiving blocked: checklist incomplete"
+  },
+  "risks": {
+    "title": "Risk register",
+    "add": "Add risk",
+    "category": "Category",
+    "description": "Description",
+    "likelihood": "Likelihood",
+    "impact": "Impact",
+    "score": "Score",
+    "mitigation": "Mitigation",
+    "owner": "Owner",
+    "status": "Status",
+    "reviewDate": "Review",
+    "matrix": "5×5 matrix",
+    "categories": {
+      "operational": "Operational",
+      "financial": "Financial",
+      "security": "Security",
+      "reputation": "Reputation",
+      "compliance": "Compliance"
+    },
+    "statuses": {
+      "open": "Open",
+      "mitigated": "Mitigated",
+      "closed": "Closed"
+    }
+  },
+  "calendar": {
+    "title": "Consolidated calendar",
+    "next30": "Next 30 days",
+    "filterType": "Event type",
+    "filterProject": "Project",
+    "types": {
+      "reportDeadline": "Report deadline",
+      "payment": "Scheduled payment",
+      "projectEnd": "Project end",
+      "riskReview": "Risk review"
+    },
+    "empty": "No upcoming events"
+  },
+  "eligibility": {
+    "title": "Donor eligibility matrix",
+    "donor": "Donor",
+    "category": "Category",
+    "ruleType": "Rule",
+    "capPct": "Cap %",
+    "capAmount": "Cap amount",
+    "notes": "Notes",
+    "documents": "Required documents",
+    "phase": "Phase",
+    "mandatory": "Mandatory",
+    "types": {
+      "allowed": "Allowed",
+      "forbidden": "Forbidden",
+      "capped": "Capped"
+    },
+    "phases": {
+      "contract": "Contract",
+      "reporting": "Reporting",
+      "closure": "Closure"
+    },
+    "importCsv": "Import CSV",
+    "exportCsv": "Export CSV"
   }
 }
