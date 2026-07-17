@@ -45,6 +45,92 @@
     "profile": "Profil",
     "guide": "Guide",
     "fieldReports": "Rapports terrain",
-    "schema": "Schéma BDD"
+    "schema": "Schéma BDD",
+    "calendar": "Calendrier",
+    "donorReports": "Reporting bailleur"
+  },
+  "burnRate": {
+    "title": "Rythme de consommation budgétaire",
+    "project": "Projet",
+    "elapsed": "Temps écoulé",
+    "burn": "Budget consommé",
+    "variance": "Écart",
+    "forecastEnd": "Fin projetée",
+    "status": "Statut",
+    "onTrack": "Dans les temps",
+    "over": "Sur-consommation",
+    "under": "Sous-consommation",
+    "alertsKpi": "Projets en alerte"
+  },
+  "closure": {
+    "title": "Clôture du projet",
+    "progress": "Progression",
+    "item": "Item",
+    "checked": "Fait",
+    "notes": "Notes",
+    "blocked": "Archivage bloqué : checklist incomplète"
+  },
+  "risks": {
+    "title": "Registre des risques",
+    "add": "Ajouter un risque",
+    "category": "Catégorie",
+    "description": "Description",
+    "likelihood": "Probabilité",
+    "impact": "Impact",
+    "score": "Score",
+    "mitigation": "Mitigation",
+    "owner": "Responsable",
+    "status": "Statut",
+    "reviewDate": "Revue",
+    "matrix": "Matrice 5×5",
+    "categories": {
+      "operational": "Opérationnel",
+      "financial": "Financier",
+      "security": "Sécurité",
+      "reputation": "Réputation",
+      "compliance": "Conformité"
+    },
+    "statuses": {
+      "open": "Ouvert",
+      "mitigated": "Atténué",
+      "closed": "Fermé"
+    }
+  },
+  "calendar": {
+    "title": "Calendrier consolidé",
+    "next30": "30 prochains jours",
+    "filterType": "Type d'événement",
+    "filterProject": "Projet",
+    "types": {
+      "reportDeadline": "Échéance rapport",
+      "payment": "Versement prévu",
+      "projectEnd": "Fin de projet",
+      "riskReview": "Revue de risque"
+    },
+    "empty": "Aucun événement à venir"
+  },
+  "eligibility": {
+    "title": "Matrice d'éligibilité bailleur",
+    "donor": "Bailleur",
+    "category": "Catégorie",
+    "ruleType": "Règle",
+    "capPct": "Plafond %",
+    "capAmount": "Plafond montant",
+    "notes": "Notes",
+    "documents": "Documents requis",
+    "phase": "Phase",
+    "mandatory": "Obligatoire",
+    "types": {
+      "allowed": "Autorisé",
+      "forbidden": "Interdit",
+      "capped": "Plafonné"
+    },
+    "phases": {
+      "contract": "Contrat",
+      "reporting": "Reporting",
+      "closure": "Clôture"
+    },
+    "importCsv": "Importer CSV",
+    "exportCsv": "Exporter CSV"
   }
 }
