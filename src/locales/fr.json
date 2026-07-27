@@ -42,12 +42,19 @@
     "projects": "Projets",
     "audit": "Audit",
     "organization": "Organisation",
-    "profile": "Profil",
-    "guide": "Guide",
+    "profile": "Mon profil",
+    "guide": "Guide d'utilisation",
     "fieldReports": "Rapports terrain",
     "schema": "Schéma BDD",
     "calendar": "Calendrier",
-    "donorReports": "Reporting bailleur"
+    "donorReports": "Reporting bailleur",
+    "users": "Gestion utilisateurs",
+    "history": "Historique",
+    "errors": "Journal d'erreurs",
+    "health": "Santé système",
+    "section": "Navigation",
+    "search": "Rechercher…",
+    "searchLabel": "Rechercher un projet"
   },
   "burnRate": {
     "title": "Rythme de consommation budgétaire",
