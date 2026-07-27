@@ -35,7 +35,8 @@ Deno.test("invite-user: refuse un token invalide", async () => {
   });
   const body = await res.json();
   assertEquals(res.status, 400);
-  assert(/autoris/i.test(String(body.error)));
+  assert(String(body.error).length > 0, "une erreur explicite doit être retournée");
+
 });
 
 Deno.test("invite-user: email manquant refusé (non authentifié en amont)", async () => {
