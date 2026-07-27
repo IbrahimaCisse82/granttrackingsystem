@@ -167,7 +167,7 @@ function BudgetRow({ line, badge, onUpdate, onRemove, readOnly }: { line: Budget
       <td className="border-b border-rule-2 border-r px-3 py-2.5 text-right font-mono text-muted-foreground">{fmt(totalEur)} €</td>
       {!readOnly && (
         <td className="border-b border-rule-2 px-3 py-2.5">
-          <button onClick={onRemove} className="opacity-0 group-hover:opacity-100 text-dim hover:text-rose transition-all" title="Supprimer">
+          <button onClick={onRemove} className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-dim hover:text-rose transition-all" title="Supprimer la ligne budgétaire" aria-label={`Supprimer la ligne budgétaire ${line.code ?? ''}`.trim()}>
             <Trash2 className="w-3.5 h-3.5" />
           </button>
         </td>
