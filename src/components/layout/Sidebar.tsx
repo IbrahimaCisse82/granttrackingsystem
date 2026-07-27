@@ -55,6 +55,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ onNavigate }: SidebarProps) {
+  const { t } = useTranslation();
   const { currentTab, openProjectIds, openProjectTab, toggleSidebarProject, sidebarSearch, setSidebarSearch } = useAppStore();
   const { projects } = useProjects();
   const { signOut, role } = useAuth();
