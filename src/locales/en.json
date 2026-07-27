@@ -42,12 +42,19 @@
     "projects": "Projects",
     "audit": "Audit",
     "organization": "Organization",
-    "profile": "Profile",
-    "guide": "Guide",
+    "profile": "My profile",
+    "guide": "User guide",
     "fieldReports": "Field reports",
     "schema": "DB schema",
     "calendar": "Calendar",
-    "donorReports": "Donor reporting"
+    "donorReports": "Donor reporting",
+    "users": "User management",
+    "history": "History",
+    "errors": "Error log",
+    "health": "System health",
+    "section": "Navigation",
+    "search": "Search…",
+    "searchLabel": "Search a project"
   },
   "profile": {
     "language": "Language",
