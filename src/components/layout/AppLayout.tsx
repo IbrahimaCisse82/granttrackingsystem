@@ -7,7 +7,7 @@ export default function AppLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-dvh">
       {/* Mobile overlay */}
       {mobileMenuOpen && (
         <div
@@ -24,7 +24,7 @@ export default function AppLayout() {
         <Sidebar onNavigate={() => setMobileMenuOpen(false)} />
       </div>
 
-      <main className="lg:ml-[260px] flex flex-1 flex-col min-h-screen w-full">
+      <main className="lg:ml-[260px] flex flex-1 flex-col min-h-dvh w-full">
         <Topbar
           onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
           showMenuButton

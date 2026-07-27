@@ -3,8 +3,9 @@ import App from "./App.tsx";
 import "./index.css";
 import "./lib/i18n";
 import { initGlobalErrorHandlers } from "./lib/logger";
+import { initSentry } from "./lib/sentry";
 
+initSentry();
 initGlobalErrorHandlers();
 
 createRoot(document.getElementById("root")!).render(<App />);
-

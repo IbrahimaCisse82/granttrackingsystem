@@ -4,6 +4,7 @@
 // - Truncates payloads to safe sizes
 // - Best-effort: never throws, never blocks the UI
 import { supabase } from '@/integrations/supabase/client';
+import { captureToSentry } from '@/lib/sentry';
 
 export type Severity = 'info' | 'warning' | 'error' | 'fatal';
 
@@ -67,6 +68,8 @@ export function log(entry: LogEntry) {
     const last = recent.get(key);
     if (last && now - last < DEDUPE_WINDOW) return;
     recent.set(key, now);
+    captureToSentry(entry.stack ? Object.assign(new Error(entry.message), { stack: entry.stack }) : entry.message, entry.severity, entry.context);
+
     // Trim dedupe map occasionally
     if (recent.size > 200) {
       for (const [k, t] of recent) if (now - t > DEDUPE_WINDOW) recent.delete(k);
