@@ -4,6 +4,7 @@
 // - Truncates payloads to safe sizes
 // - Best-effort: never throws, never blocks the UI
 import { supabase } from '@/integrations/supabase/client';
+import { captureToSentry } from '@/lib/sentry';
 
 export type Severity = 'info' | 'warning' | 'error' | 'fatal';
 
