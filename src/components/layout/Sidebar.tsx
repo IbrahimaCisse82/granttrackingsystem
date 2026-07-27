@@ -96,35 +96,36 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
             type="text"
             value={sidebarSearch}
             onChange={(e) => setSidebarSearch(e.target.value)}
-            placeholder="Rechercher…"
-            aria-label="Rechercher un projet"
+            placeholder={t('nav.search', 'Rechercher…')}
+            aria-label={t('nav.searchLabel', 'Rechercher un projet')}
             className="w-full rounded-md border border-sidebar-foreground/10 bg-sidebar-foreground/5 py-1.5 pl-8 pr-3 text-xs text-sidebar-foreground/70 placeholder:text-sidebar-foreground/25 outline-none focus:border-primary/60 focus:bg-sidebar-foreground/8"
           />
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="p-2.5 pt-3" aria-label="Navigation principale">
-        <p className="px-2 pb-1.5 text-[9.5px] font-semibold uppercase tracking-[1.2px] text-sidebar-foreground/25">Navigation</p>
-        <NavItem icon={<LayoutDashboard className="w-4 h-4" />} label="Portefeuille" active={currentPath === '/'} onClick={() => navTo('/')} />
-        <NavItem icon={<BarChart3 className="w-4 h-4" />} label="Dashboard" active={currentPath === '/dashboard'} onClick={() => navTo('/dashboard')} />
-        <NavItem icon={<CalendarDays className="w-4 h-4" />} label="Calendrier" active={currentPath === '/calendar'} onClick={() => navTo('/calendar')} />
-        <NavItem icon={<BookOpen className="w-4 h-4" />} label="Guide d'utilisation" active={currentPath === '/guide'} onClick={() => navTo('/guide')} />
-        <NavItem icon={<Users className="w-4 h-4" />} label="Gestion utilisateurs" active={currentPath === '/admin'} onClick={() => navTo('/admin')} />
-        <NavItem icon={<History className="w-4 h-4" />} label="Historique" active={currentPath === '/audit'} onClick={() => navTo('/audit')} />
-        <NavItem icon={<Building2 className="w-4 h-4" />} label="Organisation" active={currentPath === '/organization'} onClick={() => navTo('/organization')} />
-        <NavItem icon={<ClipboardList className="w-4 h-4" />} label="Rapports terrain" active={currentPath === '/field-reports'} onClick={() => navTo('/field-reports')} />
-        <NavItem icon={<FileSpreadsheet className="w-4 h-4" />} label="Reporting bailleur" active={currentPath === '/donor-reports'} onClick={() => navTo('/donor-reports')} />
+      <nav className="p-2.5 pt-3" aria-label={t('nav.section', 'Navigation')}>
+        <p className="px-2 pb-1.5 text-[9.5px] font-semibold uppercase tracking-[1.2px] text-sidebar-foreground/25">{t('nav.section', 'Navigation')}</p>
+        <NavItem icon={<LayoutDashboard className="w-4 h-4" />} label={t('nav.portfolio', 'Portefeuille')} active={currentPath === '/'} onClick={() => navTo('/')} />
+        <NavItem icon={<BarChart3 className="w-4 h-4" />} label={t('nav.dashboard', 'Tableau de bord')} active={currentPath === '/dashboard'} onClick={() => navTo('/dashboard')} />
+        <NavItem icon={<CalendarDays className="w-4 h-4" />} label={t('nav.calendar', 'Calendrier')} active={currentPath === '/calendar'} onClick={() => navTo('/calendar')} />
+        <NavItem icon={<BookOpen className="w-4 h-4" />} label={t('nav.guide', "Guide d'utilisation")} active={currentPath === '/guide'} onClick={() => navTo('/guide')} />
+        <NavItem icon={<Users className="w-4 h-4" />} label={t('nav.users', 'Gestion utilisateurs')} active={currentPath === '/admin'} onClick={() => navTo('/admin')} />
+        <NavItem icon={<History className="w-4 h-4" />} label={t('nav.history', 'Historique')} active={currentPath === '/audit'} onClick={() => navTo('/audit')} />
+        <NavItem icon={<Building2 className="w-4 h-4" />} label={t('nav.organization', 'Organisation')} active={currentPath === '/organization'} onClick={() => navTo('/organization')} />
+        <NavItem icon={<ClipboardList className="w-4 h-4" />} label={t('nav.fieldReports', 'Rapports terrain')} active={currentPath === '/field-reports'} onClick={() => navTo('/field-reports')} />
+        <NavItem icon={<FileSpreadsheet className="w-4 h-4" />} label={t('nav.donorReports', 'Reporting bailleur')} active={currentPath === '/donor-reports'} onClick={() => navTo('/donor-reports')} />
         {role === 'admin' && (
-          <NavItem icon={<Database className="w-4 h-4" />} label="Schéma BDD" active={currentPath === '/admin/schema'} onClick={() => navTo('/admin/schema')} />
+          <NavItem icon={<Database className="w-4 h-4" />} label={t('nav.schema', 'Schéma BDD')} active={currentPath === '/admin/schema'} onClick={() => navTo('/admin/schema')} />
         )}
         {role === 'admin' && (
-          <NavItem icon={<Bug className="w-4 h-4" />} label="Journal d'erreurs" active={currentPath === '/admin/errors'} onClick={() => navTo('/admin/errors')} />
+          <NavItem icon={<Bug className="w-4 h-4" />} label={t('nav.errors', "Journal d'erreurs")} active={currentPath === '/admin/errors'} onClick={() => navTo('/admin/errors')} />
         )}
         {role === 'admin' && (
-          <NavItem icon={<Activity className="w-4 h-4" />} label="Santé système" active={currentPath === '/admin/health'} onClick={() => navTo('/admin/health')} />
+          <NavItem icon={<Activity className="w-4 h-4" />} label={t('nav.health', 'Santé système')} active={currentPath === '/admin/health'} onClick={() => navTo('/admin/health')} />
         )}
-        <NavItem icon={<UserCircle className="w-4 h-4" />} label="Mon profil" active={currentPath === '/profile'} onClick={() => navTo('/profile')} />
+        <NavItem icon={<UserCircle className="w-4 h-4" />} label={t('nav.profile', 'Mon profil')} active={currentPath === '/profile'} onClick={() => navTo('/profile')} />
+
       </nav>
 
       {/* Projects */}
