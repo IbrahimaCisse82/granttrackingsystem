@@ -17,7 +17,10 @@
     "error": "Error",
     "success": "Success",
     "warning": "Warning",
-    "noData": "No data"
+    "noData": "No data",
+    "signOut": "Sign out",
+    "rights": "All rights reserved",
+    "activeProjects": "Projects · {{count}} active"
   },
   "export": {
     "menu": "Export",

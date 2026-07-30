@@ -17,7 +17,10 @@
     "error": "Erreur",
     "success": "Succès",
     "warning": "Attention",
-    "noData": "Aucune donnée"
+    "noData": "Aucune donnée",
+    "signOut": "Déconnexion",
+    "rights": "Tous droits réservés",
+    "activeProjects": "Projets · {{count}} actif(s)"
   },
   "export": {
     "menu": "Exporter",
