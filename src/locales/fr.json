@@ -57,7 +57,7 @@
     "searchLabel": "Rechercher un projet"
   },
   "burnRate": {
-    "title": "Rythme de consommation budgétaire",
+    "title": "Burn rate & prévisions",
     "project": "Projet",
     "elapsed": "Temps écoulé",
     "burn": "Budget consommé",
@@ -67,7 +67,18 @@
     "onTrack": "Dans les temps",
     "over": "Sur-consommation",
     "under": "Sous-consommation",
-    "alertsKpi": "Projets en alerte"
+    "alertsKpi": "Projets en alerte",
+    "alerts": "{{count}} alerte(s)",
+    "empty": "Aucun projet avec dates début/fin renseignées",
+    "progress": "Progression",
+    "budget": "Budget",
+    "spent": "Dépensé",
+    "plannedEnd": "Fin prévue",
+    "contractual": "contractuelle",
+    "time": "Temps",
+    "onTrackShort": "Dans les temps",
+    "overPct": "Sur-consommation (+{{v}}%)",
+    "underPct": "Sous-consommation ({{v}}%)"
   },
   "closure": {
     "title": "Clôture du projet",
@@ -75,7 +86,15 @@
     "item": "Item",
     "checked": "Fait",
     "notes": "Notes",
-    "blocked": "Archivage bloqué : checklist incomplète"
+    "blocked": "Archivage bloqué : checklist incomplète",
+    "heading": "Checklist de clôture",
+    "subtitle": "Sécurise l'archivage du projet et prépare l'audit externe.",
+    "endsIn": "Fin dans {{count}} jour(s)",
+    "check": "Cocher",
+    "uncheck": "Décocher",
+    "notePlaceholder": "Note (optionnelle)…",
+    "checkedOn": "Coché le {{date}}",
+    "incomplete": "⚠️ Complétez tous les items avant d'archiver le projet."
   },
   "risks": {
     "title": "Registre des risques",
@@ -101,7 +120,21 @@
       "open": "Ouvert",
       "mitigated": "Atténué",
       "closed": "Fermé"
-    }
+    },
+    "subtitle": "Matrice 5×5 · score = probabilité × impact · conformité UE/AFD",
+    "avgOpen": "score moyen (ouverts)",
+    "matrixTitle": "Matrice probabilité / impact",
+    "allCategories": "Toutes catégories",
+    "new": "Nouveau risque",
+    "empty": "Aucun risque enregistré.",
+    "confirmDelete": "Supprimer ce risque ?",
+    "likelihoodField": "Probabilité (1-5)",
+    "impactField": "Impact (1-5)",
+    "reviewOn": "Revue le",
+    "mitigationPlan": "Plan de mitigation",
+    "other": "Autre",
+    "statusMitigated": "Mitigé",
+    "statusClosed": "Clos"
   },
   "calendar": {
     "title": "Calendrier consolidé",
@@ -114,7 +147,19 @@
       "projectEnd": "Fin de projet",
       "riskReview": "Revue de risque"
     },
-    "empty": "Aucun événement à venir"
+    "empty": "Aucun événement à venir",
+    "subtitle": "Deadlines rapports, versements, fins de projet et revues de risques.",
+    "filters": "Filtres :",
+    "allTypes": "Tous types",
+    "allProjects": "Tous projets",
+    "noEventDay": "Aucun événement ce jour.",
+    "noUpcoming": "Aucune échéance à venir.",
+    "short": {
+      "report": "Rapport",
+      "payment": "Versement",
+      "projectEnd": "Fin projet",
+      "risk": "Risque"
+    }
   },
   "eligibility": {
     "title": "Matrice d'éligibilité bailleur",

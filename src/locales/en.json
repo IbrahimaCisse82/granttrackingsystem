@@ -61,7 +61,7 @@
     "languageHint": "Interface language preference"
   },
   "burnRate": {
-    "title": "Budget burn rate",
+    "title": "Burn rate & forecast",
     "project": "Project",
     "elapsed": "Time elapsed",
     "burn": "Budget spent",
@@ -71,7 +71,18 @@
     "onTrack": "On track",
     "over": "Over-spending",
     "under": "Under-spending",
-    "alertsKpi": "Projects at risk"
+    "alertsKpi": "Projects at risk",
+    "alerts": "{{count}} alert(s)",
+    "empty": "No project with start/end dates",
+    "progress": "Progress",
+    "budget": "Budget",
+    "spent": "Spent",
+    "plannedEnd": "Forecast end",
+    "contractual": "contractual",
+    "time": "Time",
+    "onTrackShort": "On track",
+    "overPct": "Over-spending (+{{v}}%)",
+    "underPct": "Under-spending ({{v}}%)"
   },
   "closure": {
     "title": "Project closure",
@@ -79,7 +90,15 @@
     "item": "Item",
     "checked": "Done",
     "notes": "Notes",
-    "blocked": "Archiving blocked: checklist incomplete"
+    "blocked": "Archiving blocked: checklist incomplete",
+    "heading": "Closure checklist",
+    "subtitle": "Secures project archiving and prepares the external audit.",
+    "endsIn": "Ends in {{count}} day(s)",
+    "check": "Check",
+    "uncheck": "Uncheck",
+    "notePlaceholder": "Note (optional)…",
+    "checkedOn": "Checked on {{date}}",
+    "incomplete": "⚠️ Complete all items before archiving the project."
   },
   "risks": {
     "title": "Risk register",
@@ -105,7 +124,21 @@
       "open": "Open",
       "mitigated": "Mitigated",
       "closed": "Closed"
-    }
+    },
+    "subtitle": "5×5 matrix · score = likelihood × impact · EU/AFD compliant",
+    "avgOpen": "average score (open)",
+    "matrixTitle": "Likelihood / impact matrix",
+    "allCategories": "All categories",
+    "new": "New risk",
+    "empty": "No risk recorded.",
+    "confirmDelete": "Delete this risk?",
+    "likelihoodField": "Likelihood (1-5)",
+    "impactField": "Impact (1-5)",
+    "reviewOn": "Review date",
+    "mitigationPlan": "Mitigation plan",
+    "other": "Other",
+    "statusMitigated": "Mitigated",
+    "statusClosed": "Closed"
   },
   "calendar": {
     "title": "Consolidated calendar",
@@ -118,7 +151,19 @@
       "projectEnd": "Project end",
       "riskReview": "Risk review"
     },
-    "empty": "No upcoming events"
+    "empty": "No upcoming events",
+    "subtitle": "Report deadlines, payments, project ends and risk reviews.",
+    "filters": "Filters:",
+    "allTypes": "All types",
+    "allProjects": "All projects",
+    "noEventDay": "No event on this day.",
+    "noUpcoming": "No upcoming deadline.",
+    "short": {
+      "report": "Report",
+      "payment": "Payment",
+      "projectEnd": "Project end",
+      "risk": "Risk"
+    }
   },
   "eligibility": {
     "title": "Donor eligibility matrix",
