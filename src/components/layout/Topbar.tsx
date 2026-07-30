@@ -35,6 +35,7 @@ interface TopbarProps {
 }
 
 export default function Topbar({ onMenuToggle, showMenuButton }: TopbarProps) {
+  const { t } = useTranslation();
   const { currentTab, triggerForceSave } = useAppStore();
   const { projects, addProject } = useProjects();
   const { role, signOut } = useAuth();
