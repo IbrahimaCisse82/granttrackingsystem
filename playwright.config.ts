@@ -1,4 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
+import { config as loadEnv } from 'dotenv';
+
+// Charge les identifiants E2E depuis .env.e2e (prioritaire) puis .env,
+// afin que E2E_USER_EMAIL / E2E_USER_PASSWORD n'aient pas à être exportés à la main.
+loadEnv({ path: '.env.e2e' });
+loadEnv();
 
 /**
  * Configuration Playwright pour les tests E2E.
