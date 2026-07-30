@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import logo from '@/assets/logo-growhub.png';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,6 +11,20 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const { user, loading: authLoading } = useAuth();
+  const location = useLocation();
+  const from = (location.state as { from?: string } | null)?.from ?? '/';
+
+  if (authLoading) {
+    return (
+      <div className="min-h-dvh flex items-center justify-center bg-background">
+        <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (user) return <Navigate to={from} replace />;
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
