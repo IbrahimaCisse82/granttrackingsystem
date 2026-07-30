@@ -181,11 +181,11 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
       {/* Footer */}
       <div className="mt-auto border-t border-sidebar-foreground/5 p-4">
         <button onClick={signOut} className="w-full rounded-md border border-sidebar-foreground/10 px-3 py-1.5 text-[11px] text-sidebar-foreground/50 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground/70 transition-colors">
-          Déconnexion
+          {t('common.signOut')}
         </button>
         <p className="mt-3 text-[10.5px] leading-relaxed text-sidebar-foreground/20">
           Grow Hub SARL · GH-GTS v3.0<br />
-          © {new Date().getFullYear()} — Tous droits réservés
+          © {new Date().getFullYear()} — {t('common.rights')}
         </p>
       </div>
     </aside>

@@ -3,6 +3,7 @@ import { useProjects } from '@/hooks/useProjects';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useDarkMode } from '@/hooks/useDarkMode';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { Save, Download, Bell, User, LogOut, FileDown, FileSpreadsheet, Upload, Sun, Moon, Menu } from 'lucide-react';
 import { toast } from 'sonner';
@@ -34,6 +35,7 @@ interface TopbarProps {
 }
 
 export default function Topbar({ onMenuToggle, showMenuButton }: TopbarProps) {
+  const { t } = useTranslation();
   const { currentTab, triggerForceSave } = useAppStore();
   const { projects, addProject } = useProjects();
   const { role, signOut } = useAuth();
@@ -145,7 +147,7 @@ export default function Topbar({ onMenuToggle, showMenuButton }: TopbarProps) {
           </button>
         )}
         <nav className="flex items-center gap-1.5 text-xs text-muted-foreground" aria-label="Fil d'Ariane">
-          <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors hidden sm:inline">Grow Hub GTS</button>
+          <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors hidden sm:inline">G-GTS</button>
           {isProjectPage && project && (
             <>
               <span className="text-dim hidden sm:inline">›</span>
@@ -251,7 +253,7 @@ export default function Topbar({ onMenuToggle, showMenuButton }: TopbarProps) {
             <User className="w-3.5 h-3.5 text-primary-foreground" />
           </div>
           <span className="text-xs font-medium text-ink-3">{role ?? '…'}</span>
-          <button onClick={signOut} className="ml-1 p-1 rounded hover:bg-muted transition-colors" title="Déconnexion" aria-label="Déconnexion">
+          <button onClick={signOut} className="ml-1 p-1 rounded hover:bg-muted transition-colors" title={t('common.signOut')} aria-label={t('common.signOut')}>
             <LogOut className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
         </div>
