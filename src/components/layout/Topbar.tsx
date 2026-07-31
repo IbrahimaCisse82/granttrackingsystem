@@ -10,7 +10,9 @@ import { toast } from 'sonner';
 import { exportBudgetPDF, exportReportPDF, exportTransactionsPDF } from '@/lib/export-pdf';
 import { exportBudgetExcel, exportFullProjectExcel } from '@/lib/export-excel';
 import { useState, useRef, useEffect, useCallback } from 'react';
+import LanguageToggle from '@/components/LanguageToggle';
 import type { Project } from '@/lib/types';
+
 
 function getSectionLabel(tab: string): string {
   const LABELS: Record<string, string> = {
