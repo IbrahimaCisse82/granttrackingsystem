@@ -10,7 +10,9 @@ import { toast } from 'sonner';
 import { exportBudgetPDF, exportReportPDF, exportTransactionsPDF } from '@/lib/export-pdf';
 import { exportBudgetExcel, exportFullProjectExcel } from '@/lib/export-excel';
 import { useState, useRef, useEffect, useCallback } from 'react';
+import LanguageToggle from '@/components/LanguageToggle';
 import type { Project } from '@/lib/types';
+
 
 function getSectionLabel(tab: string): string {
   const LABELS: Record<string, string> = {
@@ -203,9 +205,12 @@ export default function Topbar({ onMenuToggle, showMenuButton }: TopbarProps) {
           </button>
         )}
 
+        <LanguageToggle />
+
         <button onClick={toggleDarkMode} className="rounded-md border border-rule bg-card p-1.5 text-steel hover:bg-paper transition-colors" title="Basculer thème" aria-label="Basculer mode sombre">
           {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
+
 
         <div className="relative" ref={notifRef}>
           <button onClick={() => setShowNotifs(!showNotifs)} className="relative rounded-md border border-rule bg-card p-1.5 text-steel hover:bg-paper" aria-label={`Notifications${unread > 0 ? ` (${unread} non lues)` : ''}`}>
