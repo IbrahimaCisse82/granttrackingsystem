@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Project } from '@/lib/types';
 import { calcBudgetTotal, calcDepensesTotal, fmt, getReportCount } from '@/lib/utils-project';
 import { useAppStore } from '@/lib/store';
@@ -18,6 +19,7 @@ const RISK_STYLES: Record<string, string> = {
 };
 
 export default function ProjectCard({ project }: { project: Project }) {
+  const { t } = useTranslation();
   const { openProject } = useAppStore();
   const { deleteProject, archiveProject } = useProjects();
   const navigate = useNavigate();
@@ -37,7 +39,7 @@ export default function ProjectCard({ project }: { project: Project }) {
       className="group relative cursor-pointer overflow-hidden rounded-[10px] border border-rule bg-card transition-all duration-200 hover:shadow-gts-md hover:-translate-y-0.5 hover:border-primary"
       onClick={handleOpen}
       role="article"
-      aria-label={`Projet ${project.org}`}
+      aria-label={t('projectCard.aria', { org: project.org })}
     >
       <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: project.color.stripe }} />
 
@@ -52,23 +54,23 @@ export default function ProjectCard({ project }: { project: Project }) {
       </div>
 
       <div className="p-4 space-y-0">
-        <Row label="Budget total" value={`${fmt(budget)} €`} />
-        <Row label="Dépenses engagées" value={`${fmt(depenses)} €`} />
-        <Row label="Pays" value={project.pays || '—'} noMono />
-        <Row label="Période" value={`${project.debut || '—'} → ${project.fin || '—'}`} noMono small />
+        <Row label={t('projectCard.budget')} value={`${fmt(budget)} €`} />
+        <Row label={t('projectCard.expenses')} value={`${fmt(depenses)} €`} />
+        <Row label={t('projectCard.country')} value={project.pays || '—'} noMono />
+        <Row label={t('projectCard.period')} value={`${project.debut || '—'} → ${project.fin || '—'}`} noMono small />
         <div className="flex items-center justify-between py-1.5 border-b border-rule-2 last:border-b-0">
-          <span className="text-[11.5px] text-muted-foreground">Risque</span>
+          <span className="text-[11.5px] text-muted-foreground">{t('projectCard.risk')}</span>
           <span className={`inline-block rounded px-2 py-0.5 font-mono text-[10.5px] font-semibold ${RISK_STYLES[project.risque] || 'bg-muted text-steel'}`}>
             {project.risque || '—'}
           </span>
         </div>
-        <Row label="Rapports" value={`${rapSoumis} / ${getReportCount(project.periodicite)} soumis`} />
+        <Row label={t('projectCard.reports')} value={t('projectCard.reportsValue', { done: rapSoumis, total: getReportCount(project.periodicite) })} />
       </div>
 
       <div className="flex items-center gap-1.5 border-t border-rule bg-paper p-3 px-4" onClick={e => e.stopPropagation()}>
         <div className="flex-1">
           <div className="flex justify-between text-[10.5px] text-dim mb-1">
-            <span>Consommation budget</span>
+            <span>{t('projectCard.consumption')}</span>
             <span>{pct}%</span>
           </div>
           <div className="h-[5px] overflow-hidden rounded-full bg-rule" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
@@ -78,7 +80,7 @@ export default function ProjectCard({ project }: { project: Project }) {
         <div className="flex shrink-0 gap-1 ml-3">
           <button
             onClick={(e) => { e.stopPropagation(); archiveProject(project.id, !isArchived); }}
-            title={isArchived ? 'Désarchiver' : 'Archiver'}
+            title={isArchived ? t('projectCard.unarchive') : t('projectCard.archive')}
             className="rounded border border-rule bg-card px-2 py-1 text-[11px] text-steel transition-colors hover:bg-paper hover:border-dim"
           >
             {isArchived ? <ArchiveRestore className="w-3.5 h-3.5" /> : <Archive className="w-3.5 h-3.5" />}
@@ -94,15 +96,15 @@ export default function ProjectCard({ project }: { project: Project }) {
             </AlertDialogTrigger>
             <AlertDialogContent onClick={e => e.stopPropagation()}>
               <AlertDialogHeader>
-                <AlertDialogTitle>Supprimer ce projet ?</AlertDialogTitle>
+                <AlertDialogTitle>{t('projectCard.deleteTitle')}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Êtes-vous sûr de vouloir supprimer <strong>{project.org}</strong> ({project.convention}) ? Cette action est irréversible et toutes les données du projet seront perdues.
+                  <strong>{project.org}</strong> ({project.convention}) — {t('projectCard.deleteDesc')}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                 <AlertDialogAction onClick={() => deleteProject(project.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  Supprimer
+                  {t('common.delete')}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

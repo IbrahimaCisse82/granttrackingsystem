@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { calcBudgetTotal, calcDepensesTotal, fmt } from '@/lib/utils-project';
 import { useProjects } from '@/hooks/useProjects';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -15,15 +16,10 @@ import { OnboardingTip } from '@/components/OnboardingTip';
 import { HelpButton } from '@/components/HelpButton';
 
 const RISK_OPTIONS = ['Faible risque', 'Risque modéré', 'Risque important', 'Risque élevé'];
-const SORT_OPTIONS: { value: ProjectSortKey; label: string }[] = [
-  { value: 'created_at', label: 'Date de création' },
-  { value: 'org', label: 'Organisation' },
-  { value: 'debut', label: 'Date de début' },
-  { value: 'fin', label: 'Date de fin' },
-  { value: 'pays', label: 'Pays' },
-];
+const SORT_KEYS: ProjectSortKey[] = ['created_at', 'org', 'debut', 'fin', 'pays'];
 
 export default function Portfolio() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [riskFilter, setRiskFilter] = useState('');
@@ -129,13 +125,13 @@ export default function Portfolio() {
         sortBy,
         sortDir,
       }, activeOrg?.name);
-      toast.success(`${rows.length} projet(s) exporté(s)`);
+      toast.success(t('portfolio.exported', { count: rows.length }));
     } catch (e: any) {
-      toast.error('Erreur export: ' + e.message);
+      toast.error(t('portfolio.exportError', { msg: e.message }));
     } finally {
       setIsExporting(false);
     }
-  }, [activeOrgId, activeOrg, sortBy, sortDir, showArchived, riskFilter, paysFilter, debouncedSearch]);
+  }, [activeOrgId, activeOrg, sortBy, sortDir, showArchived, riskFilter, paysFilter, debouncedSearch, t]);
 
   if (isLoading && !isFetching) {
     return (
@@ -154,11 +150,11 @@ export default function Portfolio() {
     <div>
       <OnboardingTip
         moduleId="portfolio"
-        title="Bienvenue sur le portefeuille"
-        description="Retrouvez ici tous vos projets de subvention. Utilisez la recherche, les filtres et le tri pour naviguer, ou créez un nouveau projet via le bouton en haut à droite."
+        title={t('portfolio.tipTitle')}
+        description={t('portfolio.tipDesc')}
       />
       <HelpButton
-        title="Aide — Portefeuille"
+        title={t('portfolio.helpTitle')}
         content={
           <>
             <p>Le portefeuille liste tous les projets de votre organisation active.</p>
@@ -175,8 +171,8 @@ export default function Portfolio() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start justify-between mb-6 gap-3">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground">Portefeuille global</h1>
-          <p className="text-xs text-muted-foreground mt-1">Vue d'ensemble de tous les projets de subvention</p>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">{t('portfolio.title')}</h1>
+          <p className="text-xs text-muted-foreground mt-1">{t('portfolio.subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -184,10 +180,10 @@ export default function Portfolio() {
             onClick={handleExportPDF}
             disabled={isExporting || totalCount === 0}
             className="inline-flex items-center gap-1.5 rounded-md border border-rule bg-card px-3 py-2 text-xs font-medium text-steel hover:bg-paper transition-colors disabled:opacity-50"
-            aria-label="Exporter le portefeuille en PDF"
+            aria-label={t('portfolio.exportAria')}
           >
             {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
-            Exporter PDF
+            {t('portfolio.exportPdf')}
           </button>
           <CreateProjectDialog />
         </div>
@@ -195,10 +191,10 @@ export default function Portfolio() {
 
       {/* Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
-        <MetricCard label="Projets actifs" value={String(activeCount)} note="en cours" accentColor="blue" />
-        <MetricCard label="Budget total" value={`${fmt(metrics.totalBudget)} €`} note="page courante" accentColor="teal" />
-        <MetricCard label="Dépenses totales" value={`${fmt(metrics.totalDepenses)} €`} note="page courante" accentColor="amber" />
-        <MetricCard label="Rapports soumis" value={String(metrics.totalRapports)} note="page courante" accentColor="emerald" />
+        <MetricCard label={t('portfolio.activeProjects')} value={String(activeCount)} note={t('portfolio.inProgress')} accentColor="blue" />
+        <MetricCard label={t('portfolio.totalBudget')} value={`${fmt(metrics.totalBudget)} €`} note={t('portfolio.currentPage')} accentColor="teal" />
+        <MetricCard label={t('portfolio.totalExpenses')} value={`${fmt(metrics.totalDepenses)} €`} note={t('portfolio.currentPage')} accentColor="amber" />
+        <MetricCard label={t('portfolio.submittedReports')} value={String(metrics.totalRapports)} note={t('portfolio.currentPage')} accentColor="emerald" />
       </div>
 
       {/* Search & Filters */}
@@ -210,12 +206,12 @@ export default function Portfolio() {
               type="text"
               value={search}
               onChange={e => handleSearch(e.target.value)}
-              placeholder="Rechercher par organisation, convention ou titre…"
-              aria-label="Rechercher un projet"
+              placeholder={t('portfolio.searchPlaceholder')}
+              aria-label={t('portfolio.searchAria')}
               className="w-full rounded-lg border border-rule bg-card py-2 pl-9 pr-3 text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-colors"
             />
             {search && (
-              <button onClick={() => { setSearch(''); setDebouncedSearch(''); setPage(0); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-dim hover:text-foreground" aria-label="Effacer la recherche">
+              <button onClick={() => { setSearch(''); setDebouncedSearch(''); setPage(0); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-dim hover:text-foreground" aria-label={t('portfolio.clearSearch')}>
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
@@ -223,22 +219,22 @@ export default function Portfolio() {
           <div className="flex flex-wrap gap-2">
             <div className="inline-flex items-center gap-1 rounded-lg border border-rule bg-card px-2 py-1 text-xs">
               <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground" />
-              <label htmlFor="sort-by" className="sr-only">Trier par</label>
+              <label htmlFor="sort-by" className="sr-only">{t('portfolio.sortBy')}</label>
               <select
                 id="sort-by"
                 value={sortBy}
                 onChange={e => { setSortBy(e.target.value as ProjectSortKey); setPage(0); }}
                 className="bg-transparent text-xs outline-none cursor-pointer"
-                aria-label="Critère de tri"
+                aria-label={t('portfolio.sortCriteria')}
               >
-                {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                {SORT_KEYS.map(k => <option key={k} value={k}>{t(`portfolio.sort.${k}`)}</option>)}
               </select>
               <button
                 type="button"
                 onClick={() => { setSortDir(d => d === 'asc' ? 'desc' : 'asc'); setPage(0); }}
                 className="text-xs text-steel hover:text-primary px-1"
-                aria-label={`Inverser le tri (actuellement ${sortDir === 'asc' ? 'croissant' : 'décroissant'})`}
-                title={sortDir === 'asc' ? 'Croissant' : 'Décroissant'}
+                aria-label={t('portfolio.toggleSort')}
+                title={sortDir === 'asc' ? t('portfolio.asc') : t('portfolio.desc')}
               >
                 {sortDir === 'asc' ? '↑' : '↓'}
               </button>
@@ -248,14 +244,14 @@ export default function Portfolio() {
                 showArchived ? 'border-amber bg-amber-light text-amber' : 'border-rule bg-card text-steel hover:bg-paper'
               }`}>
               <Archive className="w-3.5 h-3.5" />
-              Archivés ({archivedCount})
+              {t('portfolio.archived')} ({archivedCount})
             </button>
             <button onClick={() => setShowFilters(!showFilters)}
               className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
                 hasFilters ? 'border-primary bg-enabel-light text-primary' : 'border-rule bg-card text-steel hover:bg-paper'
               }`}>
               <Filter className="w-3.5 h-3.5" />
-              Filtres {hasFilters && `(${[riskFilter, paysFilter].filter(Boolean).length})`}
+              {t('portfolio.filters')} {hasFilters && `(${[riskFilter, paysFilter].filter(Boolean).length})`}
             </button>
           </div>
         </div>
@@ -263,7 +259,7 @@ export default function Portfolio() {
         {showFilters && (
           <div className="flex flex-wrap items-center gap-3 rounded-lg border border-rule bg-card p-3">
             <div className="flex items-center gap-2">
-              <label htmlFor="risk-filter" className="text-[11px] font-medium text-steel whitespace-nowrap">Risque :</label>
+              <label htmlFor="risk-filter" className="text-[11px] font-medium text-steel whitespace-nowrap">{t('portfolio.risk')} :</label>
               <select id="risk-filter" value={riskFilter} onChange={e => handleFilterChange(setRiskFilter)(e.target.value)}
                 className="rounded-md border border-input bg-background px-2 py-1 text-xs outline-none focus:border-primary">
                 <option value="">Tous</option>
@@ -271,7 +267,7 @@ export default function Portfolio() {
               </select>
             </div>
             <div className="flex items-center gap-2">
-              <label htmlFor="country-filter" className="text-[11px] font-medium text-steel whitespace-nowrap">Pays :</label>
+              <label htmlFor="country-filter" className="text-[11px] font-medium text-steel whitespace-nowrap">{t('portfolio.country')} :</label>
               <select id="country-filter" value={paysFilter} onChange={e => handleFilterChange(setPaysFilter)(e.target.value)}
                 className="rounded-md border border-input bg-background px-2 py-1 text-xs outline-none focus:border-primary">
                 <option value="">Tous</option>
@@ -281,10 +277,10 @@ export default function Portfolio() {
             {hasFilters && (
               <button onClick={() => { setRiskFilter(''); setPaysFilter(''); setPage(0); }}
                 className="text-[11px] text-primary hover:underline ml-2">
-                Réinitialiser
+                {t('portfolio.reset')}
               </button>
             )}
-            <span className="ml-auto text-[11px] text-muted-foreground">{totalCount} projet(s) au total</span>
+            <span className="ml-auto text-[11px] text-muted-foreground">{t('portfolio.totalProjects', { count: totalCount })}</span>
           </div>
         )}
       </div>
@@ -305,17 +301,17 @@ export default function Portfolio() {
         ) : totalCount > 0 ? (
           <div className="flex flex-col items-center justify-center rounded-[10px] border-2 border-dashed border-rule py-16 text-center">
             <Search className="w-10 h-10 text-dim mb-3" />
-            <p className="text-sm font-semibold text-foreground mb-1">Aucun résultat</p>
-            <p className="text-xs text-muted-foreground">Modifiez vos critères de recherche ou filtres</p>
+            <p className="text-sm font-semibold text-foreground mb-1">{t('portfolio.noResults')}</p>
+            <p className="text-xs text-muted-foreground">{t('portfolio.noResultsHint')}</p>
           </div>
         ) : !isLoading ? (
           <div className="flex flex-col items-center justify-center rounded-[10px] border-2 border-dashed border-rule py-20 text-center">
             <FolderOpen className="w-12 h-12 text-dim mb-4" />
-            <p className="text-sm font-semibold text-foreground mb-1">Aucun projet</p>
-            <p className="text-xs text-muted-foreground mb-4">Créez votre premier projet de subvention</p>
+            <p className="text-sm font-semibold text-foreground mb-1">{t('portfolio.noProjects')}</p>
+            <p className="text-xs text-muted-foreground mb-4">{t('portfolio.noProjectsHint')}</p>
             <CreateProjectDialog trigger={
               <button className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-xs font-medium text-primary-foreground">
-                <Plus className="w-3.5 h-3.5" /> Créer un projet
+                <Plus className="w-3.5 h-3.5" /> {t('portfolio.createProject')}
               </button>
             } />
           </div>
@@ -326,14 +322,14 @@ export default function Portfolio() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-6 pt-4 border-t border-rule">
           <p className="text-[11px] text-muted-foreground">
-            {currentPage * 12 + 1}–{Math.min((currentPage + 1) * 12, totalCount)} sur {totalCount} projets
+            {t('portfolio.pagination', { from: currentPage * 12 + 1, to: Math.min((currentPage + 1) * 12, totalCount), total: totalCount })}
           </p>
           <div className="flex items-center gap-1">
             <button
               onClick={() => setPage(p => Math.max(0, p - 1))}
               disabled={currentPage === 0}
               className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-rule text-xs disabled:opacity-40 hover:bg-paper transition-colors"
-              aria-label="Page précédente"
+              aria-label={t('portfolio.prevPage')}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -360,7 +356,7 @@ export default function Portfolio() {
               onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
               disabled={currentPage === totalPages - 1}
               className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-rule text-xs disabled:opacity-40 hover:bg-paper transition-colors"
-              aria-label="Page suivante"
+              aria-label={t('portfolio.nextPage')}
             >
               <ChevronRight className="w-4 h-4" />
             </button>
