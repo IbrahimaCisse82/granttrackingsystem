@@ -203,9 +203,12 @@ export default function Topbar({ onMenuToggle, showMenuButton }: TopbarProps) {
           </button>
         )}
 
+        <LanguageToggle />
+
         <button onClick={toggleDarkMode} className="rounded-md border border-rule bg-card p-1.5 text-steel hover:bg-paper transition-colors" title="Basculer thème" aria-label="Basculer mode sombre">
           {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
+
 
         <div className="relative" ref={notifRef}>
           <button onClick={() => setShowNotifs(!showNotifs)} className="relative rounded-md border border-rule bg-card p-1.5 text-steel hover:bg-paper" aria-label={`Notifications${unread > 0 ? ` (${unread} non lues)` : ''}`}>
