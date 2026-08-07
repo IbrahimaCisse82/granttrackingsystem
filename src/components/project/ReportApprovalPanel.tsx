@@ -128,7 +128,7 @@ export default function ReportApprovalPanel({ project, reportIndex }: Props) {
           <Textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Expliquez la raison du rejet…" rows={4} />
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setRejectOpen(false)}>Annuler</Button>
-            <Button variant="destructive" onClick={onReject} disabled={!reason.trim() || reject.isPending}>Rejeter</Button>
+            <Button variant="destructive" onClick={onReject} disabled={reason.trim().length < 5 || reject.isPending}>Rejeter</Button>
           </div>
         </DialogContent>
       </Dialog>
