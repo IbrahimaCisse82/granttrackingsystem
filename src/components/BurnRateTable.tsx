@@ -104,11 +104,15 @@ export default function BurnRateTable() {
             </thead>
             <tbody>
               {projects.map((p) => (
-                <tr key={p.id} className="border-b border-rule/50 hover:bg-paper">
+                <tr key={p.id} className={`border-b border-rule/50 hover:bg-paper ${Math.abs(p.variance) > 20 ? 'bg-rose/5' : ''}`}>
                   <td className="py-2 pr-2">
-                    <div className="font-medium text-foreground truncate max-w-[180px]" title={p.title}>{p.title}</div>
+                    <div className="font-medium text-foreground truncate max-w-[180px] flex items-center gap-1" title={p.title}>
+                      {Math.abs(p.variance) > 20 && <AlertTriangle className="w-3 h-3 shrink-0 text-rose" aria-label={t('burnRate.criticalTitle')} />}
+                      <span className="truncate">{p.title}</span>
+                    </div>
                     <div className="text-[10px] text-muted-foreground truncate max-w-[180px]">{p.org}</div>
                   </td>
+
                   <td className="py-2 px-2"><DualBar elapsed={p.elapsed_pct} burn={p.burn_pct} /></td>
                   <td className="py-2 px-2 text-right font-mono">{fmt(p.budget_total)}</td>
                   <td className="py-2 px-2 text-right font-mono">{fmt(p.depenses_total)}</td>
