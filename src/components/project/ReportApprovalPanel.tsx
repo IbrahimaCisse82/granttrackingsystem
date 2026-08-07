@@ -9,7 +9,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Send, CheckCircle2, XCircle, Clock, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
+import { reportRejectSchema, formatZodError } from '@/lib/schemas';
 import type { Project } from '@/lib/types';
+
 
 interface Props {
   project: Project;
@@ -75,11 +77,17 @@ export default function ReportApprovalPanel({ project, reportIndex }: Props) {
 
   const onApprove = () => current && approve.mutate(current);
   const onReject = () => {
-    if (!current || !reason.trim()) return;
-    reject.mutate({ report: current, reason: reason.trim() }, {
+    if (!current) return;
+    const parsed = reportRejectSchema.safeParse({ reason });
+    if (!parsed.success) {
+      toast.error(formatZodError(parsed.error));
+      return;
+    }
+    reject.mutate({ report: current, reason: parsed.data.reason }, {
       onSuccess: () => { setRejectOpen(false); setReason(''); },
     });
   };
+
 
   return (
     <div className="rounded-lg border bg-card p-4 mb-4 flex items-center justify-between gap-4 flex-wrap">
