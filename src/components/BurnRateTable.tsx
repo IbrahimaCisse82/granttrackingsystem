@@ -47,12 +47,37 @@ function DualBar({ elapsed, burn }: { elapsed: number; burn: number }) {
 export default function BurnRateTable() {
   const { t, i18n } = useTranslation();
   const { data, isLoading } = useBurnRate();
+export default function BurnRateTable() {
+  const { t, i18n } = useTranslation();
+  const { data, isLoading } = useBurnRate();
+  const { user } = useAuth();
   const lng = i18n.language?.startsWith('en') ? 'en-GB' : 'fr-FR';
-  if (isLoading) return <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>;
   const projects = data?.projects ?? [];
+
+  // Notify once per day per project when variance exceeds 20 points (critical)
+  useEffect(() => {
+    if (!user) return;
+    const day = new Date().toISOString().slice(0, 10);
+    const critical = projects.filter(p => Math.abs(p.variance) > 20);
+    critical.forEach(async (p) => {
+      const key = `burn-alert:${user.id}:${p.id}:${day}`;
+      if (localStorage.getItem(key)) return;
+      localStorage.setItem(key, '1');
+      await supabase.from('notifications').insert({
+        user_id: user.id,
+        type: 'warning',
+        title: t('burnRate.criticalTitle'),
+        message: t('burnRate.criticalMessage', { title: p.title, v: p.variance }),
+        project_id: p.id,
+      });
+    });
+  }, [projects, user, t]);
+
+  if (isLoading) return <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>;
 
   return (
     <div className="rounded-[10px] border border-rule bg-card p-4">
+
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-[13px] font-semibold flex items-center gap-2">
           {t('burnRate.title')}
