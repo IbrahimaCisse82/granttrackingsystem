@@ -81,7 +81,9 @@
     "time": "Temps",
     "onTrackShort": "Dans les temps",
     "overPct": "Sur-consommation (+{{v}}%)",
-    "underPct": "Sous-consommation ({{v}}%)"
+    "underPct": "Sous-consommation ({{v}}%)",
+    "criticalTitle": "Alerte burn rate critique",
+    "criticalMessage": "{{title}} : écart de {{v}} points entre consommation budgétaire et temps écoulé."
   },
   "closure": {
     "title": "Clôture du projet",

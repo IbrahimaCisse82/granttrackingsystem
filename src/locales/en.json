@@ -85,7 +85,9 @@
     "time": "Time",
     "onTrackShort": "On track",
     "overPct": "Over-spending (+{{v}}%)",
-    "underPct": "Under-spending ({{v}}%)"
+    "underPct": "Under-spending ({{v}}%)",
+    "criticalTitle": "Critical burn rate alert",
+    "criticalMessage": "{{title}}: {{v}}-point gap between budget consumption and elapsed time."
   },
   "closure": {
     "title": "Project closure",
