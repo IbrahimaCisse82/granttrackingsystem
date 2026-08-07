@@ -26,7 +26,12 @@ export default function ProjectCard({ project }: { project: Project }) {
   const { t } = useTranslation();
   const { openProject } = useAppStore();
   const { deleteProject, archiveProject } = useProjects();
+  const { role } = useAuth();
+  const { log } = useAuditLog();
+  const [blockOpen, setBlockOpen] = useState(false);
+  const [closure, setClosure] = useState<{ done: number; total: number }>({ done: 0, total: 0 });
   const navigate = useNavigate();
+
   const isArchived = (project as any).archived ?? false;
   const budget = calcBudgetTotal(project);
   const depenses = calcDepensesTotal(project);
@@ -37,6 +42,30 @@ export default function ProjectCard({ project }: { project: Project }) {
     openProject(project.id);
     navigate(`/projects/${project.id}`);
   }, [openProject, project.id, navigate]);
+
+  const requestArchive = useCallback(async () => {
+    if (isArchived) { archiveProject(project.id, false); return; }
+    const { data } = await supabase
+      .from('project_closure_checklists')
+      .select('checked')
+      .eq('project_id', project.id);
+    const total = data?.length ?? 0;
+    const done = (data || []).filter((i: { checked: boolean }) => i.checked).length;
+    if (total > 0 && done < total) {
+      setClosure({ done, total });
+      setBlockOpen(true);
+      return;
+    }
+    archiveProject(project.id, true);
+  }, [archiveProject, isArchived, project.id]);
+
+  const forceArchive = useCallback(() => {
+    archiveProject(project.id, true);
+    log('archive', project.id, { forced: true, closure });
+    setBlockOpen(false);
+  }, [archiveProject, closure, log, project.id]);
+
+
 
   return (
     <div
