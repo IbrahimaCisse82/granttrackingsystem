@@ -9,7 +9,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Send, CheckCircle2, XCircle, Clock, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
+import { reportRejectSchema, formatZodError } from '@/lib/schemas';
 import type { Project } from '@/lib/types';
+
 
 interface Props {
   project: Project;
@@ -75,11 +77,17 @@ export default function ReportApprovalPanel({ project, reportIndex }: Props) {
 
   const onApprove = () => current && approve.mutate(current);
   const onReject = () => {
-    if (!current || !reason.trim()) return;
-    reject.mutate({ report: current, reason: reason.trim() }, {
+    if (!current) return;
+    const parsed = reportRejectSchema.safeParse({ reason });
+    if (!parsed.success) {
+      toast.error(formatZodError(parsed.error));
+      return;
+    }
+    reject.mutate({ report: current, reason: parsed.data.reason }, {
       onSuccess: () => { setRejectOpen(false); setReason(''); },
     });
   };
+
 
   return (
     <div className="rounded-lg border bg-card p-4 mb-4 flex items-center justify-between gap-4 flex-wrap">
@@ -120,7 +128,7 @@ export default function ReportApprovalPanel({ project, reportIndex }: Props) {
           <Textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Expliquez la raison du rejet…" rows={4} />
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setRejectOpen(false)}>Annuler</Button>
-            <Button variant="destructive" onClick={onReject} disabled={!reason.trim() || reject.isPending}>Rejeter</Button>
+            <Button variant="destructive" onClick={onReject} disabled={reason.trim().length < 5 || reject.isPending}>Rejeter</Button>
           </div>
         </DialogContent>
       </Dialog>

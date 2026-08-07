@@ -85,7 +85,9 @@
     "time": "Time",
     "onTrackShort": "On track",
     "overPct": "Over-spending (+{{v}}%)",
-    "underPct": "Under-spending ({{v}}%)"
+    "underPct": "Under-spending ({{v}}%)",
+    "criticalTitle": "Critical burn rate alert",
+    "criticalMessage": "{{title}}: {{v}}-point gap between budget consumption and elapsed time."
   },
   "closure": {
     "title": "Project closure",
@@ -141,7 +143,8 @@
     "mitigationPlan": "Mitigation plan",
     "other": "Other",
     "statusMitigated": "Mitigated",
-    "statusClosed": "Closed"
+    "statusClosed": "Closed",
+    "mitigationRequired": "A mitigation measure is required for a score above 15."
   },
   "calendar": {
     "title": "Consolidated calendar",
@@ -166,7 +169,10 @@
       "payment": "Payment",
       "projectEnd": "Project end",
       "risk": "Risk"
-    }
+    },
+    "overdue": "Overdue",
+    "overdueSection": "Past due deadlines",
+    "lateBadge": "Late"
   },
   "eligibility": {
     "title": "Donor eligibility matrix",
@@ -190,7 +196,10 @@
       "closure": "Closure"
     },
     "importCsv": "Import CSV",
-    "exportCsv": "Export CSV"
+    "exportCsv": "Export CSV",
+    "import": "Import CSV",
+    "importDone": "{{ok}} row(s) imported, {{ko}} rejected",
+    "importEmpty": "No valid row in the file"
   },
   "portfolio": {
     "title": "Global portfolio",
@@ -286,6 +295,12 @@
     "archive": "Archive",
     "unarchive": "Unarchive",
     "deleteTitle": "Delete this project?",
-    "deleteDesc": "This action is irreversible and all project data will be lost."
+    "deleteDesc": "This action is irreversible and all project data will be lost.",
+    "closureBlockTitle": "Closure incomplete",
+    "closureBlockDesc": "The closure checklist is incomplete ({{done}}/{{total}}). Complete it before archiving the project.",
+    "closureForce": "Force archive (admin)"
+  },
+  "reports": {
+    "rejectReasonTooShort": "Reason required (5 characters minimum)"
   }
 }

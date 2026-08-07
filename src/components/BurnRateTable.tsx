@@ -1,7 +1,11 @@
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBurnRate, type BurnRateProject } from '@/hooks/useBurnRate';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { fmt } from '@/lib/utils-project';
 import { AlertTriangle, TrendingUp, TrendingDown, CheckCircle2, Loader2 } from 'lucide-react';
+
 
 function StatusBadge({ status, variance }: { status: BurnRateProject['status']; variance: number }) {
   const { t } = useTranslation();
@@ -43,12 +47,34 @@ function DualBar({ elapsed, burn }: { elapsed: number; burn: number }) {
 export default function BurnRateTable() {
   const { t, i18n } = useTranslation();
   const { data, isLoading } = useBurnRate();
+  const { user } = useAuth();
   const lng = i18n.language?.startsWith('en') ? 'en-GB' : 'fr-FR';
-  if (isLoading) return <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>;
   const projects = data?.projects ?? [];
+
+  // Notify once per day per project when variance exceeds 20 points (critical)
+  useEffect(() => {
+    if (!user) return;
+    const day = new Date().toISOString().slice(0, 10);
+    const critical = projects.filter(p => Math.abs(p.variance) > 20);
+    critical.forEach(async (p) => {
+      const key = `burn-alert:${user.id}:${p.id}:${day}`;
+      if (localStorage.getItem(key)) return;
+      localStorage.setItem(key, '1');
+      await supabase.from('notifications').insert({
+        user_id: user.id,
+        type: 'warning',
+        title: t('burnRate.criticalTitle'),
+        message: t('burnRate.criticalMessage', { title: p.title, v: p.variance }),
+        project_id: p.id,
+      });
+    });
+  }, [projects, user, t]);
+
+  if (isLoading) return <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>;
 
   return (
     <div className="rounded-[10px] border border-rule bg-card p-4">
+
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-[13px] font-semibold flex items-center gap-2">
           {t('burnRate.title')}
@@ -78,11 +104,15 @@ export default function BurnRateTable() {
             </thead>
             <tbody>
               {projects.map((p) => (
-                <tr key={p.id} className="border-b border-rule/50 hover:bg-paper">
+                <tr key={p.id} className={`border-b border-rule/50 hover:bg-paper ${Math.abs(p.variance) > 20 ? 'bg-rose/5' : ''}`}>
                   <td className="py-2 pr-2">
-                    <div className="font-medium text-foreground truncate max-w-[180px]" title={p.title}>{p.title}</div>
+                    <div className="font-medium text-foreground truncate max-w-[180px] flex items-center gap-1" title={p.title}>
+                      {Math.abs(p.variance) > 20 && <AlertTriangle className="w-3 h-3 shrink-0 text-rose" aria-label={t('burnRate.criticalTitle')} />}
+                      <span className="truncate">{p.title}</span>
+                    </div>
                     <div className="text-[10px] text-muted-foreground truncate max-w-[180px]">{p.org}</div>
                   </td>
+
                   <td className="py-2 px-2"><DualBar elapsed={p.elapsed_pct} burn={p.burn_pct} /></td>
                   <td className="py-2 px-2 text-right font-mono">{fmt(p.budget_total)}</td>
                   <td className="py-2 px-2 text-right font-mono">{fmt(p.depenses_total)}</td>

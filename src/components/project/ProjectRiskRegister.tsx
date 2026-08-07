@@ -41,11 +41,14 @@ export default function ProjectRiskRegister({ project, readOnly }: Props) {
   const [catFilter, setCatFilter] = useState<string>('');
 
   const shown = catFilter ? risks.filter(r => r.category === catFilter) : risks;
+  const draftScore = (draft.likelihood ?? 3) * (draft.impact ?? 3);
+  const draftMitigationMissing = draftScore > 15 && !(draft.mitigation ?? '').trim();
   const avgOpen = (() => {
     const open = risks.filter(r => r.status === 'open');
     if (!open.length) return 0;
     return Math.round(open.reduce((s, r) => s + r.score, 0) / open.length);
   })();
+
 
   if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>;
 
@@ -130,8 +133,13 @@ export default function ProjectRiskRegister({ project, readOnly }: Props) {
           <label className="text-xs block">
             {t('risks.mitigationPlan')}
             <textarea value={draft.mitigation ?? ''} onChange={e => setDraft({ ...draft, mitigation: e.target.value })} rows={2}
-              className="mt-1 w-full rounded border border-input bg-background px-2 py-1.5 text-xs" />
+              aria-invalid={draftMitigationMissing}
+              className={`mt-1 w-full rounded border bg-background px-2 py-1.5 text-xs ${draftMitigationMissing ? 'border-rose' : 'border-input'}`} />
+            {draftMitigationMissing && (
+              <span className="mt-1 block text-[11px] text-rose">{t('risks.mitigationRequired')}</span>
+            )}
           </label>
+
           <div className="grid grid-cols-3 gap-3">
             <label className="text-xs">
               {t('risks.likelihoodField')}
@@ -155,7 +163,7 @@ export default function ProjectRiskRegister({ project, readOnly }: Props) {
           <div className="flex justify-end gap-2">
             <button onClick={() => setShowForm(false)} className="rounded border border-input px-3 py-1.5 text-xs">{t('common.cancel')}</button>
             <button
-              disabled={!draft.description || !activeOrgId}
+              disabled={!draft.description || !activeOrgId || draftMitigationMissing}
               onClick={async () => {
                 await create.mutateAsync({ ...draft, organization_id: activeOrgId! });
                 setShowForm(false);

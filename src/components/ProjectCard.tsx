@@ -1,15 +1,19 @@
 import { useNavigate } from 'react-router-dom';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Project } from '@/lib/types';
 import { calcBudgetTotal, calcDepensesTotal, fmt, getReportCount } from '@/lib/utils-project';
 import { useAppStore } from '@/lib/store';
 import { useProjects } from '@/hooks/useProjects';
+import { useAuth } from '@/hooks/useAuth';
+import { useAuditLog } from '@/hooks/useAuditLog';
+import { supabase } from '@/integrations/supabase/client';
 import { Archive, ArchiveRestore } from 'lucide-react';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+
 
 const RISK_STYLES: Record<string, string> = {
   'Faible risque': 'bg-emerald-light text-emerald',
@@ -22,7 +26,12 @@ export default function ProjectCard({ project }: { project: Project }) {
   const { t } = useTranslation();
   const { openProject } = useAppStore();
   const { deleteProject, archiveProject } = useProjects();
+  const { role } = useAuth();
+  const { log } = useAuditLog();
+  const [blockOpen, setBlockOpen] = useState(false);
+  const [closure, setClosure] = useState<{ done: number; total: number }>({ done: 0, total: 0 });
   const navigate = useNavigate();
+
   const isArchived = (project as any).archived ?? false;
   const budget = calcBudgetTotal(project);
   const depenses = calcDepensesTotal(project);
@@ -33,6 +42,30 @@ export default function ProjectCard({ project }: { project: Project }) {
     openProject(project.id);
     navigate(`/projects/${project.id}`);
   }, [openProject, project.id, navigate]);
+
+  const requestArchive = useCallback(async () => {
+    if (isArchived) { archiveProject(project.id, false); return; }
+    const { data } = await supabase
+      .from('project_closure_checklists')
+      .select('checked')
+      .eq('project_id', project.id);
+    const total = data?.length ?? 0;
+    const done = (data || []).filter((i: { checked: boolean }) => i.checked).length;
+    if (total > 0 && done < total) {
+      setClosure({ done, total });
+      setBlockOpen(true);
+      return;
+    }
+    archiveProject(project.id, true);
+  }, [archiveProject, isArchived, project.id]);
+
+  const forceArchive = useCallback(() => {
+    archiveProject(project.id, true);
+    log('archive', project.id, { forced: true, closure });
+    setBlockOpen(false);
+  }, [archiveProject, closure, log, project.id]);
+
+
 
   return (
     <div
@@ -79,12 +112,30 @@ export default function ProjectCard({ project }: { project: Project }) {
         </div>
         <div className="flex shrink-0 gap-1 ml-3">
           <button
-            onClick={(e) => { e.stopPropagation(); archiveProject(project.id, !isArchived); }}
+            onClick={(e) => { e.stopPropagation(); void requestArchive(); }}
             title={isArchived ? t('projectCard.unarchive') : t('projectCard.archive')}
+            aria-label={isArchived ? t('projectCard.unarchive') : t('projectCard.archive')}
             className="rounded border border-rule bg-card px-2 py-1 text-[11px] text-steel transition-colors hover:bg-paper hover:border-dim"
           >
             {isArchived ? <ArchiveRestore className="w-3.5 h-3.5" /> : <Archive className="w-3.5 h-3.5" />}
           </button>
+          <AlertDialog open={blockOpen} onOpenChange={setBlockOpen}>
+            <AlertDialogContent onClick={e => e.stopPropagation()}>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t('projectCard.closureBlockTitle')}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t('projectCard.closureBlockDesc', { done: closure.done, total: closure.total })}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                {role === 'admin' && (
+                  <AlertDialogAction onClick={forceArchive}>{t('projectCard.closureForce')}</AlertDialogAction>
+                )}
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <button
