@@ -46,11 +46,25 @@ export default function CalendarPage() {
 
   const eventDays = useMemo(() => Array.from(eventsByDay.keys()).map(d => new Date(d + 'T00:00:00')), [eventsByDay]);
 
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const isPending = (e: CalendarEvent) => {
+    const st = e.meta?.status;
+    if (e.type === 'report_deadline') return st !== 'approved';
+    if (e.type === 'payment') return st !== 'reconciled';
+    if (e.type === 'risk_review') return st === 'open';
+    return true;
+  };
+
   const upcoming = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
     const in30 = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
-    return filtered.filter(e => e.date >= today && e.date <= in30);
-  }, [filtered]);
+    return filtered.filter(e => e.date >= todayIso && e.date <= in30);
+  }, [filtered, todayIso]);
+
+  const overdue = useMemo(
+    () => filtered.filter(e => e.date < todayIso && isPending(e)).sort((a, b) => b.date.localeCompare(a.date)),
+    [filtered, todayIso],
+  );
+
 
   const selectedIso = selected?.toISOString().slice(0, 10);
   const selectedEvents = selectedIso ? (eventsByDay.get(selectedIso) || []) : [];
