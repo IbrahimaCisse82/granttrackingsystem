@@ -148,11 +148,27 @@ export default function DonorEligibilityMatrix() {
             <Download className="w-3.5 h-3.5" /> CSV
           </button>
           {isAdmin && (
-            <button onClick={() => tab === 'rules' ? setShowRuleForm(!showRuleForm) : setShowDocForm(!showDocForm)}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">
-              <Plus className="w-3.5 h-3.5" /> Ajouter
-            </button>
+            <>
+              <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs hover:bg-muted">
+                <Upload className="w-3.5 h-3.5" /> Importer CSV
+                <input
+                  type="file"
+                  accept=".csv,text/csv"
+                  className="sr-only"
+                  onChange={e => {
+                    const f = e.target.files?.[0];
+                    if (f) void importCsv(f);
+                    e.target.value = '';
+                  }}
+                />
+              </label>
+              <button onClick={() => tab === 'rules' ? setShowRuleForm(!showRuleForm) : setShowDocForm(!showDocForm)}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">
+                <Plus className="w-3.5 h-3.5" /> Ajouter
+              </button>
+            </>
           )}
+
         </div>
       </div>
 
