@@ -142,31 +142,62 @@ export default function CalendarPage() {
           )}
         </div>
 
-        {/* Next 30 days */}
-        <div className="rounded-[10px] border border-border bg-card p-4">
-          <h3 className="text-sm font-semibold text-foreground mb-3">{t('calendar.next30')}</h3>
-          {upcoming.length === 0 ? (
-            <p className="text-xs text-muted-foreground italic">{t('calendar.noUpcoming')}</p>
-          ) : (
-            <ul className="space-y-2 max-h-[600px] overflow-y-auto">
-              {upcoming.map(e => (
-                <li key={e.id}>
-                  <button onClick={() => e.project_id && navigate(`/projects/${e.project_id}`)}
-                    className="w-full text-left rounded-lg border border-border/60 bg-background/50 p-2.5 hover:border-primary/40 transition-colors">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[10px] font-mono text-muted-foreground">{fmtDay(e.date)}</span>
-                      <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium"
-                        style={{ background: TYPE_META[e.type].color + '18', color: TYPE_META[e.type].color }}>
-                        {TYPE_META[e.type].icon}{t(TYPE_META[e.type].labelKey)}
-                      </span>
-                    </div>
-                    <p className="text-xs text-foreground line-clamp-2">{e.title}</p>
-                  </button>
-                </li>
-              ))}
-            </ul>
+        {/* Overdue + next 30 days */}
+        <div className="space-y-6">
+          {overdue.length > 0 && (
+            <div className="rounded-[10px] border border-rose/40 bg-card p-4">
+              <h3 className="text-sm font-semibold text-rose mb-3">
+                {t('calendar.overdueSection')} ({overdue.length})
+              </h3>
+              <ul className="space-y-2 max-h-[280px] overflow-y-auto">
+                {overdue.map(e => (
+                  <li key={e.id}>
+                    <button onClick={() => e.project_id && navigate(`/projects/${e.project_id}`)}
+                      className="w-full text-left rounded-lg border border-rose/30 bg-rose/5 p-2.5 hover:border-rose transition-colors">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="text-[10px] font-mono text-muted-foreground">{fmtDay(e.date)}</span>
+                        <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium"
+                          style={{ background: TYPE_META[e.type].color + '18', color: TYPE_META[e.type].color }}>
+                          {TYPE_META[e.type].icon}{t(TYPE_META[e.type].labelKey)}
+                        </span>
+                        <span className="inline-flex items-center rounded-full bg-rose/15 px-2 py-0.5 text-[10px] font-semibold text-rose">
+                          {t('calendar.lateBadge')}
+                        </span>
+                      </div>
+                      <p className="text-xs text-foreground line-clamp-2">{e.title}</p>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
+
+          <div className="rounded-[10px] border border-border bg-card p-4">
+            <h3 className="text-sm font-semibold text-foreground mb-3">{t('calendar.next30')}</h3>
+            {upcoming.length === 0 ? (
+              <p className="text-xs text-muted-foreground italic">{t('calendar.noUpcoming')}</p>
+            ) : (
+              <ul className="space-y-2 max-h-[600px] overflow-y-auto">
+                {upcoming.map(e => (
+                  <li key={e.id}>
+                    <button onClick={() => e.project_id && navigate(`/projects/${e.project_id}`)}
+                      className="w-full text-left rounded-lg border border-border/60 bg-background/50 p-2.5 hover:border-primary/40 transition-colors">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[10px] font-mono text-muted-foreground">{fmtDay(e.date)}</span>
+                        <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium"
+                          style={{ background: TYPE_META[e.type].color + '18', color: TYPE_META[e.type].color }}>
+                          {TYPE_META[e.type].icon}{t(TYPE_META[e.type].labelKey)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-foreground line-clamp-2">{e.title}</p>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
+
       </div>
     </div>
   );
