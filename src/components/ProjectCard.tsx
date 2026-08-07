@@ -112,12 +112,30 @@ export default function ProjectCard({ project }: { project: Project }) {
         </div>
         <div className="flex shrink-0 gap-1 ml-3">
           <button
-            onClick={(e) => { e.stopPropagation(); archiveProject(project.id, !isArchived); }}
+            onClick={(e) => { e.stopPropagation(); void requestArchive(); }}
             title={isArchived ? t('projectCard.unarchive') : t('projectCard.archive')}
+            aria-label={isArchived ? t('projectCard.unarchive') : t('projectCard.archive')}
             className="rounded border border-rule bg-card px-2 py-1 text-[11px] text-steel transition-colors hover:bg-paper hover:border-dim"
           >
             {isArchived ? <ArchiveRestore className="w-3.5 h-3.5" /> : <Archive className="w-3.5 h-3.5" />}
           </button>
+          <AlertDialog open={blockOpen} onOpenChange={setBlockOpen}>
+            <AlertDialogContent onClick={e => e.stopPropagation()}>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t('projectCard.closureBlockTitle')}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t('projectCard.closureBlockDesc', { done: closure.done, total: closure.total })}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                {role === 'admin' && (
+                  <AlertDialogAction onClick={forceArchive}>{t('projectCard.closureForce')}</AlertDialogAction>
+                )}
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <button
