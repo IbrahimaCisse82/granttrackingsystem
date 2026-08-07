@@ -1,7 +1,11 @@
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBurnRate, type BurnRateProject } from '@/hooks/useBurnRate';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { fmt } from '@/lib/utils-project';
 import { AlertTriangle, TrendingUp, TrendingDown, CheckCircle2, Loader2 } from 'lucide-react';
+
 
 function StatusBadge({ status, variance }: { status: BurnRateProject['status']; variance: number }) {
   const { t } = useTranslation();
