@@ -47,9 +47,6 @@ function DualBar({ elapsed, burn }: { elapsed: number; burn: number }) {
 export default function BurnRateTable() {
   const { t, i18n } = useTranslation();
   const { data, isLoading } = useBurnRate();
-export default function BurnRateTable() {
-  const { t, i18n } = useTranslation();
-  const { data, isLoading } = useBurnRate();
   const { user } = useAuth();
   const lng = i18n.language?.startsWith('en') ? 'en-GB' : 'fr-FR';
   const projects = data?.projects ?? [];
