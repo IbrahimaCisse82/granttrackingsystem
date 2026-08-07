@@ -137,7 +137,8 @@
     "mitigationPlan": "Plan de mitigation",
     "other": "Autre",
     "statusMitigated": "Mitigé",
-    "statusClosed": "Clos"
+    "statusClosed": "Clos",
+    "mitigationRequired": "Mesure d'atténuation obligatoire pour un score supérieur à 15."
   },
   "calendar": {
     "title": "Calendrier consolidé",
@@ -162,7 +163,10 @@
       "payment": "Versement",
       "projectEnd": "Fin projet",
       "risk": "Risque"
-    }
+    },
+    "overdue": "En retard",
+    "overdueSection": "Échéances dépassées",
+    "lateBadge": "Retard"
   },
   "eligibility": {
     "title": "Matrice d'éligibilité bailleur",
@@ -186,7 +190,10 @@
       "closure": "Clôture"
     },
     "importCsv": "Importer CSV",
-    "exportCsv": "Exporter CSV"
+    "exportCsv": "Exporter CSV",
+    "import": "Importer CSV",
+    "importDone": "{{ok}} ligne(s) importée(s), {{ko}} rejetée(s)",
+    "importEmpty": "Aucune ligne valide dans le fichier"
   },
   "portfolio": {
     "title": "Portefeuille global",
@@ -282,6 +289,12 @@
     "archive": "Archiver",
     "unarchive": "Désarchiver",
     "deleteTitle": "Supprimer ce projet ?",
-    "deleteDesc": "Cette action est irréversible et toutes les données du projet seront perdues."
+    "deleteDesc": "Cette action est irréversible et toutes les données du projet seront perdues.",
+    "closureBlockTitle": "Clôture incomplète",
+    "closureBlockDesc": "La checklist de clôture est incomplète ({{done}}/{{total}}). Complétez-la avant d'archiver le projet.",
+    "closureForce": "Forcer l'archivage (admin)"
+  },
+  "reports": {
+    "rejectReasonTooShort": "Motif requis (5 caractères minimum)"
   }
 }
