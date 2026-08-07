@@ -81,6 +81,49 @@ export default function DonorEligibilityMatrix() {
     toast.success('Export CSV téléchargé');
   };
 
+  const importCsv = async (file: File) => {
+    if (!activeOrg) return;
+    const rows = parseCsv(await file.text());
+    if (rows.length < 2) { toast.error('Aucune ligne valide dans le fichier'); return; }
+    const body = rows.slice(1);
+    let ok = 0;
+    const rejected: number[] = [];
+
+    for (let i = 0; i < body.length; i++) {
+      const c = body[i].map(v => v.trim());
+      try {
+        if (tab === 'rules') {
+          const [donor, category, ruleType, capPct, capAmount, notes] = c;
+          if (!donor || !category || !['allowed', 'forbidden', 'capped'].includes(ruleType)) throw new Error('invalid');
+          const pct = capPct ? Number(capPct) : null;
+          const amt = capAmount ? Number(capAmount) : null;
+          if ((pct !== null && !Number.isFinite(pct)) || (amt !== null && !Number.isFinite(amt))) throw new Error('invalid');
+          if (ruleType === 'capped' && pct === null && amt === null) throw new Error('invalid');
+          await upsertRule.mutateAsync({
+            organization_id: activeOrg.id, donor_name: donor, category,
+            rule_type: ruleType as DonorRuleType, cap_pct: pct, cap_amount: amt, notes: notes || '',
+          } as any);
+        } else {
+          const [donor, docKey, docLabel, mandatory, phase, notes] = c;
+          if (!donor || !docKey || !docLabel || !['contract', 'reporting', 'closure'].includes(phase)) throw new Error('invalid');
+          await upsertDoc.mutateAsync({
+            organization_id: activeOrg.id, donor_name: donor, doc_key: docKey, doc_label: docLabel,
+            mandatory: !['false', '0', 'non', 'no'].includes((mandatory || '').toLowerCase()),
+            phase: phase as DonorDocPhase, notes: notes || '',
+          } as any);
+        }
+        ok++;
+      } catch {
+        rejected.push(i + 2);
+      }
+    }
+
+    if (ok === 0) toast.error('Aucune ligne valide dans le fichier');
+    else if (rejected.length) toast.warning(`${ok} ligne(s) importée(s), ${rejected.length} rejetée(s) (lignes ${rejected.join(', ')})`);
+    else toast.success(`${ok} ligne(s) importée(s)`);
+  };
+
+
   return (
     <div className="mt-6 rounded-[10px] border border-border bg-card overflow-hidden">
       <div className="p-4 border-b border-border flex items-center justify-between flex-wrap gap-2">
