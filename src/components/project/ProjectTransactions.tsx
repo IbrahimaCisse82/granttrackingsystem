@@ -127,13 +127,9 @@ export default function ProjectTransactions({ project, reportIndex, onSave, read
           continue;
         }
 
-        const { data: urlData } = supabase.storage
-          .from('transaction-attachments')
-          .getPublicUrl(path);
-
         newAttachments.push({
           name: file.name,
-          url: urlData.publicUrl,
+          url: '',
           path,
           size: file.size,
           uploadedAt: new Date().toISOString(),
