@@ -53,8 +53,8 @@ const App = () => (
       <AuthProvider>
         <OrganizationProvider>
           <TooltipProvider>
-            {/*T*/}
-            {/*S*/}
+            <Toaster />
+            <Sonner />
             <BrowserRouter>
               <Suspense fallback={<PageLoader />}>
                 <Routes>
