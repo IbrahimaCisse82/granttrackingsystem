@@ -12,7 +12,7 @@
       font-src 'self' data: https://fonts.gstatic.com;
       img-src 'self' data: blob: https:;
       connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.lovable.app https://*.lovable.dev https://api.openai.com https://ai.gateway.lovable.dev;
-      frame-ancestors 'self' https://*.lovable.app https://*.lovable.dev;
+      <!-- frame-ancestors must be sent as an HTTP header; ignored in meta CSP -->
       base-uri 'self';
       form-action 'self';
       object-src 'none';
