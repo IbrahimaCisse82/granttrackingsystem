@@ -317,10 +317,10 @@ export default function ProjectTransactions({ project, reportIndex, onSave, read
                         {t.attachments!.map((att, ai) => (
                           <div key={ai} className="flex items-center gap-1 text-[9px] bg-muted/50 rounded px-1.5 py-0.5 group/att">
                             <FileText className="w-3 h-3 text-muted-foreground shrink-0" />
-                            <a href={att.url} target="_blank" rel="noopener noreferrer"
-                              className="truncate max-w-[80px] hover:text-primary transition-colors" title={att.name}>
+                            <button type="button" onClick={() => openAttachment(att)}
+                              className="truncate max-w-[80px] hover:text-primary transition-colors text-left" title={att.name}>
                               {att.name}
-                            </a>
+                            </button>
                             <span className="text-muted-foreground shrink-0">({formatSize(att.size)})</span>
                             {!readOnly && (
                               <button onClick={() => removeAttachment(i, ai)}
