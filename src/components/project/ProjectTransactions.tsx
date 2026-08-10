@@ -151,6 +151,17 @@ export default function ProjectTransactions({ project, reportIndex, onSave, read
     }
   };
 
+  const openAttachment = async (att: Attachment) => {
+    const { data, error } = await supabase.storage
+      .from('transaction-attachments')
+      .createSignedUrl(att.path, 60);
+    if (error || !data?.signedUrl) {
+      toast.error('Accès au fichier refusé');
+      return;
+    }
+    window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
+  };
+
   const removeAttachment = async (txIndex: number, attIndex: number) => {
     if (readOnly) return;
     const tx = transactions[txIndex];
