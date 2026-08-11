@@ -19,8 +19,10 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { getReportCount } from '@/lib/utils-project';
 import type { Project } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function ProjectView() {
+  const { t } = useTranslation();
   const { projectId } = useParams<{ projectId: string }>();
   const [searchParams] = useSearchParams();
   const { currentTab, forceSaveCounter, openProject } = useAppStore();
@@ -72,8 +74,8 @@ export default function ProjectView() {
       map[`rapport-${i}`] = <ProjectReport project={project} reportIndex={i - 1} onSave={save} readOnly={readOnly} />;
       map[`trans-${i}`] = <ProjectTransactions project={project} reportIndex={i - 1} onSave={save} readOnly={readOnly} />;
     }
-    return map[currentTab] || <p className="p-8 text-muted-foreground italic">Section à venir.</p>;
-  }, [project, currentTab, reportCount, save, readOnly]);
+    return map[currentTab] || <p className="p-8 text-muted-foreground italic">{t('projectView.comingSoon')}</p>;
+  }, [project, currentTab, reportCount, save, readOnly, t]);
 
   if (isLoading) {
     return (
@@ -84,7 +86,7 @@ export default function ProjectView() {
   }
 
   if (!project) {
-    return <p className="p-8 text-muted-foreground">Projet introuvable.</p>;
+    return <p className="p-8 text-muted-foreground">{t('projectView.notFound')}</p>;
   }
 
   return (
@@ -92,7 +94,7 @@ export default function ProjectView() {
       <div className="flex items-center justify-end gap-3 mb-2">
         {readOnly && (
           <span className="rounded-md bg-amber-light px-2.5 py-1 text-[11px] font-semibold text-amber">
-            🔒 Mode lecture seule
+            🔒 {t('projectView.readOnly')}
           </span>
         )}
         <SaveIndicator saving={saving} />

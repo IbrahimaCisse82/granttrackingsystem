@@ -298,5 +298,37 @@
   },
   "reports": {
     "rejectReasonTooShort": "Motif requis (5 caractères minimum)"
+  },
+  "auth": {
+    "login": "Connexion",
+    "loginSubtitle": "Accédez à votre espace de suivi",
+    "forgot": "Mot de passe oublié",
+    "forgotSubtitle": "Recevez un lien de réinitialisation",
+    "email": "Email",
+    "password": "Mot de passe",
+    "signIn": "Se connecter",
+    "signingIn": "Connexion…",
+    "forgotLink": "Mot de passe oublié ?",
+    "contactAdmin": "Contactez votre administrateur pour obtenir un accès.",
+    "sendLink": "Envoyer le lien",
+    "sending": "Envoi…",
+    "backToLogin": "← Retour à la connexion",
+    "resetSent": "Consultez votre boîte mail pour réinitialiser votre mot de passe.",
+    "tagline": "Grant Tracking System"
+  },
+  "profile": {
+    "title": "Mon profil",
+    "personalInfo": "Informations personnelles",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "organization": "Organisation",
+    "phone": "Téléphone",
+    "saving": "Enregistrement…",
+    "updated": "Profil mis à jour"
+  },
+  "projectView": {
+    "readOnly": "Mode lecture seule",
+    "notFound": "Projet introuvable.",
+    "comingSoon": "Section à venir."
   }
 }

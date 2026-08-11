@@ -5,8 +5,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import logo from '@/assets/logo-growhub.png';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export default function Auth() {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<'login' | 'forgot'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,7 +45,7 @@ export default function Auth() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success('Consultez votre boîte mail pour réinitialiser votre mot de passe.');
+      toast.success(t('auth.resetSent'));
     }
     setLoading(false);
   };
@@ -52,8 +54,8 @@ export default function Auth() {
     "w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground";
 
   const titles: Record<string, { title: string; subtitle: string }> = {
-    login: { title: 'Connexion', subtitle: 'Accédez à votre espace de suivi' },
-    forgot: { title: 'Mot de passe oublié', subtitle: 'Recevez un lien de réinitialisation' },
+    login: { title: t('auth.login'), subtitle: t('auth.loginSubtitle') },
+    forgot: { title: t('auth.forgot'), subtitle: t('auth.forgotSubtitle') },
   };
 
   return (
@@ -78,8 +80,8 @@ export default function Auth() {
                 <img src={logo} alt="Grow Hub" className="h-8 w-auto brightness-0 invert" />
               </div>
             </div>
-            <h1 className="text-xl font-bold text-foreground tracking-tight">GH-GTS</h1>
-            <p className="text-xs text-muted-foreground mt-0.5">Grants Tracking System</p>
+            <h1 className="text-xl font-bold text-foreground tracking-tight">G-GTS</h1>
+            <p className="text-xs text-muted-foreground mt-0.5">{t('auth.tagline')}</p>
           </div>
 
           <AnimatePresence mode="wait">
@@ -108,26 +110,26 @@ export default function Auth() {
                 className="space-y-4"
               >
                 <div>
-                  <label htmlFor="login-email" className="block text-xs font-medium text-foreground mb-1.5">Email</label>
+                  <label htmlFor="login-email" className="block text-xs font-medium text-foreground mb-1.5">{t('auth.email')}</label>
                   <input id="login-email" type="email" required value={email} onChange={e => setEmail(e.target.value)}
                     placeholder="votre@email.com" className={inputClass} autoComplete="email" />
                 </div>
                 <div>
-                  <label htmlFor="login-password" className="block text-xs font-medium text-foreground mb-1.5">Mot de passe</label>
+                  <label htmlFor="login-password" className="block text-xs font-medium text-foreground mb-1.5">{t('auth.password')}</label>
                   <input id="login-password" type="password" required value={password} onChange={e => setPassword(e.target.value)}
                     placeholder="••••••••" className={inputClass} autoComplete="current-password" />
                 </div>
                 <button type="submit" disabled={loading}
                   className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:bg-[hsl(var(--enabel-dark))] transition-all duration-200 disabled:opacity-50 shadow-sm hover:shadow-md">
-                  {loading ? 'Connexion…' : 'Se connecter'}
+                  {loading ? t('auth.signingIn') : t('auth.signIn')}
                 </button>
                 <div className="text-center">
                   <button type="button" onClick={() => setMode('forgot')} className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                    Mot de passe oublié ?
+                    {t('auth.forgotLink')}
                   </button>
                 </div>
                 <p className="text-[10px] text-center text-muted-foreground mt-2">
-                  Contactez votre administrateur pour obtenir un accès.
+                  {t('auth.contactAdmin')}
                 </p>
               </motion.form>
             )}
@@ -143,16 +145,16 @@ export default function Auth() {
                 className="space-y-4"
               >
                 <div>
-                  <label htmlFor="forgot-email" className="block text-xs font-medium text-foreground mb-1.5">Email</label>
+                  <label htmlFor="forgot-email" className="block text-xs font-medium text-foreground mb-1.5">{t('auth.email')}</label>
                   <input id="forgot-email" type="email" required value={email} onChange={e => setEmail(e.target.value)}
                     placeholder="votre@email.com" className={inputClass} autoComplete="email" />
                 </div>
                 <button type="submit" disabled={loading}
                   className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:bg-[hsl(var(--enabel-dark))] transition-all duration-200 disabled:opacity-50 shadow-sm hover:shadow-md">
-                  {loading ? 'Envoi…' : 'Envoyer le lien'}
+                  {loading ? t('auth.sending') : t('auth.sendLink')}
                 </button>
                 <button type="button" onClick={() => setMode('login')} className="w-full text-xs text-muted-foreground hover:text-primary transition-colors">
-                  ← Retour à la connexion
+                  {t('auth.backToLogin')}
                 </button>
               </motion.form>
             )}
@@ -160,7 +162,7 @@ export default function Auth() {
         </div>
 
         <p className="text-center text-[10px] text-muted-foreground mt-5 opacity-60">
-          Grow Hub SARL · GH-GTS v3.0 · © {new Date().getFullYear()}
+          Grow Hub SARL · G-GTS v3.0 · © {new Date().getFullYear()}
         </p>
       </motion.div>
     </div>

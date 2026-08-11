@@ -60,8 +60,14 @@
     "searchLabel": "Search a project"
   },
   "profile": {
-    "language": "Language",
-    "languageHint": "Interface language preference"
+    "title": "My profile",
+    "personalInfo": "Personal information",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "organization": "Organization",
+    "phone": "Phone",
+    "saving": "Saving…",
+    "updated": "Profile updated"
   },
   "burnRate": {
     "title": "Burn rate & forecast",
@@ -302,5 +308,27 @@
   },
   "reports": {
     "rejectReasonTooShort": "Reason required (5 characters minimum)"
+  },
+  "auth": {
+    "login": "Sign in",
+    "loginSubtitle": "Access your tracking workspace",
+    "forgot": "Forgot password",
+    "forgotSubtitle": "Receive a reset link",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "forgotLink": "Forgot password?",
+    "contactAdmin": "Contact your administrator to request access.",
+    "sendLink": "Send link",
+    "sending": "Sending…",
+    "backToLogin": "← Back to sign in",
+    "resetSent": "Check your inbox to reset your password.",
+    "tagline": "Grant Tracking System"
+  },
+  "projectView": {
+    "readOnly": "Read-only mode",
+    "notFound": "Project not found.",
+    "comingSoon": "Section coming soon."
   }
 }
