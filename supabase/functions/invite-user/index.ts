@@ -102,7 +102,21 @@ Deno.serve(async (req) => {
         user_id: targetUserId,
         role: memberRole,
       });
+
+      // In-app notification for the invited user
+      const { data: org } = await adminClient
+        .from("organizations")
+        .select("name")
+        .eq("id", organization_id)
+        .single();
+      await adminClient.from("notifications").insert({
+        user_id: targetUserId,
+        type: "success",
+        title: "Bienvenue dans votre organisation",
+        message: `Vous avez été ajouté à ${org?.name ?? "une organisation"} avec le rôle ${memberRole}.`,
+      });
     }
+
 
     return new Response(JSON.stringify({ success: true, user_id: targetUserId, existing: !!existingUser }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
