@@ -20,7 +20,9 @@
     "noData": "Aucune donnée",
     "signOut": "Déconnexion",
     "rights": "Tous droits réservés",
-    "activeProjects": "Projets · {{count}} actif(s)"
+    "activeProjects": "Projets · {{count}} actif(s)",
+    "select": "Sélectionner…",
+    "validate": "Valider"
   },
   "export": {
     "menu": "Exporter",

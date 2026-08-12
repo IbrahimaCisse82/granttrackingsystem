@@ -20,7 +20,9 @@
     "noData": "No data",
     "signOut": "Sign out",
     "rights": "All rights reserved",
-    "activeProjects": "Projects · {{count}} active"
+    "activeProjects": "Projects · {{count}} active",
+    "select": "Select…",
+    "validate": "Validate"
   },
   "export": {
     "menu": "Export",
