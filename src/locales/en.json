@@ -20,7 +20,9 @@
     "noData": "No data",
     "signOut": "Sign out",
     "rights": "All rights reserved",
-    "activeProjects": "Projects · {{count}} active"
+    "activeProjects": "Projects · {{count}} active",
+    "select": "Select…",
+    "validate": "Validate"
   },
   "export": {
     "menu": "Export",
@@ -363,5 +365,49 @@
       "submit_amendement": "Amendment submitted",
       "approve_amendement": "Amendment approved"
     }
+  },
+  "org": {
+    "title": "Organization",
+    "subtitle": "Manage your organization settings and members",
+    "none": "No organization selected",
+    "switch": "Switch organization",
+    "members": "Members",
+    "invite": "Invite",
+    "email": "Email",
+    "role": "Role",
+    "since": "Since",
+    "member": "Member",
+    "admin": "Admin",
+    "owner": "Owner",
+    "you": "(you)",
+    "actions": "Actions",
+    "memberCol": "Member",
+    "emailPlaceholder": "user@example.com",
+    "addedExisting": "Existing user added to the organization",
+    "invited": "New member invited successfully"
+  },
+  "fieldReports": {
+    "title": "Field reports",
+    "subtitleManager": "All reports submitted by beneficiaries.",
+    "subtitleBeneficiary": "Submit your narrative reports for the projects assigned to you.",
+    "new": "New report",
+    "newTitle": "New field report",
+    "project": "Project",
+    "start": "Start",
+    "end": "End",
+    "narrative": "Narrative",
+    "narrativePlaceholder": "Activities carried out, results, difficulties encountered…",
+    "noAssignment": "No project is assigned to you. Contact an administrator.",
+    "period": "Period",
+    "status": "Status",
+    "actions": "Actions",
+    "empty": "No reports.",
+    "submit": "Submit",
+    "review": "Review",
+    "reviewTitle": "Mark as reviewed",
+    "reviewPlaceholder": "Comments (optional)…",
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "reviewed": "Reviewed"
   }
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
@@ -8,13 +9,14 @@ import { toast } from 'sonner';
 import ExchangeRatesPanel from '@/components/ExchangeRatesPanel';
 import DonorEligibilityMatrix from '@/components/DonorEligibilityMatrix';
 
-const ROLE_LABELS: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
-  owner: { label: 'Propriétaire', icon: <Crown className="w-3.5 h-3.5" />, color: 'hsl(var(--amber))' },
-  admin: { label: 'Admin', icon: <Shield className="w-3.5 h-3.5" />, color: 'hsl(var(--destructive))' },
-  member: { label: 'Membre', icon: <User className="w-3.5 h-3.5" />, color: 'hsl(var(--primary))' },
+const ROLE_META: Record<string, { key: string; icon: React.ReactNode; color: string }> = {
+  owner: { key: 'org.owner', icon: <Crown className="w-3.5 h-3.5" />, color: 'hsl(var(--amber))' },
+  admin: { key: 'org.admin', icon: <Shield className="w-3.5 h-3.5" />, color: 'hsl(var(--destructive))' },
+  member: { key: 'org.member', icon: <User className="w-3.5 h-3.5" />, color: 'hsl(var(--primary))' },
 };
 
 export default function OrganizationSettings() {
+  const { t, i18n } = useTranslation();
   const { activeOrg, members, membersLoading, orgRole, removeMember, updateMemberRole, organizations, setActiveOrg } = useOrganization();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -40,7 +42,7 @@ export default function OrganizationSettings() {
         throw new Error(res.data?.error || res.error?.message || 'Erreur');
       }
       const isExisting = res.data?.existing;
-      toast.success(isExisting ? 'Utilisateur existant ajouté à l\'organisation' : 'Nouveau membre invité avec succès');
+      toast.success(isExisting ? t('org.addedExisting') : t('org.invited'));
       // Refresh members list
       queryClient.invalidateQueries({ queryKey: ['org-members', activeOrg?.id] });
       setShowAddMember(false);
@@ -55,7 +57,7 @@ export default function OrganizationSettings() {
     return (
       <div className="text-center py-20">
         <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-        <p className="text-sm text-muted-foreground">Aucune organisation sélectionnée</p>
+        <p className="text-sm text-muted-foreground">{t('org.none')}</p>
       </div>
     );
   }
@@ -63,8 +65,8 @@ export default function OrganizationSettings() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-bold tracking-tight text-foreground">Organisation</h1>
-        <p className="text-xs text-muted-foreground mt-1">Gérez les paramètres et les membres de votre organisation</p>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">{t('org.title')}</h1>
+        <p className="text-xs text-muted-foreground mt-1">{t('org.subtitle')}</p>
       </div>
 
       {/* Org info card */}
@@ -79,8 +81,8 @@ export default function OrganizationSettings() {
           </div>
           {orgRole && (
             <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
-              style={{ background: ROLE_LABELS[orgRole]?.color + '15', color: ROLE_LABELS[orgRole]?.color }}>
-              {ROLE_LABELS[orgRole]?.icon} {ROLE_LABELS[orgRole]?.label}
+              style={{ background: ROLE_META[orgRole]?.color + '15', color: ROLE_META[orgRole]?.color }}>
+              {ROLE_META[orgRole]?.icon} {t(ROLE_META[orgRole]?.key || 'org.member')}
             </span>
           )}
         </div>
@@ -89,7 +91,7 @@ export default function OrganizationSettings() {
       {/* Switch org */}
       {organizations.length > 1 && (
         <div className="rounded-[10px] border border-border bg-card p-4 mb-6">
-          <h3 className="text-sm font-semibold text-foreground mb-3">Changer d'organisation</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-3">{t('org.switch')}</h3>
           <div className="flex flex-wrap gap-2">
             {organizations.map(org => (
               <button
@@ -113,12 +115,12 @@ export default function OrganizationSettings() {
         <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm font-semibold text-foreground">Membres ({members.length})</span>
+            <span className="text-sm font-semibold text-foreground">{t('org.members')} ({members.length})</span>
           </div>
           {isOrgAdmin && (
             <button onClick={() => setShowAddMember(!showAddMember)}
               className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
-              <Plus className="w-3.5 h-3.5" /> Inviter
+              <Plus className="w-3.5 h-3.5" /> {t('org.invite')}
             </button>
           )}
         </div>
@@ -127,42 +129,42 @@ export default function OrganizationSettings() {
           <div className="p-4 border-b border-border bg-muted/30">
             <form onSubmit={handleAddMember} className="flex items-end gap-3">
               <div className="flex-1">
-                <label className="block text-xs font-medium text-foreground mb-1">Email</label>
+                <label className="block text-xs font-medium text-foreground mb-1">{t('org.email')}</label>
                 <input type="email" required value={addEmail} onChange={e => setAddEmail(e.target.value)}
-                  placeholder="utilisateur@exemple.com"
+                  placeholder={t('org.emailPlaceholder')}
                   className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-foreground mb-1">Rôle</label>
+                <label className="block text-xs font-medium text-foreground mb-1">{t('org.role')}</label>
                 <select value={addRole} onChange={e => setAddRole(e.target.value)}
                   className="rounded-lg border border-input bg-background px-3 py-2 text-sm">
-                  <option value="member">Membre</option>
-                  <option value="admin">Admin</option>
+                  <option value="member">{t('org.member')}</option>
+                  <option value="admin">{t('org.admin')}</option>
                 </select>
               </div>
               <button type="submit" disabled={addLoading}
                 className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50">
-                {addLoading ? '…' : 'Inviter'}
+                {addLoading ? '…' : t('org.invite')}
               </button>
             </form>
           </div>
         )}
 
         {membersLoading ? (
-          <div className="p-8 text-center text-sm text-muted-foreground">Chargement…</div>
+          <div className="p-8 text-center text-sm text-muted-foreground">{t('common.loading')}</div>
         ) : (
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-muted/50 text-xs text-muted-foreground">
-                <th className="text-left px-4 py-2.5 font-medium">Membre</th>
-                <th className="text-left px-4 py-2.5 font-medium">Rôle</th>
-                <th className="text-left px-4 py-2.5 font-medium">Depuis</th>
-                {isOrgAdmin && <th className="text-right px-4 py-2.5 font-medium">Actions</th>}
+                <th className="text-left px-4 py-2.5 font-medium">{t('org.memberCol')}</th>
+                <th className="text-left px-4 py-2.5 font-medium">{t('org.role')}</th>
+                <th className="text-left px-4 py-2.5 font-medium">{t('org.since')}</th>
+                {isOrgAdmin && <th className="text-right px-4 py-2.5 font-medium">{t('org.actions')}</th>}
               </tr>
             </thead>
             <tbody>
               {members.map(m => {
-                const rl = ROLE_LABELS[m.role] || ROLE_LABELS.member;
+                const rl = ROLE_META[m.role] || ROLE_META.member;
                 const isSelf = m.user_id === user?.id;
                 return (
                   <tr key={m.id} className="border-t border-border hover:bg-muted/30 transition-colors">
@@ -174,7 +176,7 @@ export default function OrganizationSettings() {
                         <div>
                           <p className="font-medium text-foreground">
                             {m.first_name} {m.last_name}
-                            {isSelf && <span className="ml-1.5 text-[10px] text-muted-foreground">(vous)</span>}
+                            {isSelf && <span className="ml-1.5 text-[10px] text-muted-foreground">{t('org.you')}</span>}
                           </p>
                         </div>
                       </div>
@@ -183,18 +185,18 @@ export default function OrganizationSettings() {
                       {isOrgAdmin && !isSelf && m.role !== 'owner' ? (
                         <select value={m.role} onChange={e => updateMemberRole(m.id, e.target.value)}
                           className="rounded-md border border-input bg-background px-2 py-1 text-xs">
-                          <option value="member">Membre</option>
-                          <option value="admin">Admin</option>
+                          <option value="member">{t('org.member')}</option>
+                          <option value="admin">{t('org.admin')}</option>
                         </select>
                       ) : (
                         <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
                           style={{ background: rl.color + '15', color: rl.color }}>
-                          {rl.icon} {rl.label}
+                          {rl.icon} {t(rl.key)}
                         </span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground font-mono">
-                      {new Date(m.created_at).toLocaleDateString('fr-FR')}
+                      {new Date(m.created_at).toLocaleDateString(i18n.language === 'en' ? 'en-GB' : 'fr-FR')}
                     </td>
                     {isOrgAdmin && (
                       <td className="px-4 py-3 text-right">
