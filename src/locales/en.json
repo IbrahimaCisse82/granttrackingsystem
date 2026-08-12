@@ -330,5 +330,38 @@
     "readOnly": "Read-only mode",
     "notFound": "Project not found.",
     "comingSoon": "Section coming soon."
+  },
+  "notFound": {
+    "title": "Oops! Page not found",
+    "back": "Return to home"
+  },
+  "reset": {
+    "title": "New password",
+    "newPassword": "New password",
+    "submit": "Update",
+    "updating": "Updating…",
+    "updated": "Password updated",
+    "updatedDesc": "You can now sign in.",
+    "invalidLink": "Invalid or expired link."
+  },
+  "audit": {
+    "title": "Change history",
+    "subtitle": "Audit log of all actions performed on projects",
+    "empty": "No activity",
+    "emptyHint": "Actions will appear here as they happen",
+    "date": "Date",
+    "action": "Action",
+    "details": "Details",
+    "project": "Project",
+    "actions": {
+      "create": "Created",
+      "update": "Updated",
+      "delete": "Deleted",
+      "archive": "Archived",
+      "unarchive": "Unarchived",
+      "submit_report": "Report submitted",
+      "submit_amendement": "Amendment submitted",
+      "approve_amendement": "Amendment approved"
+    }
   }
 }

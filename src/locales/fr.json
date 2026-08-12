@@ -330,5 +330,38 @@
     "readOnly": "Mode lecture seule",
     "notFound": "Projet introuvable.",
     "comingSoon": "Section à venir."
+  },
+  "notFound": {
+    "title": "Oups ! Page introuvable",
+    "back": "Retour à l'accueil"
+  },
+  "reset": {
+    "title": "Nouveau mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "submit": "Mettre à jour",
+    "updating": "Mise à jour…",
+    "updated": "Mot de passe mis à jour",
+    "updatedDesc": "Vous pouvez maintenant vous connecter.",
+    "invalidLink": "Lien invalide ou expiré."
+  },
+  "audit": {
+    "title": "Historique des modifications",
+    "subtitle": "Journal d'audit de toutes les actions effectuées sur les projets",
+    "empty": "Aucune activité",
+    "emptyHint": "Les actions apparaîtront ici au fur et à mesure",
+    "date": "Date",
+    "action": "Action",
+    "details": "Détails",
+    "project": "Projet",
+    "actions": {
+      "create": "Création",
+      "update": "Modification",
+      "delete": "Suppression",
+      "archive": "Archivage",
+      "unarchive": "Désarchivage",
+      "submit_report": "Soumission rapport",
+      "submit_amendement": "Soumission amendement",
+      "approve_amendement": "Approbation amendement"
+    }
   }
 }
