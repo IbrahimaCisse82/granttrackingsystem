@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFieldReports, type FieldReport } from '@/hooks/useFieldReports';
 import { useProjects } from '@/hooks/useProjects';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,13 +16,14 @@ import { ClipboardList, Send, CheckCircle2, Clock, FileEdit } from 'lucide-react
 import { toast } from 'sonner';
 import { fieldReportSchema, formatZodError } from '@/lib/schemas';
 
-const STATUS: Record<string, { label: string; cls: string; icon: React.ReactNode }> = {
-  draft: { label: 'Brouillon', cls: 'bg-muted text-muted-foreground', icon: <FileEdit className="w-3 h-3" /> },
-  submitted: { label: 'Soumis', cls: 'bg-amber-50 text-amber-700', icon: <Clock className="w-3 h-3" /> },
-  reviewed: { label: 'Révisé', cls: 'bg-emerald-50 text-emerald-700', icon: <CheckCircle2 className="w-3 h-3" /> },
+const STATUS: Record<string, { key: string; cls: string; icon: React.ReactNode }> = {
+  draft: { key: 'fieldReports.draft', cls: 'bg-muted text-muted-foreground', icon: <FileEdit className="w-3 h-3" /> },
+  submitted: { key: 'fieldReports.submitted', cls: 'bg-amber-50 text-amber-700', icon: <Clock className="w-3 h-3" /> },
+  reviewed: { key: 'fieldReports.reviewed', cls: 'bg-emerald-50 text-emerald-700', icon: <CheckCircle2 className="w-3 h-3" /> },
 };
 
 export default function FieldReports() {
+  const { t } = useTranslation();
   const { user, role } = useAuth();
   const { activeOrg } = useOrganization();
   const { projects } = useProjects();
@@ -95,38 +97,38 @@ export default function FieldReports() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <ClipboardList className="w-5 h-5 text-primary" /> Rapports de terrain
+            <ClipboardList className="w-5 h-5 text-primary" /> {t('fieldReports.title')}
           </h1>
           <p className="text-xs text-muted-foreground mt-1">
-            {isManager ? 'Tous les rapports soumis par les bénéficiaires.' : 'Soumettez vos rapports narratifs sur les projets qui vous sont assignés.'}
+            {isManager ? t('fieldReports.subtitleManager') : t('fieldReports.subtitleBeneficiary')}
           </p>
         </div>
         {!isManager && assignedProjects.length > 0 && (
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="gap-1.5"><FileEdit className="w-4 h-4" /> Nouveau rapport</Button>
+              <Button size="sm" className="gap-1.5"><FileEdit className="w-4 h-4" /> {t('fieldReports.new')}</Button>
             </DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle>Nouveau rapport de terrain</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle>{t('fieldReports.newTitle')}</DialogTitle></DialogHeader>
               <form onSubmit={handleCreate} className="space-y-3">
                 <div className="space-y-1">
-                  <Label>Projet *</Label>
+                  <Label>{t('fieldReports.project')} *</Label>
                   <Select value={form.project_id} onValueChange={v => setForm(f => ({ ...f, project_id: v }))}>
-                    <SelectTrigger><SelectValue placeholder="Sélectionner…" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder={t('common.select')} /></SelectTrigger>
                     <SelectContent>
                       {assignedProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.org} — {p.title}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1"><Label>Début *</Label><Input type="date" required value={form.period_start} onChange={e => setForm(f => ({ ...f, period_start: e.target.value }))} /></div>
-                  <div className="space-y-1"><Label>Fin *</Label><Input type="date" required value={form.period_end} onChange={e => setForm(f => ({ ...f, period_end: e.target.value }))} /></div>
+                  <div className="space-y-1"><Label>{t('fieldReports.start')} *</Label><Input type="date" required value={form.period_start} onChange={e => setForm(f => ({ ...f, period_start: e.target.value }))} /></div>
+                  <div className="space-y-1"><Label>{t('fieldReports.end')} *</Label><Input type="date" required value={form.period_end} onChange={e => setForm(f => ({ ...f, period_end: e.target.value }))} /></div>
                 </div>
                 <div className="space-y-1">
-                  <Label>Narratif *</Label>
-                  <Textarea required rows={6} value={form.narrative} onChange={e => setForm(f => ({ ...f, narrative: e.target.value }))} placeholder="Activités menées, résultats, difficultés rencontrées…" />
+                  <Label>{t('fieldReports.narrative')} *</Label>
+                  <Textarea required rows={6} value={form.narrative} onChange={e => setForm(f => ({ ...f, narrative: e.target.value }))} placeholder={t('fieldReports.narrativePlaceholder')} />
                 </div>
-                <div className="flex justify-end gap-2"><Button type="button" variant="outline" onClick={() => setOpen(false)}>Annuler</Button><Button type="submit" disabled={create.isPending}>Créer</Button></div>
+                <div className="flex justify-end gap-2"><Button type="button" variant="outline" onClick={() => setOpen(false)}>{t('common.cancel')}</Button><Button type="submit" disabled={create.isPending}>{t('common.create')}</Button></div>
               </form>
             </DialogContent>
           </Dialog>
@@ -135,33 +137,33 @@ export default function FieldReports() {
 
       {!isManager && assignedProjects.length === 0 && (
         <div className="rounded-lg border bg-card p-8 text-center text-sm text-muted-foreground">
-          Aucun projet ne vous est assigné. Contactez un administrateur.
+          {t('fieldReports.noAssignment')}
         </div>
       )}
 
       <div className="rounded-lg border bg-card overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-xs uppercase tracking-wider">
-            <tr>{['Projet', 'Période', 'Statut', 'Narratif', 'Actions'].map(h => <th key={h} className="px-3 py-2 text-left font-semibold">{h}</th>)}</tr>
+            <tr>{[t('fieldReports.project'), t('fieldReports.period'), t('fieldReports.status'), t('fieldReports.narrative'), t('fieldReports.actions')].map(h => <th key={h} className="px-3 py-2 text-left font-semibold">{h}</th>)}</tr>
           </thead>
           <tbody>
             {reports.length === 0 ? (
-              <tr><td colSpan={5} className="px-3 py-8 text-center italic text-muted-foreground">Aucun rapport.</td></tr>
+              <tr><td colSpan={5} className="px-3 py-8 text-center italic text-muted-foreground">{t('fieldReports.empty')}</td></tr>
             ) : reports.map(r => {
               const s = STATUS[r.status];
               return (
                 <tr key={r.id} className="border-t hover:bg-muted/30 align-top">
                   <td className="px-3 py-2 font-medium">{projectName(r.project_id)}</td>
                   <td className="px-3 py-2 font-mono text-xs">{r.period_start} → {r.period_end}</td>
-                  <td className="px-3 py-2"><span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold ${s.cls}`}>{s.icon} {s.label}</span></td>
+                  <td className="px-3 py-2"><span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold ${s.cls}`}>{s.icon} {t(s.key)}</span></td>
                   <td className="px-3 py-2 text-xs max-w-md"><div className="line-clamp-2">{r.narrative}</div></td>
                   <td className="px-3 py-2">
                     <div className="flex gap-1">
                       {!isManager && r.status === 'draft' && r.beneficiary_id === user?.id && (
-                        <Button size="sm" variant="outline" onClick={() => submit.mutate(r.id)} className="h-7 text-xs gap-1"><Send className="w-3 h-3" /> Soumettre</Button>
+                        <Button size="sm" variant="outline" onClick={() => submit.mutate(r.id)} className="h-7 text-xs gap-1"><Send className="w-3 h-3" /> {t('fieldReports.submit')}</Button>
                       )}
                       {isManager && r.status === 'submitted' && (
-                        <Button size="sm" variant="outline" onClick={() => { setReviewing(r); setReviewNotes(''); }} className="h-7 text-xs gap-1"><CheckCircle2 className="w-3 h-3" /> Réviser</Button>
+                        <Button size="sm" variant="outline" onClick={() => { setReviewing(r); setReviewNotes(''); }} className="h-7 text-xs gap-1"><CheckCircle2 className="w-3 h-3" /> {t('fieldReports.review')}</Button>
                       )}
                     </div>
                   </td>
@@ -174,9 +176,9 @@ export default function FieldReports() {
 
       <Dialog open={!!reviewing} onOpenChange={(v) => !v && setReviewing(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Marquer comme révisé</DialogTitle></DialogHeader>
-          <Textarea rows={4} value={reviewNotes} onChange={e => setReviewNotes(e.target.value)} placeholder="Commentaires (optionnel)…" />
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setReviewing(null)}>Annuler</Button><Button onClick={submitReview}>Valider</Button></div>
+          <DialogHeader><DialogTitle>{t('fieldReports.reviewTitle')}</DialogTitle></DialogHeader>
+          <Textarea rows={4} value={reviewNotes} onChange={e => setReviewNotes(e.target.value)} placeholder={t('fieldReports.reviewPlaceholder')} />
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setReviewing(null)}>{t('common.cancel')}</Button><Button onClick={submitReview}>{t('common.validate')}</Button></div>
         </DialogContent>
       </Dialog>
     </div>
