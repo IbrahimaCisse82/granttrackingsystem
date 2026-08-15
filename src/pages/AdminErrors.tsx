@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle, Bug, Info, Skull, Trash2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Severity = 'info' | 'warning' | 'error' | 'fatal';
 
@@ -29,6 +30,7 @@ const SEV_META: Record<Severity, { label: string; cls: string; icon: React.React
 };
 
 export default function AdminErrors() {
+  const { t } = useTranslation();
   const { role } = useAuth();
   const qc = useQueryClient();
   const [filter, setFilter] = useState<Severity | 'all'>('all');
@@ -52,27 +54,27 @@ export default function AdminErrors() {
       const { error } = await supabase.from('client_errors').delete().lt('created_at', cutoff);
       if (error) throw error;
     },
-    onSuccess: () => { toast.success('Erreurs > 30 jours supprimées'); qc.invalidateQueries({ queryKey: ['client-errors'] }); },
+    onSuccess: () => { toast.success(t('admin.purged')); qc.invalidateQueries({ queryKey: ['client-errors'] }); },
     onError: (e: Error) => toast.error(e.message),
   });
 
   if (role !== 'admin') {
-    return <div className="p-8 text-sm text-muted-foreground">Accès réservé aux administrateurs.</div>;
+    return <div className="p-8 text-sm text-muted-foreground">{t('admin.restricted')}</div>;
   }
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Journal d'erreurs client</h1>
-          <p className="text-sm text-muted-foreground mt-1">200 derniers événements capturés dans le navigateur.</p>
+          <h1 className="text-2xl font-bold tracking-tight">{t('admin.errorsTitle')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('admin.errorsSubtitle')}</p>
         </div>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={() => qc.invalidateQueries({ queryKey: ['client-errors'] })}>
-            <RefreshCw className="w-4 h-4 mr-1.5" /> Actualiser
+            <RefreshCw className="w-4 h-4 mr-1.5" /> {t('admin.refresh')}
           </Button>
           <Button size="sm" variant="outline" onClick={() => purge.mutate()} disabled={purge.isPending}>
-            <Trash2 className="w-4 h-4 mr-1.5" /> Purger &gt; 30j
+            <Trash2 className="w-4 h-4 mr-1.5" /> {t('admin.purge')}
           </Button>
         </div>
       </div>
@@ -81,15 +83,15 @@ export default function AdminErrors() {
         {(['all','fatal','error','warning','info'] as const).map(s => (
           <button key={s} onClick={() => setFilter(s)}
             className={`px-3 py-1 rounded-full text-xs font-medium border ${filter === s ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-rule hover:bg-muted'}`}>
-            {s === 'all' ? 'Tous' : SEV_META[s].label}
+            {s === 'all' ? t('admin.all') : SEV_META[s].label}
           </button>
         ))}
       </div>
 
-      {list.isLoading && <div className="text-sm text-muted-foreground">Chargement…</div>}
+      {list.isLoading && <div className="text-sm text-muted-foreground">{t('admin.loading')}</div>}
       {list.data?.length === 0 && (
         <div className="rounded-lg border border-rule bg-card p-8 text-center text-sm text-muted-foreground">
-          Aucune erreur enregistrée. 🎉
+          {t('admin.noErrors')}
         </div>
       )}
 
@@ -117,13 +119,13 @@ export default function AdminErrors() {
                 <div className="border-t border-rule bg-muted/30 p-3 space-y-2 text-xs">
                   {e.stack && (
                     <div>
-                      <div className="font-semibold mb-1 text-muted-foreground uppercase tracking-wider text-[10px]">Stack</div>
+                      <div className="font-semibold mb-1 text-muted-foreground uppercase tracking-wider text-[10px]">{t('admin.stack')}</div>
                       <pre className="whitespace-pre-wrap break-words font-mono text-[11px] bg-background p-2 rounded border border-rule max-h-60 overflow-auto">{e.stack}</pre>
                     </div>
                   )}
                   {Object.keys(e.context || {}).length > 0 && (
                     <div>
-                      <div className="font-semibold mb-1 text-muted-foreground uppercase tracking-wider text-[10px]">Contexte</div>
+                      <div className="font-semibold mb-1 text-muted-foreground uppercase tracking-wider text-[10px]">{t('admin.context')}</div>
                       <pre className="whitespace-pre-wrap break-words font-mono text-[11px] bg-background p-2 rounded border border-rule">{JSON.stringify(e.context, null, 2)}</pre>
                     </div>
                   )}

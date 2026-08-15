@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 import { Activity, AlertTriangle, Bug, Gauge, ShieldCheck, History } from 'lucide-react';
 
 interface Bucket24h { hour: string; count: number }
 
 export default function AdminHealth() {
+  const { t } = useTranslation();
   const { role } = useAuth();
 
   const errors = useQuery({
@@ -56,7 +58,7 @@ export default function AdminHealth() {
   });
 
   if (role !== 'admin') {
-    return <div className="p-8 text-sm text-muted-foreground">Accès réservé aux administrateurs.</div>;
+    return <div className="p-8 text-sm text-muted-foreground">{t('admin.restricted')}</div>;
   }
 
   // Bucket errors per hour
@@ -84,22 +86,22 @@ export default function AdminHealth() {
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Santé du système</h1>
-        <p className="text-sm text-muted-foreground mt-1">Vue d'ensemble des erreurs, abus et activités sensibles — 24 dernières heures.</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t('admin.healthTitle')}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{t('admin.healthSubtitle')}</p>
       </div>
 
       {/* KPI cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-        <KpiCard icon={<Bug className="w-4 h-4" />} label="Erreurs (24h)" value={totalErrors24h} tone={totalErrors24h > 50 ? 'rose' : 'sky'} />
-        <KpiCard icon={<AlertTriangle className="w-4 h-4" />} label="Erreurs fatales" value={fatalCount} tone={fatalCount > 0 ? 'rose' : 'emerald'} />
-        <KpiCard icon={<Gauge className="w-4 h-4" />} label="Pics rate-limit" value={breaches} tone={breaches > 0 ? 'amber' : 'emerald'} />
-        <KpiCard icon={<ShieldCheck className="w-4 h-4" />} label="Erreurs niveau « error »" value={errorCount} tone={errorCount > 10 ? 'amber' : 'sky'} />
+        <KpiCard icon={<Bug className="w-4 h-4" />} label={t('admin.kpiErrors24h')} value={totalErrors24h} tone={totalErrors24h > 50 ? 'rose' : 'sky'} />
+        <KpiCard icon={<AlertTriangle className="w-4 h-4" />} label={t('admin.kpiFatal')} value={fatalCount} tone={fatalCount > 0 ? 'rose' : 'emerald'} />
+        <KpiCard icon={<Gauge className="w-4 h-4" />} label={t('admin.kpiRateLimit')} value={breaches} tone={breaches > 0 ? 'amber' : 'emerald'} />
+        <KpiCard icon={<ShieldCheck className="w-4 h-4" />} label={t('admin.kpiErrorLevel')} value={errorCount} tone={errorCount > 10 ? 'amber' : 'sky'} />
       </div>
 
       {/* Sparkline 24h */}
       <section className="rounded-lg border border-rule bg-card p-5 mb-6">
         <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
-          <Activity className="w-4 h-4" /> Erreurs par heure
+          <Activity className="w-4 h-4" /> {t('admin.errorsPerHour')}
         </h2>
         <div className="flex items-end gap-1 h-32">
           {buckets.map((b, i) => {
@@ -121,10 +123,10 @@ export default function AdminHealth() {
       {/* Rate-limits */}
       <section className="rounded-lg border border-rule bg-card p-5 mb-6">
         <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
-          <Gauge className="w-4 h-4" /> Top compteurs de rate-limit (24h)
+          <Gauge className="w-4 h-4" /> {t('admin.topRateLimits')}
         </h2>
-        {rateLimits.isLoading && <div className="text-xs text-muted-foreground">Chargement…</div>}
-        {rateLimits.data?.length === 0 && <div className="text-xs text-muted-foreground">Aucun appel limité.</div>}
+        {rateLimits.isLoading && <div className="text-xs text-muted-foreground">{t('admin.loading')}</div>}
+        {rateLimits.data?.length === 0 && <div className="text-xs text-muted-foreground">{t('admin.noRateLimits')}</div>}
         <div className="space-y-1.5">
           {rateLimits.data?.slice(0, 10).map((r: any, i) => (
             <div key={i} className="flex items-center justify-between text-xs py-1.5 border-b border-rule last:border-0">
@@ -143,9 +145,9 @@ export default function AdminHealth() {
       {/* Audit */}
       <section className="rounded-lg border border-rule bg-card p-5">
         <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
-          <History className="w-4 h-4" /> Dernières activités sensibles
+          <History className="w-4 h-4" /> {t('admin.recentActivity')}
         </h2>
-        {audit.isLoading && <div className="text-xs text-muted-foreground">Chargement…</div>}
+        {audit.isLoading && <div className="text-xs text-muted-foreground">{t('admin.loading')}</div>}
         <div className="space-y-1.5">
           {audit.data?.map((a: any) => (
             <div key={a.id} className="flex items-center justify-between text-xs py-1.5 border-b border-rule last:border-0">
