@@ -175,13 +175,13 @@ export default function DonorReports() {
             {templates.length === 0 ? (
               <p className="p-6 text-xs text-muted-foreground italic text-center">{t('donorReports.noTemplate')}</p>
             ) : templates.map(tpl => (
-              <div key={t.id} className="p-4 flex items-center justify-between">
+              <div key={tpl.id} className="p-4 flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-semibold">{t.name}</div>
-                  <div className="text-xs text-muted-foreground">{t.donor_name} · {t.periodicity} · {t.currency} · {t.sections.length} sections</div>
+                  <div className="text-sm font-semibold">{tpl.name}</div>
+                  <div className="text-xs text-muted-foreground">{tpl.donor_name} · {tpl.periodicity} · {tpl.currency} · {tpl.sections.length} {t('donorReports.sectionsCount')}</div>
                 </div>
                 {canEdit && (
-                  <button onClick={() => remove.mutate(t.id)} className="text-destructive hover:opacity-70">
+                  <button onClick={() => remove.mutate(tpl.id)} className="text-destructive hover:opacity-70">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 )}
@@ -205,7 +205,7 @@ export default function DonorReports() {
                 <Label className="text-xs">{t('donorReports.template')}</Label>
                 <Select value={genTemplate} onValueChange={setGenTemplate}>
                   <SelectTrigger><SelectValue placeholder={t('donorReports.select')} /></SelectTrigger>
-                  <SelectContent>{templates.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent>
+                  <SelectContent>{templates.map(tp => <SelectItem key={tp.id} value={tp.id}>{tp.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
