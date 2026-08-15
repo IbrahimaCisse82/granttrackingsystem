@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { Users, Shield, Eye, Briefcase, UserCheck, ChevronDown, Plus, X, Trash2, Ban, CheckCircle, MoreHorizontal } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { Database } from '@/integrations/supabase/types';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -21,14 +22,15 @@ interface UserWithRole {
   created_at: string;
 }
 
-const ROLE_CONFIG: Record<AppRole, { label: string; icon: React.ReactNode; color: string }> = {
-  admin: { label: 'Admin', icon: <Shield className="w-3.5 h-3.5" />, color: 'hsl(var(--destructive))' },
-  manager: { label: 'Manager', icon: <Briefcase className="w-3.5 h-3.5" />, color: 'hsl(var(--enabel))' },
-  lecteur: { label: 'Lecteur', icon: <Eye className="w-3.5 h-3.5" />, color: 'hsl(var(--teal))' },
-  beneficiaire: { label: 'Bénéficiaire', icon: <UserCheck className="w-3.5 h-3.5" />, color: 'hsl(var(--amber))' },
+const ROLE_CONFIG: Record<AppRole, { labelKey: string; icon: React.ReactNode; color: string }> = {
+  admin: { labelKey: 'users.roleAdmin', icon: <Shield className="w-3.5 h-3.5" />, color: 'hsl(var(--destructive))' },
+  manager: { labelKey: 'users.roleManager', icon: <Briefcase className="w-3.5 h-3.5" />, color: 'hsl(var(--enabel))' },
+  lecteur: { labelKey: 'users.roleLecteur', icon: <Eye className="w-3.5 h-3.5" />, color: 'hsl(var(--teal))' },
+  beneficiaire: { labelKey: 'users.roleBeneficiaire', icon: <UserCheck className="w-3.5 h-3.5" />, color: 'hsl(var(--amber))' },
 };
 
 export default function AdminUsers() {
+  const { t } = useTranslation();
   const { role: currentRole, user } = useAuth();
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,7 +64,7 @@ export default function AdminUsers() {
     const { data: profiles, error: pErr } = await supabase.from('profiles').select('*');
     const { data: roles, error: rErr } = await supabase.from('user_roles').select('*');
     if (pErr || rErr) {
-      toast({ title: 'Erreur', description: 'Impossible de charger les utilisateurs.', variant: 'destructive' });
+      toast({ title: t('users.error'), description: t('users.loadError'), variant: 'destructive' });
       setLoading(false);
       return;
     }
@@ -81,9 +83,9 @@ export default function AdminUsers() {
   const changeRole = async (userId: string, newRole: AppRole) => {
     const { error } = await supabase.from('user_roles').update({ role: newRole }).eq('user_id', userId);
     if (error) {
-      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+      toast({ title: t('users.error'), description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: 'Rôle mis à jour' });
+      toast({ title: t('users.roleUpdated') });
       setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, role: newRole } : u));
     }
     setEditingUserId(null);
@@ -99,14 +101,14 @@ export default function AdminUsers() {
         headers: { Authorization: `Bearer ${session?.access_token}` },
       });
       if (res.error || res.data?.error) {
-        throw new Error(res.data?.error || res.error?.message || 'Erreur inconnue');
+        throw new Error(res.data?.error || res.error?.message || t('users.unknownError'));
       }
-      toast({ title: 'Utilisateur créé', description: `${inviteForm.email} a été ajouté avec le rôle ${ROLE_CONFIG[inviteForm.role].label}.` });
+      toast({ title: t('users.created'), description: t('users.createdDesc', { email: inviteForm.email, role: t(ROLE_CONFIG[inviteForm.role].labelKey) }) });
       setShowInvite(false);
       setInviteForm({ email: '', password: '', first_name: '', last_name: '', role: 'beneficiaire' });
       fetchUsers();
     } catch (err: any) {
-      toast({ title: 'Erreur', description: err.message, variant: 'destructive' });
+      toast({ title: t('users.error'), description: err.message, variant: 'destructive' });
     }
     setInviteLoading(false);
   };
@@ -120,12 +122,12 @@ export default function AdminUsers() {
         headers: { Authorization: `Bearer ${session?.access_token}` },
       });
       if (res.error || res.data?.error) {
-        throw new Error(res.data?.error || res.error?.message || 'Erreur inconnue');
+        throw new Error(res.data?.error || res.error?.message || t('users.unknownError'));
       }
       const messages = {
-        delete: 'Utilisateur supprimé avec succès',
-        disable: 'Utilisateur désactivé avec succès',
-        enable: 'Utilisateur réactivé avec succès',
+        delete: t('users.deleted'),
+        disable: t('users.disabled'),
+        enable: t('users.enabled'),
       };
       toast({ title: messages[confirmDialog.action] });
       if (confirmDialog.action === 'delete') {
@@ -134,7 +136,7 @@ export default function AdminUsers() {
         fetchUsers();
       }
     } catch (err: any) {
-      toast({ title: 'Erreur', description: err.message, variant: 'destructive' });
+      toast({ title: t('users.error'), description: err.message, variant: 'destructive' });
     }
     setActionLoading(false);
     setConfirmDialog(prev => ({ ...prev, open: false }));
@@ -144,8 +146,8 @@ export default function AdminUsers() {
     return (
       <div className="text-center py-20">
         <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-        <h1 className="text-xl font-bold text-foreground mb-2">Accès restreint</h1>
-        <p className="text-sm text-muted-foreground">Seuls les administrateurs peuvent accéder à cette section.</p>
+        <h1 className="text-xl font-bold text-foreground mb-2">{t('users.restrictedTitle')}</h1>
+        <p className="text-sm text-muted-foreground">{t('users.restrictedBody')}</p>
       </div>
     );
   }
@@ -156,12 +158,12 @@ export default function AdminUsers() {
     <div>
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground">Gestion des utilisateurs</h1>
-          <p className="text-xs text-muted-foreground mt-1">Gérez les accès et les rôles des membres de la plateforme</p>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">{t('users.title')}</h1>
+          <p className="text-xs text-muted-foreground mt-1">{t('users.subtitle')}</p>
         </div>
         <button onClick={() => setShowInvite(true)}
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-[hsl(var(--enabel-dark))] transition-colors">
-          <Plus className="w-4 h-4" /> Ajouter un utilisateur
+          <Plus className="w-4 h-4" /> {t('users.addUser')}
         </button>
       </div>
 
@@ -170,44 +172,44 @@ export default function AdminUsers() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-card rounded-2xl border border-border p-6 w-full max-w-md shadow-lg mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-foreground">Nouvel utilisateur</h2>
+              <h2 className="text-base font-semibold text-foreground">{t('users.newUser')}</h2>
               <button onClick={() => setShowInvite(false)} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
             </div>
             <form onSubmit={handleInvite} className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-foreground mb-1">Prénom</label>
+                  <label className="block text-xs font-medium text-foreground mb-1">{t('users.firstName')}</label>
                   <input type="text" required value={inviteForm.first_name}
                     onChange={e => setInviteForm(f => ({ ...f, first_name: e.target.value }))} className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-foreground mb-1">Nom</label>
+                  <label className="block text-xs font-medium text-foreground mb-1">{t('users.lastName')}</label>
                   <input type="text" required value={inviteForm.last_name}
                     onChange={e => setInviteForm(f => ({ ...f, last_name: e.target.value }))} className={inputClass} />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-foreground mb-1">Email</label>
+                <label className="block text-xs font-medium text-foreground mb-1">{t('users.email')}</label>
                 <input type="email" required value={inviteForm.email}
                   onChange={e => setInviteForm(f => ({ ...f, email: e.target.value }))} className={inputClass} />
               </div>
               <div>
-                <label className="block text-xs font-medium text-foreground mb-1">Mot de passe initial</label>
+                <label className="block text-xs font-medium text-foreground mb-1">{t('users.initialPassword')}</label>
                 <input type="password" required minLength={6} value={inviteForm.password}
                   onChange={e => setInviteForm(f => ({ ...f, password: e.target.value }))} className={inputClass} />
               </div>
               <div>
-                <label className="block text-xs font-medium text-foreground mb-1">Rôle</label>
+                <label className="block text-xs font-medium text-foreground mb-1">{t('users.role')}</label>
                 <select value={inviteForm.role} onChange={e => setInviteForm(f => ({ ...f, role: e.target.value as AppRole }))}
                   className={inputClass}>
                   {(Object.keys(ROLE_CONFIG) as AppRole[]).map(r => (
-                    <option key={r} value={r}>{ROLE_CONFIG[r].label}</option>
+                    <option key={r} value={r}>{t(ROLE_CONFIG[r].labelKey)}</option>
                   ))}
                 </select>
               </div>
               <button type="submit" disabled={inviteLoading}
                 className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:bg-[hsl(var(--enabel-dark))] transition-colors disabled:opacity-50">
-                {inviteLoading ? 'Création…' : 'Créer le compte'}
+                {inviteLoading ? t('users.creating') : t('users.createAccount')}
               </button>
             </form>
           </div>
@@ -219,30 +221,20 @@ export default function AdminUsers() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {confirmDialog.action === 'delete' && 'Supprimer l\'utilisateur'}
-              {confirmDialog.action === 'disable' && 'Désactiver l\'utilisateur'}
-              {confirmDialog.action === 'enable' && 'Réactiver l\'utilisateur'}
+              {t(`users.${confirmDialog.action}Title`)}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {confirmDialog.action === 'delete' && (
-                <>Êtes-vous sûr de vouloir supprimer <strong>{confirmDialog.userName}</strong> ? Cette action est irréversible et toutes ses données seront perdues.</>
-              )}
-              {confirmDialog.action === 'disable' && (
-                <>Êtes-vous sûr de vouloir désactiver <strong>{confirmDialog.userName}</strong> ? L'utilisateur ne pourra plus se connecter.</>
-              )}
-              {confirmDialog.action === 'enable' && (
-                <>Réactiver <strong>{confirmDialog.userName}</strong> ? L'utilisateur pourra à nouveau se connecter.</>
-              )}
+              {t(`users.${confirmDialog.action}Body`, { name: confirmDialog.userName })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={actionLoading}>Annuler</AlertDialogCancel>
+            <AlertDialogCancel disabled={actionLoading}>{t('users.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleUserAction}
               disabled={actionLoading}
               className={confirmDialog.action === 'delete' ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''}
             >
-              {actionLoading ? 'En cours…' : confirmDialog.action === 'delete' ? 'Supprimer' : confirmDialog.action === 'disable' ? 'Désactiver' : 'Réactiver'}
+              {actionLoading ? t('users.pending') : t(`users.${confirmDialog.action}`)}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -257,7 +249,7 @@ export default function AdminUsers() {
             <div key={role} className="rounded-[10px] border border-border bg-card p-4">
               <div className="flex items-center gap-2 mb-2">
                 <div className="rounded-md p-1.5" style={{ background: config.color + '18', color: config.color }}>{config.icon}</div>
-                <span className="text-xs font-medium text-muted-foreground">{config.label}</span>
+                <span className="text-xs font-medium text-muted-foreground">{t(config.labelKey)}</span>
               </div>
               <p className="text-2xl font-bold font-mono text-foreground">{count}</p>
             </div>
@@ -269,22 +261,22 @@ export default function AdminUsers() {
       <div className="rounded-[10px] border border-border bg-card overflow-hidden">
         <div className="p-4 border-b border-border flex items-center gap-2">
           <Users className="w-4 h-4 text-muted-foreground" />
-          <span className="text-sm font-semibold text-foreground">Utilisateurs ({users.length})</span>
+          <span className="text-sm font-semibold text-foreground">{t('users.count', { count: users.length })}</span>
         </div>
         {loading ? (
-          <div className="p-8 text-center text-sm text-muted-foreground">Chargement…</div>
+          <div className="p-8 text-center text-sm text-muted-foreground">{t('users.loading')}</div>
         ) : users.length === 0 ? (
-          <div className="p-8 text-center text-sm text-muted-foreground">Aucun utilisateur trouvé.</div>
+          <div className="p-8 text-center text-sm text-muted-foreground">{t('users.empty')}</div>
         ) : (
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-muted/50 text-xs text-muted-foreground">
-                <th className="text-left px-4 py-2.5 font-medium">Utilisateur</th>
-                <th className="text-left px-4 py-2.5 font-medium">Organisation</th>
-                <th className="text-left px-4 py-2.5 font-medium">Téléphone</th>
-                <th className="text-left px-4 py-2.5 font-medium">Rôle</th>
-                <th className="text-left px-4 py-2.5 font-medium">Inscrit le</th>
-                <th className="text-right px-4 py-2.5 font-medium">Actions</th>
+                <th className="text-left px-4 py-2.5 font-medium">{t('users.colUser')}</th>
+                <th className="text-left px-4 py-2.5 font-medium">{t('users.colOrg')}</th>
+                <th className="text-left px-4 py-2.5 font-medium">{t('users.colPhone')}</th>
+                <th className="text-left px-4 py-2.5 font-medium">{t('users.colRole')}</th>
+                <th className="text-left px-4 py-2.5 font-medium">{t('users.colDate')}</th>
+                <th className="text-right px-4 py-2.5 font-medium">{t('users.colActions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -301,7 +293,7 @@ export default function AdminUsers() {
                         <div>
                           <p className="font-medium text-foreground">
                             {u.first_name} {u.last_name}
-                            {isSelf && <span className="ml-1.5 text-[10px] text-muted-foreground">(vous)</span>}
+                            {isSelf && <span className="ml-1.5 text-[10px] text-muted-foreground">{t('users.you')}</span>}
                           </p>
                           <p className="text-xs text-muted-foreground font-mono">{u.user_id.slice(0, 8)}…</p>
                         </div>
@@ -315,7 +307,7 @@ export default function AdminUsers() {
                           {(Object.keys(ROLE_CONFIG) as AppRole[]).map(r => (
                             <button key={r} onClick={() => changeRole(u.user_id, r)}
                               className={`text-left text-xs px-2 py-1 rounded hover:bg-muted transition-colors ${r === u.role ? 'font-bold bg-muted' : ''}`}>
-                              {ROLE_CONFIG[r].label}
+                              {t(ROLE_CONFIG[r].labelKey)}
                             </button>
                           ))}
                         </div>
@@ -323,7 +315,7 @@ export default function AdminUsers() {
                         <button onClick={(e) => { e.stopPropagation(); setEditingUserId(u.user_id); }}
                           className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors hover:opacity-80"
                           style={{ background: config.color + '15', color: config.color }}>
-                          {config.icon} {config.label} <ChevronDown className="w-3 h-3" />
+                          {config.icon} {t(config.labelKey)} <ChevronDown className="w-3 h-3" />
                         </button>
                       )}
                     </td>
@@ -351,7 +343,7 @@ export default function AdminUsers() {
                                 }}
                                 className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-muted transition-colors"
                               >
-                                <Ban className="w-3.5 h-3.5 text-amber-500" /> Désactiver
+                                <Ban className="w-3.5 h-3.5 text-amber-500" /> {t('users.disable')}
                               </button>
                               <button
                                 onClick={() => {
@@ -360,7 +352,7 @@ export default function AdminUsers() {
                                 }}
                                 className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-muted transition-colors"
                               >
-                                <CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Réactiver
+                                <CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> {t('users.enable')}
                               </button>
                               <div className="border-t border-border my-1" />
                               <button
@@ -370,7 +362,7 @@ export default function AdminUsers() {
                                 }}
                                 className="w-full flex items-center gap-2 px-3 py-2 text-xs text-destructive hover:bg-destructive/10 transition-colors"
                               >
-                                <Trash2 className="w-3.5 h-3.5" /> Supprimer
+                                <Trash2 className="w-3.5 h-3.5" /> {t('users.delete')}
                               </button>
                             </div>
                           )}
