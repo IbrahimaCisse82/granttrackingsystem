@@ -409,5 +409,28 @@
     "draft": "Draft",
     "submitted": "Submitted",
     "reviewed": "Reviewed"
+  },
+  "admin": {
+    "restricted": "Administrators only.",
+    "errorsTitle": "Client error log",
+    "errorsSubtitle": "Last 200 events captured in the browser.",
+    "refresh": "Refresh",
+    "purge": "Purge > 30d",
+    "purged": "Errors older than 30 days deleted",
+    "all": "All",
+    "loading": "Loading…",
+    "noErrors": "No errors recorded. 🎉",
+    "stack": "Stack",
+    "context": "Context",
+    "healthTitle": "System health",
+    "healthSubtitle": "Overview of errors, abuse and sensitive activity — last 24 hours.",
+    "kpiErrors24h": "Errors (24h)",
+    "kpiFatal": "Fatal errors",
+    "kpiRateLimit": "Rate-limit spikes",
+    "kpiErrorLevel": "\"error\" level",
+    "errorsPerHour": "Errors per hour",
+    "topRateLimits": "Top rate-limit counters (24h)",
+    "noRateLimits": "No throttled calls.",
+    "recentActivity": "Recent sensitive activity"
   }
 }

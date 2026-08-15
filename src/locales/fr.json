@@ -409,5 +409,28 @@
     "draft": "Brouillon",
     "submitted": "Soumis",
     "reviewed": "Révisé"
+  },
+  "admin": {
+    "restricted": "Accès réservé aux administrateurs.",
+    "errorsTitle": "Journal d'erreurs client",
+    "errorsSubtitle": "200 derniers événements capturés dans le navigateur.",
+    "refresh": "Actualiser",
+    "purge": "Purger > 30j",
+    "purged": "Erreurs > 30 jours supprimées",
+    "all": "Tous",
+    "loading": "Chargement…",
+    "noErrors": "Aucune erreur enregistrée. 🎉",
+    "stack": "Stack",
+    "context": "Contexte",
+    "healthTitle": "Santé du système",
+    "healthSubtitle": "Vue d'ensemble des erreurs, abus et activités sensibles — 24 dernières heures.",
+    "kpiErrors24h": "Erreurs (24h)",
+    "kpiFatal": "Erreurs fatales",
+    "kpiRateLimit": "Pics rate-limit",
+    "kpiErrorLevel": "Erreurs niveau « error »",
+    "errorsPerHour": "Erreurs par heure",
+    "topRateLimits": "Top compteurs de rate-limit (24h)",
+    "noRateLimits": "Aucun appel limité.",
+    "recentActivity": "Dernières activités sensibles"
   }
 }
