@@ -6,8 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trash2, Plus, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function ExchangeRatesPanel() {
+  const { t } = useTranslation();
   const { activeOrg, orgRole } = useOrganization();
   const { rates, add, remove } = useExchangeRates(activeOrg?.id);
   const canEdit = orgRole === 'owner' || orgRole === 'admin' || orgRole === 'manager';
@@ -30,45 +32,43 @@ export default function ExchangeRatesPanel() {
   return (
     <div className="rounded-lg border bg-card p-5 space-y-4">
       <div>
-        <h3 className="text-sm font-semibold">Devises &amp; Taux de change</h3>
-        <p className="text-xs text-muted-foreground mt-1">
-          Configurez les paires de devises utilisées par votre organisation. Le taux par défaut FCFA → EUR (655,957) reste actif tant qu'aucun taux personnalisé n'est saisi.
-        </p>
+        <h3 className="text-sm font-semibold">{t('rates.title')}</h3>
+        <p className="text-xs text-muted-foreground mt-1">{t('rates.subtitle')}</p>
       </div>
 
       {canEdit && (
         <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-5 gap-2 items-end">
           <div className="space-y-1">
-            <Label className="text-xs">De</Label>
+            <Label className="text-xs">{t('rates.from')}</Label>
             <Select value={from} onValueChange={setFrom}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>{ISO_CURRENCIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Vers</Label>
+            <Label className="text-xs">{t('rates.to')}</Label>
             <Select value={to} onValueChange={setTo}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>{ISO_CURRENCIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Taux</Label>
+            <Label className="text-xs">{t('rates.rate')}</Label>
             <Input type="number" step="0.000001" min="0" value={rate} onChange={e => setRate(e.target.value)} required />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Date</Label>
+            <Label className="text-xs">{t('rates.date')}</Label>
             <Input type="date" value={date} onChange={e => setDate(e.target.value)} required />
           </div>
           <Button type="submit" size="sm" disabled={add.isPending} className="gap-1.5">
-            <Plus className="w-3.5 h-3.5" /> Ajouter
+            <Plus className="w-3.5 h-3.5" /> {t('rates.add')}
           </Button>
         </form>
       )}
 
       <div className="border-t pt-3">
         {rates.length === 0 ? (
-          <p className="text-xs text-muted-foreground italic py-4 text-center">Aucun taux personnalisé configuré.</p>
+          <p className="text-xs text-muted-foreground italic py-4 text-center">{t('rates.empty')}</p>
         ) : (
           <div className="space-y-1.5 max-h-64 overflow-y-auto">
             {rates.map(r => (
