@@ -518,5 +518,46 @@
     "roleLecteur": "Lecteur",
     "roleBeneficiaire": "Bénéficiaire",
     "unknownError": "Erreur inconnue"
+  },
+  "rates": {
+    "title": "Devises & Taux de change",
+    "subtitle": "Configurez les paires de devises utilisées par votre organisation. Le taux par défaut FCFA → EUR (655,957) reste actif tant qu'aucun taux personnalisé n'est saisi.",
+    "from": "De",
+    "to": "Vers",
+    "rate": "Taux",
+    "date": "Date",
+    "add": "Ajouter",
+    "empty": "Aucun taux personnalisé configuré."
+  },
+  "comments": {
+    "title": "Commentaires",
+    "empty": "Aucun commentaire pour ce rapport",
+    "placeholder": "Écrire un commentaire…",
+    "hint": "Ctrl+Entrée pour envoyer"
+  },
+  "beneficiaries": {
+    "title": "Bénéficiaires assignés",
+    "selectMember": "Sélectionner un membre…",
+    "assign": "Assigner",
+    "empty": "Aucun bénéficiaire assigné.",
+    "assigned": "Bénéficiaire assigné",
+    "removed": "Assignation retirée",
+    "noContext": "Contexte indisponible"
+  },
+  "fiche": {
+    "title": "Fiche récapitulative des rapports financiers",
+    "subtitle": "Rapports financiers",
+    "addLine": "Ajouter une ligne",
+    "colReport": "Rapport",
+    "colPeriod": "Période",
+    "colSubmitted": "Soumis le",
+    "colDeclared": "Montant déclaré",
+    "colValidated": "Montant validé",
+    "colTranche": "Tranche",
+    "colPaymentDate": "Date paiement",
+    "colReceived": "Montant reçu",
+    "reportNo": "Rapport N°",
+    "empty": "Aucune fiche. Cliquez sur « + Ajouter une ligne ».",
+    "totals": "TOTAUX"
   }
 }

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UserPlus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import type { Project } from '@/lib/types';
 
 interface Props { project: Project; }
@@ -14,6 +15,7 @@ interface Props { project: Project; }
 interface OrgUser { user_id: string; first_name: string; last_name: string; }
 
 export default function ProjectBeneficiariesPanel({ project }: Props) {
+  const { t } = useTranslation();
   const { user, role } = useAuth();
   const { activeOrg } = useOrganization();
   const qc = useQueryClient();
@@ -47,7 +49,7 @@ export default function ProjectBeneficiariesPanel({ project }: Props) {
 
   const add = useMutation({
     mutationFn: async (beneficiary_id: string) => {
-      if (!user || !activeOrg) throw new Error('Contexte indisponible');
+      if (!user || !activeOrg) throw new Error(t('beneficiaries.noContext'));
       const { error } = await supabase.from('project_beneficiaries').insert({
         project_id: project.id,
         organization_id: activeOrg.id,
@@ -56,7 +58,7 @@ export default function ProjectBeneficiariesPanel({ project }: Props) {
       });
       if (error) throw error;
     },
-    onSuccess: () => { toast.success('Bénéficiaire assigné'); setSelected(''); qc.invalidateQueries({ queryKey: ['project-beneficiaries'] }); },
+    onSuccess: () => { toast.success(t('beneficiaries.assigned')); setSelected(''); qc.invalidateQueries({ queryKey: ['project-beneficiaries'] }); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -65,7 +67,7 @@ export default function ProjectBeneficiariesPanel({ project }: Props) {
       const { error } = await supabase.from('project_beneficiaries').delete().eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => { toast.success('Assignation retirée'); qc.invalidateQueries({ queryKey: ['project-beneficiaries'] }); },
+    onSuccess: () => { toast.success(t('beneficiaries.removed')); qc.invalidateQueries({ queryKey: ['project-beneficiaries'] }); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -81,20 +83,20 @@ export default function ProjectBeneficiariesPanel({ project }: Props) {
 
   return (
     <div className="rounded-lg border bg-card p-4 space-y-3">
-      <h3 className="text-sm font-semibold">Bénéficiaires assignés</h3>
+      <h3 className="text-sm font-semibold">{t('beneficiaries.title')}</h3>
       <div className="flex gap-2">
         <Select value={selected} onValueChange={setSelected}>
-          <SelectTrigger className="flex-1"><SelectValue placeholder="Sélectionner un membre…" /></SelectTrigger>
+          <SelectTrigger className="flex-1"><SelectValue placeholder={t('beneficiaries.selectMember')} /></SelectTrigger>
           <SelectContent>
             {candidates.map(u => <SelectItem key={u.user_id} value={u.user_id}>{u.first_name} {u.last_name}</SelectItem>)}
           </SelectContent>
         </Select>
         <Button size="sm" disabled={!selected || add.isPending} onClick={() => selected && add.mutate(selected)} className="gap-1.5">
-          <UserPlus className="w-4 h-4" /> Assigner
+          <UserPlus className="w-4 h-4" /> {t('beneficiaries.assign')}
         </Button>
       </div>
       <ul className="space-y-1.5">
-        {(assignments.data || []).length === 0 && <li className="text-xs text-muted-foreground italic">Aucun bénéficiaire assigné.</li>}
+        {(assignments.data || []).length === 0 && <li className="text-xs text-muted-foreground italic">{t('beneficiaries.empty')}</li>}
         {(assignments.data || []).map(a => (
           <li key={a.id} className="flex items-center justify-between text-sm border rounded px-3 py-1.5">
             <span>{userName(a.beneficiary_id)}</span>
