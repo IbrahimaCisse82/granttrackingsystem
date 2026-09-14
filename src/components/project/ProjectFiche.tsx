@@ -3,6 +3,7 @@ import { fmt } from '@/lib/utils-project';
 import { useCallback } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import PaymentVouchersPanel from './PaymentVouchersPanel';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   project: Project;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function ProjectFiche({ project, onSave, readOnly }: Props) {
+  const { t } = useTranslation();
   const versements = project.fiches.versements;
 
   const updateVersement = useCallback((index: number, patch: Partial<FicheVersement>) => {
@@ -46,12 +48,12 @@ export default function ProjectFiche({ project, onSave, readOnly }: Props) {
     <div>
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold tracking-tight">Fiche récapitulative des rapports financiers</h1>
-          <p className="text-xs text-muted-foreground mt-1">Rapports financiers · {project.org}</p>
+          <h1 className="text-xl font-bold tracking-tight">{t('fiche.title')}</h1>
+          <p className="text-xs text-muted-foreground mt-1">{t('fiche.subtitle')} · {project.org}</p>
         </div>
         {!readOnly && (
           <button onClick={addVersement} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-[hsl(var(--enabel-dark))] transition-colors">
-            <Plus className="w-3.5 h-3.5" /> Ajouter une ligne
+            <Plus className="w-3.5 h-3.5" /> {t('fiche.addLine')}
           </button>
         )}
       </div>
@@ -61,7 +63,7 @@ export default function ProjectFiche({ project, onSave, readOnly }: Props) {
           <table className="w-full text-[12.5px]">
             <thead>
               <tr className="bg-ink-2">
-                {['Rapport', 'Période', 'Soumis le', 'Montant déclaré', 'Montant validé', 'Tranche', 'Date paiement', 'Montant reçu', ...(readOnly ? [] : [''])].map(h => (
+                {[t('fiche.colReport'), t('fiche.colPeriod'), t('fiche.colSubmitted'), t('fiche.colDeclared'), t('fiche.colValidated'), t('fiche.colTranche'), t('fiche.colPaymentDate'), t('fiche.colReceived'), ...(readOnly ? [] : [''])].map(h => (
                   <th key={h} className="whitespace-nowrap border-r border-sidebar-foreground/5 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-wider text-sidebar-foreground/70 font-mono last:border-r-0">
                     {h}
                   </th>
@@ -71,7 +73,7 @@ export default function ProjectFiche({ project, onSave, readOnly }: Props) {
             <tbody>
               {versements.map((v, i) => (
                 <tr key={i} className="hover:bg-paper/50 transition-colors group">
-                  <td className="border-b border-rule-2 border-r px-3 py-2.5 font-semibold">Rapport N° {String(i + 1).padStart(3, '0')}</td>
+                  <td className="border-b border-rule-2 border-r px-3 py-2.5 font-semibold">{t('fiche.reportNo')} {String(i + 1).padStart(3, '0')}</td>
                   <td className="border-b border-rule-2 border-r px-3 py-2.5">
                     <input type="text" defaultValue={v.periode} key={v.periode} disabled={readOnly} onChange={e => updateVersement(i, { periode: e.target.value })}
                       className="w-full bg-transparent text-muted-foreground outline-none focus:bg-card rounded px-1 disabled:opacity-60 disabled:cursor-not-allowed" />
@@ -110,11 +112,11 @@ export default function ProjectFiche({ project, onSave, readOnly }: Props) {
                 </tr>
               ))}
               {versements.length === 0 && (
-                <tr><td colSpan={9} className="px-3 py-8 text-center text-dim italic">Aucune fiche. Cliquez sur "+ Ajouter une ligne".</td></tr>
+                <tr><td colSpan={9} className="px-3 py-8 text-center text-dim italic">{t('fiche.empty')}</td></tr>
               )}
               {versements.length > 0 && (
                 <tr className="bg-ink text-sidebar-foreground font-mono font-bold text-xs">
-                  <td colSpan={3} className="px-3 py-2">TOTAUX</td>
+                  <td colSpan={3} className="px-3 py-2">{t('fiche.totals')}</td>
                   <td className="px-3 py-2 text-right">{fmt(totalDeclare)} €</td>
                   <td className="px-3 py-2 text-right">{fmt(totalValide)} €</td>
                   <td colSpan={2}></td>
