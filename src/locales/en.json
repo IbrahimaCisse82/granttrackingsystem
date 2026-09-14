@@ -518,5 +518,46 @@
     "roleLecteur": "Reader",
     "roleBeneficiaire": "Beneficiary",
     "unknownError": "Unknown error"
+  },
+  "rates": {
+    "title": "Currencies & Exchange rates",
+    "subtitle": "Configure the currency pairs used by your organisation. The default FCFA → EUR rate (655.957) stays active until a custom rate is entered.",
+    "from": "From",
+    "to": "To",
+    "rate": "Rate",
+    "date": "Date",
+    "add": "Add",
+    "empty": "No custom rate configured."
+  },
+  "comments": {
+    "title": "Comments",
+    "empty": "No comment on this report",
+    "placeholder": "Write a comment…",
+    "hint": "Ctrl+Enter to send"
+  },
+  "beneficiaries": {
+    "title": "Assigned beneficiaries",
+    "selectMember": "Select a member…",
+    "assign": "Assign",
+    "empty": "No beneficiary assigned.",
+    "assigned": "Beneficiary assigned",
+    "removed": "Assignment removed",
+    "noContext": "Context unavailable"
+  },
+  "fiche": {
+    "title": "Financial reports summary sheet",
+    "subtitle": "Financial reports",
+    "addLine": "Add a row",
+    "colReport": "Report",
+    "colPeriod": "Period",
+    "colSubmitted": "Submitted on",
+    "colDeclared": "Declared amount",
+    "colValidated": "Approved amount",
+    "colTranche": "Tranche",
+    "colPaymentDate": "Payment date",
+    "colReceived": "Amount received",
+    "reportNo": "Report No.",
+    "empty": "No sheet yet. Click “+ Add a row”.",
+    "totals": "TOTALS"
   }
 }
