@@ -559,5 +559,25 @@
     "reportNo": "Report No.",
     "empty": "No sheet yet. Click “+ Add a row”.",
     "totals": "TOTALS"
+  },
+  "ui": {
+    "noValidRows": "No valid rows in file",
+    "add": "Add",
+    "noRules": "No eligibility rules defined.",
+    "noDocs": "No documents defined.",
+    "addVoucher": "Add a supporting document",
+    "noTransactions": "No transactions. Click \"+ Add\".",
+    "removeBudgetLine": "Delete budget line",
+    "update": "Update",
+    "addDonor": "Add a donor",
+    "noDonors": "No donor registered for this project.",
+    "noAmendments": "No amendments",
+    "addLine": "+ Add a line",
+    "noLines": "No lines. Add a change.",
+    "addIndicator": "Add an indicator",
+    "noIndicators": "No indicators defined for this project.",
+    "noPaymentVouchers": "No payment vouchers.",
+    "confirmDeleteVoucher": "Delete this voucher?",
+    "noNotifications": "No notifications"
   }
 }

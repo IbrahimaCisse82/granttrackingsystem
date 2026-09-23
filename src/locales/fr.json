@@ -559,5 +559,25 @@
     "reportNo": "Rapport N°",
     "empty": "Aucune fiche. Cliquez sur « + Ajouter une ligne ».",
     "totals": "TOTAUX"
+  },
+  "ui": {
+    "noValidRows": "Aucune ligne valide dans le fichier",
+    "add": "Ajouter",
+    "noRules": "Aucune règle d'éligibilité définie.",
+    "noDocs": "Aucun document défini.",
+    "addVoucher": "Ajouter une pièce justificative",
+    "noTransactions": "Aucune transaction. Cliquez sur \"+ Ajouter\".",
+    "removeBudgetLine": "Supprimer la ligne budgétaire",
+    "update": "Mettre à jour",
+    "addDonor": "Ajouter un bailleur",
+    "noDonors": "Aucun bailleur enregistré pour ce projet.",
+    "noAmendments": "Aucun amendement",
+    "addLine": "+ Ajouter une ligne",
+    "noLines": "Aucune ligne. Ajoutez une modification.",
+    "addIndicator": "Ajouter un indicateur",
+    "noIndicators": "Aucun indicateur défini pour ce projet.",
+    "noPaymentVouchers": "Aucune fiche de versement.",
+    "confirmDeleteVoucher": "Supprimer cette fiche ?",
+    "noNotifications": "Aucune notification"
   }
 }

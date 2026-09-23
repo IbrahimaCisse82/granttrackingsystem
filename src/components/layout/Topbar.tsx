@@ -236,7 +236,7 @@ export default function Topbar({ onMenuToggle, showMenuButton }: TopbarProps) {
               </div>
               <div className="max-h-64 overflow-y-auto">
                 {notifications.length === 0 ? (
-                  <p className="px-3 py-6 text-center text-xs text-muted-foreground italic">Aucune notification</p>
+                  <p className="px-3 py-6 text-center text-xs text-muted-foreground italic">{t('ui.noNotifications')}</p>
                 ) : notifications.map(n => (
                   <button key={n.id} onClick={() => markRead(n.id)}
                     className={`flex w-full items-start gap-2 px-3 py-2.5 text-left hover:bg-paper transition-colors border-b border-rule-2 last:border-b-0 ${!n.read ? 'bg-enabel-light/50' : ''}`}>

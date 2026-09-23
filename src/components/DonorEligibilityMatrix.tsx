@@ -1,3 +1,4 @@
+import i18n from '@/lib/i18n';
 import { useState, useMemo } from 'react';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useDonorEligibility, DonorEligibilityRule, DonorDocument, DonorRuleType, DonorDocPhase } from '@/hooks/useDonorEligibility';
@@ -84,7 +85,7 @@ export default function DonorEligibilityMatrix() {
   const importCsv = async (file: File) => {
     if (!activeOrg) return;
     const rows = parseCsv(await file.text());
-    if (rows.length < 2) { toast.error('Aucune ligne valide dans le fichier'); return; }
+    if (rows.length < 2) { toast.error(i18n.t('ui.noValidRows')); return; }
     const body = rows.slice(1);
     let ok = 0;
     const rejected: number[] = [];
@@ -118,7 +119,7 @@ export default function DonorEligibilityMatrix() {
       }
     }
 
-    if (ok === 0) toast.error('Aucune ligne valide dans le fichier');
+    if (ok === 0) toast.error(i18n.t('ui.noValidRows'));
     else if (rejected.length) toast.warning(`${ok} ligne(s) importée(s), ${rejected.length} rejetée(s) (lignes ${rejected.join(', ')})`);
     else toast.success(`${ok} ligne(s) importée(s)`);
   };
@@ -164,7 +165,7 @@ export default function DonorEligibilityMatrix() {
               </label>
               <button onClick={() => tab === 'rules' ? setShowRuleForm(!showRuleForm) : setShowDocForm(!showDocForm)}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">
-                <Plus className="w-3.5 h-3.5" /> Ajouter
+                <Plus className="w-3.5 h-3.5" /> {i18n.t('ui.add')}
               </button>
             </>
           )}
@@ -184,7 +185,7 @@ export default function DonorEligibilityMatrix() {
             <option value="capped">Plafonnée</option>
             <option value="forbidden">Interdite</option>
           </select>
-          <button type="submit" className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">Enregistrer</button>
+          <button type="submit" className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">{i18n.t('common.save')}</button>
           {ruleDraft.rule_type === 'capped' && (
             <>
               <input type="number" step="0.01" placeholder="Plafond %" value={ruleDraft.cap_pct ?? ''} onChange={e => setRuleDraft(d => ({ ...d, cap_pct: e.target.value ? Number(e.target.value) : null }))}
@@ -216,17 +217,17 @@ export default function DonorEligibilityMatrix() {
             <input type="checkbox" checked={docDraft.mandatory ?? true} onChange={e => setDocDraft(d => ({ ...d, mandatory: e.target.checked }))} />
             Obligatoire
           </label>
-          <button type="submit" className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">Enregistrer</button>
+          <button type="submit" className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">{i18n.t('common.save')}</button>
           <input placeholder="Notes" value={docDraft.notes || ''} onChange={e => setDocDraft(d => ({ ...d, notes: e.target.value }))}
             className="md:col-span-6 rounded-lg border border-input bg-background px-2.5 py-1.5 text-xs" />
         </form>
       )}
 
       {isLoading ? (
-        <div className="p-8 text-center text-sm text-muted-foreground">Chargement…</div>
+        <div className="p-8 text-center text-sm text-muted-foreground">{i18n.t('common.loading')}</div>
       ) : tab === 'rules' ? (
         rules.length === 0 ? (
-          <div className="p-8 text-center text-xs text-muted-foreground italic">Aucune règle d'éligibilité définie.</div>
+          <div className="p-8 text-center text-xs text-muted-foreground italic">{i18n.t('ui.noRules')}</div>
         ) : (
           <table className="w-full text-sm">
             <thead>
@@ -274,7 +275,7 @@ export default function DonorEligibilityMatrix() {
         )
       ) : (
         documents.length === 0 ? (
-          <div className="p-8 text-center text-xs text-muted-foreground italic">Aucun document défini.</div>
+          <div className="p-8 text-center text-xs text-muted-foreground italic">{i18n.t('ui.noDocs')}</div>
         ) : (
           <table className="w-full text-sm">
             <thead>

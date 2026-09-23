@@ -1,3 +1,4 @@
+import i18n from '@/lib/i18n';
 import type { Project, Amendement, BudgetLine } from '@/lib/types';
 import { fmt } from '@/lib/utils-project';
 import { useCallback, useState } from 'react';
@@ -129,7 +130,7 @@ export default function ProjectAmendements({ project, onSave, readOnly }: Props)
       {amendements.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-[10px] border-2 border-dashed border-rule py-16 text-center">
           <FileText className="w-10 h-10 text-dim mb-3" />
-          <p className="text-sm font-semibold text-foreground mb-1">Aucun amendement</p>
+          <p className="text-sm font-semibold text-foreground mb-1">{i18n.t('ui.noAmendments')}</p>
           <p className="text-xs text-muted-foreground">Créez un amendement pour modifier le budget initial</p>
         </div>
       ) : (
@@ -227,7 +228,7 @@ export default function ProjectAmendements({ project, onSave, readOnly }: Props)
                       <label className="text-[11px] font-medium text-steel">Lignes de modification</label>
                       {!readOnly && !isSelectedLocked && (
                         <button onClick={() => addLine(selectedIdx!)}
-                          className="text-[11px] font-medium text-primary hover:underline">+ Ajouter une ligne</button>
+                          className="text-[11px] font-medium text-primary hover:underline">{i18n.t('ui.addLine')}</button>
                       )}
                     </div>
                     <div className="overflow-hidden rounded-lg border border-rule">
@@ -242,7 +243,7 @@ export default function ProjectAmendements({ project, onSave, readOnly }: Props)
                         </thead>
                         <tbody>
                           {selected.lines.length === 0 ? (
-                            <tr><td colSpan={4} className="px-3 py-6 text-center text-dim italic text-[11px]">Aucune ligne. Ajoutez une modification.</td></tr>
+                            <tr><td colSpan={4} className="px-3 py-6 text-center text-dim italic text-[11px]">{i18n.t('ui.noLines')}</td></tr>
                           ) : selected.lines.map((line, li) => {
                             const budgetLine = project.budgetLines.find(b => b.code === line.code);
                             return (
