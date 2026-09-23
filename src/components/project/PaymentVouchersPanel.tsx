@@ -1,3 +1,4 @@
+import i18n from '@/lib/i18n';
 import { useState } from 'react';
 import { usePaymentVouchers, type PaymentVoucher, type VoucherStatus } from '@/hooks/usePaymentVouchers';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -151,7 +152,7 @@ export default function PaymentVouchersPanel({ project }: Props) {
             </thead>
             <tbody>
               {vouchers.length === 0 ? (
-                <tr><td colSpan={7} className="px-3 py-8 text-center text-muted-foreground italic">Aucune fiche de versement.</td></tr>
+                <tr><td colSpan={7} className="px-3 py-8 text-center text-muted-foreground italic">{i18n.t('ui.noPaymentVouchers')}</td></tr>
               ) : vouchers.map(v => {
                 const s = STATUS_LABEL[v.status];
                 return (
@@ -182,7 +183,7 @@ export default function PaymentVouchersPanel({ project }: Props) {
                           </button>
                         )}
                         {!readOnly && (
-                          <button onClick={() => { if (confirm('Supprimer cette fiche ?')) remove.mutate(v.id); }} className="p-1 hover:bg-muted rounded text-destructive">
+                          <button onClick={() => { if (confirm(i18n.t('ui.confirmDeleteVoucher'))) remove.mutate(v.id); }} className="p-1 hover:bg-muted rounded text-destructive">
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         )}

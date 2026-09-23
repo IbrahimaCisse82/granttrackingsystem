@@ -1,3 +1,4 @@
+import i18n from '@/lib/i18n';
 import type { Project, Transaction, Attachment } from '@/lib/types';
 import { fmt, createEmptyReport } from '@/lib/utils-project';
 import MetricCard from '@/components/MetricCard';
@@ -231,7 +232,7 @@ export default function ProjectTransactions({ project, reportIndex, onSave, read
         </div>
         {!readOnly && (
           <button onClick={addTransaction} className="rounded-md bg-teal px-3 py-1.5 text-xs font-medium text-primary-foreground hover:brightness-110 transition-all">
-            + Ajouter
+            + {i18n.t('ui.add')}
           </button>
         )}
       </div>
@@ -297,7 +298,7 @@ export default function ProjectTransactions({ project, reportIndex, onSave, read
                           onClick={() => handleUploadClick(t.id)}
                           disabled={uploading === t.id}
                           className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
-                          title="Ajouter une pièce justificative"
+                          title={i18n.t('ui.addVoucher')}
                         >
                           {uploading === t.id ? (
                             <span className="animate-spin w-3.5 h-3.5 border border-primary border-t-transparent rounded-full inline-block" />
@@ -343,7 +344,7 @@ export default function ProjectTransactions({ project, reportIndex, onSave, read
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={11} className="px-3 py-8 text-center text-dim italic">Aucune transaction. Cliquez sur "+ Ajouter".</td>
+                  <td colSpan={11} className="px-3 py-8 text-center text-dim italic">{i18n.t('ui.noTransactions')}</td>
                 </tr>
               )}
               <tr className="bg-ink text-sidebar-foreground font-mono font-bold text-xs">

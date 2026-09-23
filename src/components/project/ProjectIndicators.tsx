@@ -1,3 +1,4 @@
+import i18n from '@/lib/i18n';
 import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -150,7 +151,7 @@ export default function ProjectIndicators({ project, onSave, readOnly }: Props) 
       {!readOnly && (
         <div className="flex justify-end">
           <Button onClick={() => setShowAdd(!showAdd)} variant={showAdd ? 'outline' : 'default'} size="sm">
-            {showAdd ? <><X className="w-4 h-4 mr-1" /> Annuler</> : <><Plus className="w-4 h-4 mr-1" /> Ajouter un indicateur</>}
+            {showAdd ? <><X className="w-4 h-4 mr-1" /> {i18n.t('common.cancel')}</> : <><Plus className="w-4 h-4 mr-1" /> {i18n.t('ui.addIndicator')}</>}
           </Button>
         </div>
       )}
@@ -213,7 +214,7 @@ export default function ProjectIndicators({ project, onSave, readOnly }: Props) 
               <Input value={form.source} onChange={e => setForm({ ...form, source: e.target.value })} placeholder="Ex: Registres de formation, rapports terrain" />
             </div>
             <div className="flex justify-end">
-              <Button onClick={handleAdd} size="sm"><Check className="w-4 h-4 mr-1" /> Enregistrer</Button>
+              <Button onClick={handleAdd} size="sm"><Check className="w-4 h-4 mr-1" /> {i18n.t('common.save')}</Button>
             </div>
           </CardContent>
         </Card>
@@ -300,7 +301,7 @@ export default function ProjectIndicators({ project, onSave, readOnly }: Props) 
         <Card>
           <CardContent className="p-8 text-center">
             <Target className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
-            <p className="text-muted-foreground">Aucun indicateur défini pour ce projet.</p>
+            <p className="text-muted-foreground">{i18n.t('ui.noIndicators')}</p>
             <p className="text-xs text-muted-foreground/60 mt-1">Ajoutez des indicateurs d'impact, de résultat et d'activité pour suivre la performance programmatique.</p>
           </CardContent>
         </Card>
