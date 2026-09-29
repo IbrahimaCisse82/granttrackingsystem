@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790716369117,
+      "tag": "0000_segregation_of_duties_and_dedupe_triggers",
+      "breakpoints": true
+    }
+  ]
+}
