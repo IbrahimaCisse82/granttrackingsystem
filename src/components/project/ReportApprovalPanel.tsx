@@ -65,7 +65,8 @@ export default function ReportApprovalPanel({ project, reportIndex }: Props) {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const isManager = role === 'admin' || role === 'manager';
+  const isAuthor = !!current?.submitted_by && current.submitted_by === user?.id;
+  const isManager = (role === 'admin' || role === 'manager') && !isAuthor;
   const status: ReportStatus = current?.status ?? 'draft';
   const meta = STATUS_META[status];
 
@@ -119,6 +120,11 @@ export default function ReportApprovalPanel({ project, reportIndex }: Props) {
               <XCircle className="w-3.5 h-3.5" /> Rejeter
             </Button>
           </>
+        )}
+        {status === 'submitted' && isAuthor && (role === 'admin' || role === 'manager') && (
+          <span className="text-xs text-muted-foreground italic">
+            Un autre responsable doit approuver ce rapport (séparation des tâches).
+          </span>
         )}
       </div>
 
