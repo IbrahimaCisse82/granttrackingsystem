@@ -8,6 +8,13 @@
       "when": 1790716369117,
       "tag": "0000_segregation_of_duties_and_dedupe_triggers",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790799728571,
+      "tag": "0001_normalize_budget_transactions_reports",
+      "breakpoints": true
     }
   ]
 }
