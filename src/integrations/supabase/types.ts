@@ -98,6 +98,69 @@ export type Database = {
         }
         Relationships: []
       }
+      budget_lines: {
+        Row: {
+          allocation: number
+          code: string
+          created_at: string
+          description: string
+          id: string
+          montant: number
+          organization_id: string | null
+          position: number
+          project_id: string
+          qty: number
+          section: string
+          unite: string
+          updated_at: string
+        }
+        Insert: {
+          allocation?: number
+          code: string
+          created_at?: string
+          description?: string
+          id?: string
+          montant?: number
+          organization_id?: string | null
+          position?: number
+          project_id: string
+          qty?: number
+          section?: string
+          unite?: string
+          updated_at?: string
+        }
+        Update: {
+          allocation?: number
+          code?: string
+          created_at?: string
+          description?: string
+          id?: string
+          montant?: number
+          organization_id?: string | null
+          position?: number
+          project_id?: string
+          qty?: number
+          section?: string
+          unite?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_lines_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_errors: {
         Row: {
           app_version: string | null
@@ -950,6 +1013,78 @@ export type Database = {
           },
         ]
       }
+      project_transactions: {
+        Row: {
+          attachments: Json
+          beneficiaire: string | null
+          code: string
+          created_at: string
+          description: string | null
+          external_id: string
+          id: string
+          montant_devise: number
+          montant_eur: number
+          organization_id: string | null
+          project_id: string
+          report_index: number
+          taux_change: number
+          tx_date: string | null
+          updated_at: string
+          voucher: string | null
+        }
+        Insert: {
+          attachments?: Json
+          beneficiaire?: string | null
+          code?: string
+          created_at?: string
+          description?: string | null
+          external_id: string
+          id?: string
+          montant_devise?: number
+          montant_eur?: number
+          organization_id?: string | null
+          project_id: string
+          report_index: number
+          taux_change?: number
+          tx_date?: string | null
+          updated_at?: string
+          voucher?: string | null
+        }
+        Update: {
+          attachments?: Json
+          beneficiaire?: string | null
+          code?: string
+          created_at?: string
+          description?: string | null
+          external_id?: string
+          id?: string
+          montant_devise?: number
+          montant_eur?: number
+          organization_id?: string | null
+          project_id?: string
+          report_index?: number
+          taux_change?: number
+          tx_date?: string | null
+          updated_at?: string
+          voucher?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_transactions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           amendements: Json
@@ -1152,6 +1287,10 @@ export type Database = {
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       storage_object_project_id: { Args: { _name: string }; Returns: string }
+      sync_project_normalized: {
+        Args: { _project_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "manager" | "lecteur" | "beneficiaire"
