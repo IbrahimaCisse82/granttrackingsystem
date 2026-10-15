@@ -579,5 +579,20 @@
     "noPaymentVouchers": "No payment vouchers.",
     "confirmDeleteVoucher": "Delete this voucher?",
     "noNotifications": "No notifications"
+  },
+  "aiSummary": {
+    "button": "AI summary",
+    "title": "AI project summary",
+    "pickReports": "Select the reports to analyse:",
+    "noReports": "No reports available.",
+    "period": "Period {{n}}",
+    "generate": "Generate summary",
+    "error": "Generation failed",
+    "disclaimer": "Automatically generated from project data — review before sharing."
+  },
+  "ledger": {
+    "ok": "✓ Data consistent",
+    "mismatch": "⚠ Data mismatch",
+    "detail": "Screen budget {{a}} / stored {{b}} — screen transactions {{c}} / stored {{d}}"
   }
 }
