@@ -579,5 +579,20 @@
     "noPaymentVouchers": "Aucune fiche de versement.",
     "confirmDeleteVoucher": "Supprimer cette fiche ?",
     "noNotifications": "Aucune notification"
+  },
+  "aiSummary": {
+    "button": "Synthèse IA",
+    "title": "Synthèse IA du projet",
+    "pickReports": "Sélectionnez les rapports à analyser :",
+    "noReports": "Aucun rapport disponible.",
+    "period": "Période {{n}}",
+    "generate": "Générer la synthèse",
+    "error": "Échec de la génération",
+    "disclaimer": "Texte généré automatiquement à partir des données du projet — à vérifier avant diffusion."
+  },
+  "ledger": {
+    "ok": "✓ Données cohérentes",
+    "mismatch": "⚠ Écart de données",
+    "detail": "Budget écran {{a}} / enregistré {{b}} — transactions écran {{c}} / enregistrées {{d}}"
   }
 }
