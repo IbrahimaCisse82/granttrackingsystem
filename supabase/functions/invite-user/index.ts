@@ -88,8 +88,10 @@ Deno.serve(async (req) => {
       if (createErr) throw createErr;
       targetUserId = newUser.user!.id;
 
-      // Set app role if specified
+      // Set app role if specified — only global admins may grant the global admin role
+      const allowedRoles = roleData?.role === "admin" ? ["admin", "manager", "lecteur"] : ["manager", "lecteur"];
       if (role && role !== "beneficiaire") {
+        if (!allowedRoles.includes(role)) throw new Error("Rôle non autorisé");
         await adminClient.from("user_roles").update({ role }).eq("user_id", targetUserId);
       }
     }

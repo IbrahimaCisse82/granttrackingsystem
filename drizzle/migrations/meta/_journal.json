@@ -29,6 +29,13 @@
       "when": 1791403870561,
       "tag": "0003_metrics_read_normalized_reports",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793236836322,
+      "tag": "0004_field_reports_require_current_assignment",
+      "breakpoints": true
     }
   ]
 }
