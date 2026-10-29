@@ -3,6 +3,7 @@ import type { Project, BudgetLine } from '@/lib/types';
 import { lineTotal, fmt, fmtFCFA, EUR_TO_FCFA } from '@/lib/utils-project';
 import { useCallback } from 'react';
 import { Trash2 } from 'lucide-react';
+import { useBudgetLines } from '@/hooks/useProjectLedger';
 
 interface Props {
   project: Project;
@@ -13,8 +14,16 @@ interface Props {
 export default function ProjectBudget({ project, onSave, readOnly }: Props) {
   const linesA = project.budgetLines.filter(l => l.section === 'A');
   const linesB = project.budgetLines.filter(l => l.section === 'B');
-  const totalA = linesA.reduce((s, l) => s + lineTotal(l), 0);
-  const totalB = linesB.reduce((s, l) => s + lineTotal(l), 0);
+  const { data: ledger } = useBudgetLines(project.id);
+  const localA = linesA.reduce((s, l) => s + lineTotal(l), 0);
+  const localB = linesB.reduce((s, l) => s + lineTotal(l), 0);
+  // Section totals come from the normalized budget_lines table once it matches local edits.
+  const sum = (sec: string) => (ledger ?? []).filter(l => l.section === sec)
+    .reduce((s, l) => s + Number(l.qty) * Number(l.montant) * Number(l.allocation) / 100, 0);
+  const synced = ledger != null && ledger.length === project.budgetLines.length
+    && Math.abs(sum('A') - localA) < 0.01 && Math.abs(sum('B') - localB) < 0.01;
+  const totalA = synced ? sum('A') : localA;
+  const totalB = synced ? sum('B') : localB;
   const grand = totalA + totalB;
 
   const updateLine = useCallback((index: number, patch: Partial<BudgetLine>) => {
