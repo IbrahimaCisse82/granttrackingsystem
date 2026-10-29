@@ -44,7 +44,7 @@ export const projectCreateSchema = z
     devise: z.string().trim().min(1).max(10),
     currency: z.string().trim().min(1).max(10),
     taux: z.coerce
-      .number({ invalid_type_error: 'Taux invalide' })
+      .number({ error: 'Taux invalide' })
       .positive('Taux doit être > 0')
       .max(1_000_000, 'Taux trop élevé'),
     risque: z.union([z.enum(RISK_OPTIONS), z.literal('')]).optional(),
@@ -71,12 +71,12 @@ export const paymentVoucherSchema = z.object({
     .min(1, 'N° de fiche requis')
     .max(50, '50 caractères maximum'),
   amount_local: z.coerce
-    .number({ invalid_type_error: 'Montant invalide' })
+    .number({ error: 'Montant invalide' })
     .positive('Montant doit être > 0')
     .max(1e12, 'Montant trop élevé'),
   currency: z.string().trim().min(1, 'Devise requise').max(10),
   exchange_rate: z.coerce
-    .number({ invalid_type_error: 'Taux invalide' })
+    .number({ error: 'Taux invalide' })
     .positive('Taux doit être > 0')
     .max(1_000_000, 'Taux trop élevé'),
   payment_date: isoDate,
@@ -90,7 +90,7 @@ export type PaymentVoucherInput = z.infer<typeof paymentVoucherSchema>;
 // ---------- Field Report (rapport terrain) ----------
 export const fieldReportSchema = z
   .object({
-    project_id: z.string().uuid('Projet requis'),
+    project_id: z.guid('Projet requis'),
     period_start: isoDate,
     period_end: isoDate,
     narrative: z
