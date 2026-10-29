@@ -183,7 +183,13 @@ export function useProjects(filters?: ProjectFilters) {
         throw new Error('Conflit de version : ce projet a été modifié par un autre utilisateur. Rechargez la page.');
       }
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      // Normalized ledger tables are refreshed server-side by trigger; re-read them.
+      queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
+      queryClient.invalidateQueries({ queryKey: ['project-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['periodic-reports'] });
+    },
     onError: (e) => toast.error('Erreur: ' + e.message),
   });
 
