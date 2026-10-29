@@ -6,6 +6,7 @@ import { useCallback, useRef, useState } from 'react';
 import { Trash2, Paperclip, Upload, X, FileText, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useProjectTransactions } from '@/hooks/useProjectLedger';
 
 interface Props {
   project: Project;
@@ -17,6 +18,7 @@ interface Props {
 export default function ProjectTransactions({ project, reportIndex, onSave, readOnly }: Props) {
   const report = project.reports?.[reportIndex];
   const transactions = report?.transactions || [];
+  const { data: ledger } = useProjectTransactions(project.id, reportIndex);
   const [uploading, setUploading] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeUploadTxId, setActiveUploadTxId] = useState<string | null>(null);
@@ -210,7 +212,11 @@ export default function ProjectTransactions({ project, reportIndex, onSave, read
   }
 
   const n = reportIndex + 1;
-  const totalEUR = transactions.reduce((s, t) => s + (t.montantEUR || 0), 0);
+  const localEUR = transactions.reduce((s, t) => s + (t.montantEUR || 0), 0);
+  // Ledger (normalized table) is the reporting source; fall back to local edits until it has synced.
+  const ledgerEUR = ledger ? ledger.reduce((s, t) => s + Number(t.montant_eur || 0), 0) : null;
+  const ledgerSynced = ledger != null && ledger.length === transactions.length && Math.abs((ledgerEUR ?? 0) - localEUR) < 0.01;
+  const totalEUR = ledgerSynced ? (ledgerEUR as number) : localEUR;
   const totalDepenses = Object.values(report.depenses || {}).reduce((s, v) => s + v, 0);
   const variance = totalDepenses - totalEUR;
 
